@@ -68,11 +68,6 @@ dna = DNASequence("ATGCGATCGTAGC")
 print(f"Complement: {dna.complement()}")
 print(f"Reverse complement: {dna.reverse_complement()}")
 print(f"Translation: {dna.translate()}")
-
-# Protein sequence analysis
-protein = ProteinSequence("MRSIVA")
-print(f"Molecular weight: {protein.molecular_weight()}")
-print(f"Hydrophobicity: {protein.hydrophobicity_score()}")
 ```
 
 ## Core Features
