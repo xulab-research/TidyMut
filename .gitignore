@@ -1,0 +1,11 @@
+# Ignore vscode config
+.vscode
+
+# Ignore pytest related files
+.pytest_cache
+.coverage
+tidymut.egg-info
+htmlcov
+
+# Ignore Python bytecode cache
+__pycache__/
