@@ -123,7 +123,7 @@ git checkout main
 git pull origin main
 
 # >>> The instructions below are for maintainers preparing a release >>>
-# Generate changelog when a new version is ready 
+# Generate changelog when a new version is ready
 ## See Changelog Policy for details
 bash tool/generate_changelog.sh
 
