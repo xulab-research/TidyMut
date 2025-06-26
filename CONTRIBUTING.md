@@ -2,8 +2,6 @@
 
 Thanks for considering contributing to this project! To keep things clean and maintainable, please follow the guidelines below.
 
----
-
 ## commit Message Convention
 
 We use the [Conventional Commits](https://www.conventionalcommits.org/) standard:
@@ -46,8 +44,6 @@ file deletions without actually removing them. Useful for debugging large batch 
 Closes #42
 ```
 
----
-
 ## Changelog Policy
 
 Generate changelog.md file everytime we publish a new release:
@@ -63,8 +59,6 @@ To avoid cluttering the `main` branch with release artifacts,
 changelog updates are typically made on a `release/*` branch.
 If desired, you can manually merge only the `changelog.md` back
 into `main` using git checkout `release/* -- CHANGELOG.md`.
-
----
 
 ## Tips
 
