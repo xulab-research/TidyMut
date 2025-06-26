@@ -1,11 +1,12 @@
 # tidymut/core/sequence.py
+from __future__ import annotations
 
 import warnings
 from abc import ABC
 from pathlib import Path
-from typing import Callable, List, Dict, Literal, Optional, Union, Type
+from typing import TYPE_CHECKING
 
-from .alphabet import BaseAlphabet, DNAAlphabet, RNAAlphabet, ProteinAlphabet
+from .alphabet import DNAAlphabet, RNAAlphabet, ProteinAlphabet
 from .codon import CodonTable
 from .constants import DNA_BASE_COMPLEMENTS, RNA_BASE_COMPLEMENTS
 from .mutation import (
@@ -16,7 +17,19 @@ from .mutation import (
     CodonMutationSet,
     AminoAcidMutationSet,
 )
-from .types import SequenceType
+
+if TYPE_CHECKING:
+    from typing import Callable, Dict, Optional, List, Literal, Union, Type
+
+    from .alphabet import BaseAlphabet
+    from .types import SequenceType
+
+
+__all__ = ["BaseSequence", "DNASequence", "ProteinSequence", "RNASequence"]
+
+
+def __dir__() -> List[str]:
+    return __all__
 
 
 class BaseSequence(ABC):

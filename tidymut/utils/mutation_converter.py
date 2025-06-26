@@ -1,10 +1,23 @@
 # tidymut/utils/mutation_converter.py
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from ..core.mutation import (
     AminoAcidMutationSet,
     CodonMutationSet,
 )
-from ..core.types import MutationType, MutationSetType
+
+if TYPE_CHECKING:
+    from typing import List
+
+    from ..core.types import MutationType, MutationSetType
+
+__all__ = ["invert_mutation", "invert_mutation_set"]
+
+
+def __dir__() -> list[str]:
+    return __all__
 
 
 def invert_mutation(mutation: MutationType) -> MutationType:

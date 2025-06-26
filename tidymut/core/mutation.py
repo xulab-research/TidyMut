@@ -1,12 +1,31 @@
 # tidymut/core/mutation.py
+from __future__ import annotations
+
 import re
 from abc import ABC, abstractmethod
-from typing import Any, Dict, Generic, List, Literal, Optional, Sequence, Set, Type
+from typing import Generic, TYPE_CHECKING
 
-
-from .alphabet import BaseAlphabet, ProteinAlphabet, DNAAlphabet, RNAAlphabet
+from .alphabet import ProteinAlphabet, DNAAlphabet, RNAAlphabet
 from .codon import CodonTable
 from .types import MutationType
+
+if TYPE_CHECKING:
+    from typing import Any, Dict, List, Literal, Optional, Sequence, Set, Type
+
+    from .alphabet import BaseAlphabet
+
+__all__ = [
+    "AminoAcidMutation",
+    "AminoAcidMutationSet",
+    "BaseMutation",
+    "CodonMutation",
+    "CodonMutationSet",
+    "MutationSet",
+]
+
+
+def __dir__() -> List[str]:
+    return __all__
 
 
 class BaseMutation(ABC):
@@ -658,6 +677,16 @@ class MutationSet(Generic[MutationType]):
             f"Could not parse mutation string '{mutation_str}' with any known mutation type. "
             f"Last error: {last_error}"
         )
+
+    @classmethod
+    def _create_mutation(
+        cls,
+        mutation_str: str,
+        mutation_type: Type[BaseMutation],
+        is_zero_based: bool = False,
+        alphabet: Optional[BaseAlphabet] = None,
+    ) -> BaseMutation:
+        return mutation_type.from_string(mutation_str, is_zero_based, alphabet)
 
     @staticmethod
     def _guess_sep(string: str) -> Optional[str]:

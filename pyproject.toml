@@ -1,0 +1,52 @@
+[build-system]
+requires = ["setuptools>=77.0.3", "setuptools_scm>=8.2.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tidymut"
+dynamic = ["version"]
+description = "An efficient framework for tidying and standardizing protein mutation data."
+readme = "README.md"
+authors = [{ name = "Yuxiang Tang", email = "845351766@qq.com" }]
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+dependencies = [
+    "joblib>=1.5.0",
+    "numpy>=2.1.0",
+    "pandas>=2.1.0",
+    "tqdm>=4.60.0",
+    "python-dateutil>=2.8.2",
+    "tzdata>=2022.7",
+]
+keywords = ["protein", "mutation", "tidy", "framework", "pipeline"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "License :: OSI Approved :: BSD License",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+
+[project.urls]
+Repository = "https://github.com/xulab-research/TidyMut"
+
+[project.optional-dependencies]
+test = ["pytest>=8.0.0", "pytest-cov>=6.0.0"]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-cov>=6.0.0",
+    "sphinx>=8.0.0",
+    "sphinx-autobuild>=2024.10.0",
+    "sphinx_rtd_theme>=3.0.0",
+    "twine>=6.0.0", 
+    "gitpython", 
+    "pygithub", 
+    "jinja2",
+]

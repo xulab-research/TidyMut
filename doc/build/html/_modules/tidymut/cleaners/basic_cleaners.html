@@ -1,0 +1,1295 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tidymut.cleaners.basic_cleaners &mdash; tidymut 0.1.0-dev documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=ee2d09ae"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            tidymut
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tidymut.cleaners.html">tidymut.cleaners package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tidymut.core.html">tidymut.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tidymut.utils.html">tidymut.utils package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tidymut</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">tidymut.cleaners.basic_cleaners</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tidymut.cleaners.basic_cleaners</h1><div class="highlight"><pre>
+<span></span><span class="c1"># tidymut/cleaners/basic_cleaners.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">joblib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Parallel</span><span class="p">,</span> <span class="n">delayed</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">tqdm</span><span class="w"> </span><span class="kn">import</span> <span class="n">tqdm</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">cast</span><span class="p">,</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.alphabet</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProteinAlphabet</span><span class="p">,</span> <span class="n">DNAAlphabet</span><span class="p">,</span> <span class="n">RNAAlphabet</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">pipeline_step</span><span class="p">,</span> <span class="n">multiout_step</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.sequence</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProteinSequence</span><span class="p">,</span> <span class="n">DNASequence</span><span class="p">,</span> <span class="n">RNASequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils.cleaner_workers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">valid_single_mutation</span><span class="p">,</span>
+    <span class="n">apply_single_mutation</span><span class="p">,</span>
+    <span class="n">infer_wt_sequence_grouped</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils.dataset_builders</span><span class="w"> </span><span class="kn">import</span> <span class="n">convert_format_1</span><span class="p">,</span> <span class="n">convert_format_2</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..utils.type_converter</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">convert_data_types</span> <span class="k">as</span> <span class="n">_convert_data_types</span><span class="p">,</span>
+    <span class="n">convert_data_types_batch</span> <span class="k">as</span> <span class="n">_convert_data_types_batch</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+        <span class="n">Any</span><span class="p">,</span>
+        <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">Dict</span><span class="p">,</span>
+        <span class="n">List</span><span class="p">,</span>
+        <span class="n">Literal</span><span class="p">,</span>
+        <span class="n">Optional</span><span class="p">,</span>
+        <span class="n">Sequence</span><span class="p">,</span>
+        <span class="n">Tuple</span><span class="p">,</span>
+        <span class="n">Type</span><span class="p">,</span>
+        <span class="n">Union</span><span class="p">,</span>
+    <span class="p">)</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;read_dataset&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;merge_columns&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;extract_and_rename_columns&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;filter_and_clean_data&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;convert_data_types&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;validate_mutations&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;apply_mutations_to_sequences&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;infer_wildtype_sequences&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;convert_to_mutation_dataset_format&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="fm">__dir__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">__all__</span>
+
+
+<div class="viewcode-block" id="read_dataset">
+<a class="viewcode-back" href="../../../tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.read_dataset">[docs]</a>
+<span class="nd">@pipeline_step</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">read_dataset</span><span class="p">(</span>
+    <span class="n">file_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">file_format</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Read dataset from specified file format and return as a pandas DataFrame.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    file_path : Union[str, Path]</span>
+<span class="sd">        Path to the dataset file</span>
+<span class="sd">    file_format : str</span>
+<span class="sd">        Format of the dataset file (&quot;csv&quot;, &quot;tsv&quot;, &quot;xlsx&quot;, etc.)</span>
+<span class="sd">    kwargs : Dict[str, Any]</span>
+<span class="sd">        Additional keyword arguments for file reading</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        Dataset loaded from the specified file</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; # Specify file_format parameter</span>
+<span class="sd">    &gt;&gt;&gt; df = read_dataset(&quot;data.csv&quot;, &quot;csv&quot;)</span>
+<span class="sd">    &gt;&gt;&gt;</span>
+<span class="sd">    &gt;&gt;&gt; # Detect file_format automatically</span>
+<span class="sd">    &gt;&gt;&gt; df = read_dataset(&quot;data.csv&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">file_format</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">file_format</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">file_path</span><span class="p">)</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lstrip</span><span class="p">(</span><span class="s2">&quot;.&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+
+    <span class="n">readers</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s2">&quot;csv&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">),</span>
+        <span class="s2">&quot;tsv&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s2">&quot;</span><span class="se">\t</span><span class="s2">&quot;</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">),</span>
+        <span class="s2">&quot;xlsx&quot;</span><span class="p">:</span> <span class="k">lambda</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_excel</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kw</span><span class="p">),</span>
+    <span class="p">}</span>
+
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Reading dataset from </span><span class="si">{</span><span class="n">file_path</span><span class="si">}</span><span class="s2">...&quot;</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">readers</span><span class="p">[</span><span class="n">file_format</span><span class="p">](</span><span class="n">file_path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported file format: </span><span class="si">{</span><span class="n">file_format</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="merge_columns">
+<a class="viewcode-back" href="../../../tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.merge_columns">[docs]</a>
+<span class="nd">@pipeline_step</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">merge_columns</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">columns_to_merge</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+    <span class="n">new_column_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;_&quot;</span><span class="p">,</span>
+    <span class="n">drop_original</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">na_rep</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">prefix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">suffix</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">custom_formatter</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Callable</span><span class="p">[[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Merge multiple columns into a single column using a separator</span>
+
+<span class="sd">    This function combines values from multiple columns into a new column,</span>
+<span class="sd">    with flexible formatting options.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : pd.DataFrame</span>
+<span class="sd">        Input dataset</span>
+<span class="sd">    columns_to_merge : List[str]</span>
+<span class="sd">        List of column names to merge</span>
+<span class="sd">    new_column_name : str</span>
+<span class="sd">        Name for the new merged column</span>
+<span class="sd">    separator : str, default=&#39;_&#39;</span>
+<span class="sd">        Separator to use between values</span>
+<span class="sd">    drop_original : bool, default=False</span>
+<span class="sd">        Whether to drop the original columns after merging</span>
+<span class="sd">    na_rep : Optional[str], default=None</span>
+<span class="sd">        String representation of NaN values. If None, NaN values are skipped.</span>
+<span class="sd">    prefix : Optional[str], default=None</span>
+<span class="sd">        Prefix to add to the merged value</span>
+<span class="sd">    suffix : Optional[str], default=None</span>
+<span class="sd">        Suffix to add to the merged value</span>
+<span class="sd">    custom_formatter : Optional[Callable], default=None</span>
+<span class="sd">        Custom function to format each row. Takes a pd.Series and returns a string.</span>
+<span class="sd">        If provided, ignores separator, prefix, suffix parameters.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        Dataset with the new merged column</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Basic usage:</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;gene&#39;: [&#39;BRCA1&#39;, &#39;TP53&#39;, &#39;EGFR&#39;],</span>
+<span class="sd">    ...     &#39;position&#39;: [100, 200, 300],</span>
+<span class="sd">    ...     &#39;mutation&#39;: [&#39;A&#39;, &#39;T&#39;, &#39;G&#39;]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; result = merge_columns(df, [&#39;gene&#39;, &#39;position&#39;, &#39;mutation&#39;], &#39;mutation_id&#39;, separator=&#39;_&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(result[&#39;mutation_id&#39;])</span>
+<span class="sd">    0    BRCA1_100_A</span>
+<span class="sd">    1     TP53_200_T</span>
+<span class="sd">    2     EGFR_300_G</span>
+
+<span class="sd">    With prefix and suffix:</span>
+<span class="sd">    &gt;&gt;&gt; result = merge_columns(</span>
+<span class="sd">    ...     df, [&#39;gene&#39;, &#39;position&#39;], &#39;gene_pos&#39;,</span>
+<span class="sd">    ...     separator=&#39;:&#39;, prefix=&#39;[&#39;, suffix=&#39;]&#39;</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(result[&#39;gene_pos&#39;])</span>
+<span class="sd">    0    [BRCA1:100]</span>
+<span class="sd">    1     [TP53:200]</span>
+<span class="sd">    2     [EGFR:300]</span>
+
+<span class="sd">    Handling NaN values:</span>
+<span class="sd">    &gt;&gt;&gt; df_with_nan = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;col1&#39;: [&#39;A&#39;, &#39;B&#39;, None],</span>
+<span class="sd">    ...     &#39;col2&#39;: [&#39;X&#39;, None, &#39;Z&#39;],</span>
+<span class="sd">    ...     &#39;col3&#39;: [1, 2, 3]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; result = merge_columns(</span>
+<span class="sd">    ...     df_with_nan, [&#39;col1&#39;, &#39;col2&#39;, &#39;col3&#39;], &#39;merged&#39;,</span>
+<span class="sd">    ...     separator=&#39;-&#39;, na_rep=&#39;NA&#39;</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(result[&#39;merged&#39;])</span>
+<span class="sd">    0    A-X-1</span>
+<span class="sd">    1    B-NA-2</span>
+<span class="sd">    2    NA-Z-3</span>
+
+<span class="sd">    Custom formatter:</span>
+<span class="sd">    &gt;&gt;&gt; def format_mutation(row):</span>
+<span class="sd">    ...     return f&quot;{row[&#39;gene&#39;]}:{row[&#39;position&#39;]}{row[&#39;mutation&#39;]}&quot;</span>
+<span class="sd">    &gt;&gt;&gt; result = merge_columns(</span>
+<span class="sd">    ...     df, [&#39;gene&#39;, &#39;position&#39;, &#39;mutation&#39;], &#39;hgvs&#39;,</span>
+<span class="sd">    ...     custom_formatter=format_mutation</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(result[&#39;hgvs&#39;])</span>
+<span class="sd">    0    BRCA1:100A</span>
+<span class="sd">    1     TP53:200T</span>
+<span class="sd">    2     EGFR:300G</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Merging columns </span><span class="si">{</span><span class="n">columns_to_merge</span><span class="si">}</span><span class="s2"> into &#39;</span><span class="si">{</span><span class="n">new_column_name</span><span class="si">}</span><span class="s2">&#39;...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Validate columns exist</span>
+    <span class="n">missing_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns_to_merge</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">missing_cols</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Columns not found in dataset: </span><span class="si">{</span><span class="n">missing_cols</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Create a copy to avoid modifying original</span>
+    <span class="n">result</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">custom_formatter</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Use custom formatter</span>
+        <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Using custom formatter...&quot;</span><span class="p">)</span>
+        <span class="n">tqdm</span><span class="o">.</span><span class="n">pandas</span><span class="p">()</span>
+        <span class="n">result</span><span class="p">[</span><span class="n">new_column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">progress_apply</span><span class="p">(</span><span class="n">custom_formatter</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># type: ignore</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Standard merging with separator</span>
+        <span class="n">df_to_merge</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">columns_to_merge</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">na_rep</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Replace NaN with na_rep</span>
+            <span class="n">df_to_merge</span> <span class="o">=</span> <span class="n">df_to_merge</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">na_rep</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Convert to string and replace NaN with empty string</span>
+            <span class="n">df_to_merge</span> <span class="o">=</span> <span class="n">df_to_merge</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span>
+            <span class="n">mask</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">columns_to_merge</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span>
+            <span class="n">df_to_merge</span> <span class="o">=</span> <span class="n">df_to_merge</span><span class="o">.</span><span class="n">mask</span><span class="p">(</span><span class="n">mask</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="c1"># Vectorized merge</span>
+        <span class="n">merged</span> <span class="o">=</span> <span class="n">df_to_merge</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">separator</span><span class="o">.</span><span class="n">join</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="c1"># Skip rows with all NaN values</span>
+        <span class="k">if</span> <span class="n">na_rep</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">all_na</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">columns_to_merge</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">merged</span><span class="p">[</span><span class="n">all_na</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+
+        <span class="c1"># Add prefix and suffix if specified</span>
+        <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">suffix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="c1"># Add prefix and suffix to non-NaN values</span>
+            <span class="n">non_na_mask</span> <span class="o">=</span> <span class="n">merged</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">prefix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">merged</span><span class="p">[</span><span class="n">non_na_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">prefix</span> <span class="o">+</span> <span class="n">merged</span><span class="p">[</span><span class="n">non_na_mask</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">suffix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">merged</span><span class="p">[</span><span class="n">non_na_mask</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged</span><span class="p">[</span><span class="n">non_na_mask</span><span class="p">]</span> <span class="o">+</span> <span class="n">suffix</span>
+
+        <span class="n">result</span><span class="p">[</span><span class="n">new_column_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged</span>
+
+    <span class="c1"># Drop original columns if requested</span>
+    <span class="k">if</span> <span class="n">drop_original</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns_to_merge</span><span class="p">)</span>
+        <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Dropped original columns: </span><span class="si">{</span><span class="n">columns_to_merge</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Successfully created merged column &#39;</span><span class="si">{</span><span class="n">new_column_name</span><span class="si">}</span><span class="s2">&#39;&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<div class="viewcode-block" id="extract_and_rename_columns">
+<a class="viewcode-back" href="../../../tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.extract_and_rename_columns">[docs]</a>
+<span class="nd">@pipeline_step</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">extract_and_rename_columns</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">column_mapping</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">required_columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Extract useful columns and rename them to standard format.</span>
+
+<span class="sd">    This function extracts specified columns from the input dataset and renames them</span>
+<span class="sd">    according to the provided mapping. It helps standardize column names across</span>
+<span class="sd">    different datasets.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : pd.DataFrame</span>
+<span class="sd">        Input dataset containing the data to be processed</span>
+<span class="sd">    column_mapping : Dict[str, str]</span>
+<span class="sd">        Column name mapping from original names to new names</span>
+<span class="sd">        Format: {original_column_name: new_column_name}</span>
+<span class="sd">    required_columns : Optional[Sequence[str]], default=None</span>
+<span class="sd">        Required column names. If None, extracts all mapped columns</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        Dataset with extracted and renamed columns</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If required columns are missing from the input dataset</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;uniprot_ID&#39;: [&#39;P12345&#39;, &#39;Q67890&#39;],</span>
+<span class="sd">    ...     &#39;mutation_type&#39;: [&#39;A123B&#39;, &#39;C456D&#39;],</span>
+<span class="sd">    ...     &#39;score_value&#39;: [1.5, -2.3],</span>
+<span class="sd">    ...     &#39;extra_col&#39;: [&#39;x&#39;, &#39;y&#39;]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; mapping = {</span>
+<span class="sd">    ...     &#39;uniprot_ID&#39;: &#39;name&#39;,</span>
+<span class="sd">    ...     &#39;mutation_type&#39;: &#39;mut_info&#39;,</span>
+<span class="sd">    ...     &#39;score_value&#39;: &#39;label&#39;</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; result = extract_and_rename_columns(df, mapping)</span>
+<span class="sd">    &gt;&gt;&gt; print(result.columns.tolist())</span>
+<span class="sd">    [&#39;name&#39;, &#39;mut_info&#39;, &#39;label&#39;]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Extracting and renaming columns...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check if required columns exist</span>
+    <span class="n">missing_cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">column_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">missing_cols</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required columns: </span><span class="si">{</span><span class="n">missing_cols</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Extract and rename columns</span>
+    <span class="k">if</span> <span class="n">required_columns</span><span class="p">:</span>
+        <span class="c1"># Only extract specified columns</span>
+        <span class="n">extract_cols</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">col</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">column_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">column_mapping</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="ow">in</span> <span class="n">required_columns</span>
+        <span class="p">]</span>
+        <span class="n">extracted_dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">extract_cols</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Extract all mapped columns</span>
+        <span class="n">extracted_dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="nb">list</span><span class="p">(</span><span class="n">column_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">())]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="c1"># Rename columns</span>
+    <span class="n">extracted_dataset</span> <span class="o">=</span> <span class="n">extracted_dataset</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">column_mapping</span><span class="p">)</span>
+
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Extracted </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">extracted_dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2"> columns: </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">extracted_dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">extracted_dataset</span></div>
+
+
+
+<div class="viewcode-block" id="filter_and_clean_data">
+<a class="viewcode-back" href="../../../tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.filter_and_clean_data">[docs]</a>
+<span class="nd">@pipeline_step</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">filter_and_clean_data</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">filters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">]]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">exclude_patterns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">drop_na_columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Filter and clean data based on specified conditions.</span>
+
+<span class="sd">    This function provides flexible data filtering and cleaning capabilities,</span>
+<span class="sd">    including value-based filtering, pattern exclusion, and null value removal.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : pd.DataFrame</span>
+<span class="sd">        Input dataset to be filtered and cleaned</span>
+<span class="sd">    filters : Optional[Dict[str, Union[Any, Callable[[pd.Series], pd.Series]]]], default=None</span>
+<span class="sd">        Filter conditions in format {column_name: condition_value_or_function}</span>
+<span class="sd">        If value is callable, it will be applied to the column</span>
+<span class="sd">    exclude_patterns : Optional[Dict[str, Union[str, List[str]]]], default=None</span>
+<span class="sd">        Exclusion patterns in format {column_name: regex_pattern_or_list}</span>
+<span class="sd">        Rows matching these patterns will be excluded</span>
+<span class="sd">    drop_na_columns : Optional[List[str]], default=None</span>
+<span class="sd">        List of column names where null values should be dropped</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        Filtered and cleaned dataset</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;mut_type&#39;: [&#39;A123B&#39;, &#39;wt&#39;, &#39;C456D&#39;, &#39;insert&#39;, &#39;E789F&#39;],</span>
+<span class="sd">    ...     &#39;score&#39;: [1.5, 2.0, &#39;-&#39;, 3.2, 4.1],</span>
+<span class="sd">    ...     &#39;quality&#39;: [&#39;good&#39;, &#39;bad&#39;, &#39;good&#39;, &#39;good&#39;, None]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; filters = {&#39;score&#39;: lambda x: x != &#39;-&#39;}</span>
+<span class="sd">    &gt;&gt;&gt; exclude_patterns = {&#39;mut_type&#39;: [&#39;wt&#39;, &#39;insert&#39;]}</span>
+<span class="sd">    &gt;&gt;&gt; drop_na_columns = [&#39;quality&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; result = filter_and_clean_data(df, filters, exclude_patterns, drop_na_columns)</span>
+<span class="sd">    &gt;&gt;&gt; print(len(result))  # Should be 2 (A123B and E789F rows)</span>
+<span class="sd">    2</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Filtering and cleaning data...&quot;</span><span class="p">)</span>
+    <span class="n">original_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">)</span>
+
+    <span class="c1"># Collect all filter conditions to avoid dataframe copy</span>
+    <span class="n">filter_masks</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="n">available_columns</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+    <span class="c1"># Apply filter conditions</span>
+    <span class="k">if</span> <span class="n">filters</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">condition</span> <span class="ow">in</span> <span class="n">filters</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_columns</span><span class="p">:</span>
+                <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Column &#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">&#39; not found for filtering&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="nb">callable</span><span class="p">(</span><span class="n">condition</span><span class="p">):</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">condition</span><span class="p">(</span><span class="n">dataset</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
+                <span class="n">filter_masks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="n">condition</span>
+                <span class="n">filter_masks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+    <span class="c1"># Exclude specific patterns</span>
+    <span class="k">if</span> <span class="n">exclude_patterns</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">col</span><span class="p">,</span> <span class="n">patterns</span> <span class="ow">in</span> <span class="n">exclude_patterns</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available_columns</span><span class="p">:</span>
+                <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Column &#39;</span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2">&#39; not found for pattern exclusion&quot;</span><span class="p">)</span>
+                <span class="k">continue</span>
+
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">patterns</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">patterns</span> <span class="o">=</span> <span class="p">[</span><span class="n">patterns</span><span class="p">]</span>
+
+            <span class="c1"># Combine patterns into a single regex pattern</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">patterns</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">combined_pattern</span> <span class="o">=</span> <span class="n">patterns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">combined_pattern</span> <span class="o">=</span> <span class="s2">&quot;|&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="n">pattern</span><span class="si">}</span><span class="s2">)&quot;</span> <span class="k">for</span> <span class="n">pattern</span> <span class="ow">in</span> <span class="n">patterns</span><span class="p">)</span>
+
+            <span class="n">mask</span> <span class="o">=</span> <span class="o">~</span><span class="n">dataset</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">contains</span><span class="p">(</span><span class="n">combined_pattern</span><span class="p">,</span> <span class="n">na</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">filter_masks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+    <span class="c1"># Drop null values for specified columns</span>
+    <span class="k">if</span> <span class="n">drop_na_columns</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">drop_na_columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">available_columns</span><span class="p">:</span>
+                <span class="n">mask</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span>
+                <span class="n">filter_masks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
+
+    <span class="c1"># Apply combined filter conditions</span>
+    <span class="k">if</span> <span class="n">filter_masks</span><span class="p">:</span>
+        <span class="n">combined_mask</span> <span class="o">=</span> <span class="n">filter_masks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">mask</span> <span class="ow">in</span> <span class="n">filter_masks</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span>
+            <span class="n">combined_mask</span> <span class="o">&amp;=</span> <span class="n">mask</span>
+
+        <span class="n">result</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">combined_mask</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">result</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Filtered data: </span><span class="si">{</span><span class="n">original_len</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="si">}</span><span class="s2"> rows &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;(</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span><span class="o">/</span><span class="n">original_len</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% retained)&quot;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">result</span></div>
+
+
+
+<div class="viewcode-block" id="convert_data_types">
+<a class="viewcode-back" href="../../../tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.convert_data_types">[docs]</a>
+<span class="nd">@pipeline_step</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_data_types</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">type_conversions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">dtype</span><span class="p">]],</span>
+    <span class="n">handle_errors</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;coerce&quot;</span><span class="p">,</span>
+    <span class="n">optimize_memory</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">use_batch_processing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">chunk_size</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10000</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert data types for specified columns.</span>
+
+<span class="sd">    This function provides unified data type conversion with error handling options.</span>
+<span class="sd">    Supports pandas, numpy, and Python built-in types with memory optimization.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : pd.DataFrame</span>
+<span class="sd">        Input dataset with columns to be converted</span>
+<span class="sd">    type_conversions : Dict[str, Union[str, Type, np.dtype]]</span>
+<span class="sd">        Type conversion mapping in format {column_name: target_type}</span>
+<span class="sd">        Supported formats:</span>
+<span class="sd">        - String types: &#39;float&#39;, &#39;int&#39;, &#39;str&#39;, &#39;category&#39;, &#39;bool&#39;, &#39;datetime&#39;</span>
+<span class="sd">        - Numpy types: np.float32, np.float64, np.int32, np.int64, etc.</span>
+<span class="sd">        - Pandas types: &#39;Int64&#39;, &#39;Float64&#39;, &#39;string&#39;, &#39;boolean&#39;</span>
+<span class="sd">        - Python types: float, int, str, bool</span>
+<span class="sd">    handle_errors : str, default=&#39;coerce&#39;</span>
+<span class="sd">        Error handling strategy: &#39;raise&#39;, &#39;coerce&#39;, or &#39;ignore&#39;</span>
+<span class="sd">    optimize_memory : bool, default=True</span>
+<span class="sd">        Whether to automatically optimize memory usage by choosing smaller dtypes</span>
+<span class="sd">    use_batch_processing : bool, default=False</span>
+<span class="sd">        Whether to use batch processing for large datasets</span>
+<span class="sd">    chunk_size : int, default=10000</span>
+<span class="sd">        Chunk size when using batch processing</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        Dataset with converted data types</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;score&#39;: [&#39;1.5&#39;, &#39;2.3&#39;, &#39;3.7&#39;],</span>
+<span class="sd">    ...     &#39;count&#39;: [&#39;10&#39;, &#39;20&#39;, &#39;30&#39;],</span>
+<span class="sd">    ...     &#39;name&#39;: [123, 456, 789],</span>
+<span class="sd">    ...     &#39;flag&#39;: [&#39;True&#39;, &#39;False&#39;, &#39;True&#39;]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; conversions = {</span>
+<span class="sd">    ...     &#39;score&#39;: np.float32,</span>
+<span class="sd">    ...     &#39;count&#39;: &#39;Int64&#39;,</span>
+<span class="sd">    ...     &#39;name&#39;: &#39;string&#39;,</span>
+<span class="sd">    ...     &#39;flag&#39;: &#39;boolean&#39;</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; result = convert_data_types(df, conversions)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Converting data types...&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">use_batch_processing</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_convert_data_types_batch</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="p">,</span> <span class="n">type_conversions</span><span class="p">,</span> <span class="n">handle_errors</span><span class="p">,</span> <span class="n">optimize_memory</span><span class="p">,</span> <span class="n">chunk_size</span>
+        <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_convert_data_types</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="p">,</span> <span class="n">type_conversions</span><span class="p">,</span> <span class="n">handle_errors</span><span class="p">,</span> <span class="n">optimize_memory</span>
+        <span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="validate_mutations">
+<a class="viewcode-back" href="../../../tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.validate_mutations">[docs]</a>
+<span class="nd">@multiout_step</span><span class="p">(</span><span class="n">main</span><span class="o">=</span><span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="n">failed</span><span class="o">=</span><span class="s2">&quot;failed&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">validate_mutations</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">mutation_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mut_info&quot;</span><span class="p">,</span>
+    <span class="n">format_mutations</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">mutation_sep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="p">,</span>
+    <span class="n">is_zero_based</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">cache_results</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Validate and format mutation information.</span>
+
+<span class="sd">    This function validates mutation strings, optionally formats them to a standard</span>
+<span class="sd">    representation, and separates valid and invalid mutations into different datasets.</span>
+<span class="sd">    It supports caching for improved performance on datasets with repeated mutations.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : pd.DataFrame</span>
+<span class="sd">        Input dataset containing mutation information</span>
+<span class="sd">    mutation_column : str, default=&#39;mut_info&#39;</span>
+<span class="sd">        Name of the column containing mutation information</span>
+<span class="sd">    format_mutations : bool, default=True</span>
+<span class="sd">        Whether to format mutations to standard representation</span>
+<span class="sd">    mutation_sep : str, default=&#39;,&#39;</span>
+<span class="sd">        Separator used to split multiple mutations in a single string (e.g., &#39;A123B,C456D&#39;)</span>
+<span class="sd">    is_zero_based : bool, default=False</span>
+<span class="sd">        Whether origin mutation positions are zero-based</span>
+<span class="sd">    cache_results : bool, default=True</span>
+<span class="sd">        Whether to cache formatting results for performance</span>
+<span class="sd">    num_workers : int, default=4</span>
+<span class="sd">        Number of parallel workers for processing, set to -1 for all available CPUs</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple[pd.DataFrame, pd.DataFrame]</span>
+<span class="sd">        (successful_dataset, failed_dataset) - datasets with valid and invalid mutations</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;name&#39;: [&#39;protein1&#39;, &#39;protein1&#39;, &#39;protein2&#39;],</span>
+<span class="sd">    ...     &#39;mut_info&#39;: [&#39;A123S&#39;, &#39;C456D,E789F&#39;, &#39;InvalidMut&#39;],</span>
+<span class="sd">    ...     &#39;score&#39;: [1.5, 2.3, 3.7]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; successful, failed = validate_mutations(df, mutation_column=&#39;mut_info&#39;, mutation_sep=&#39;,&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; print(len(successful))  # Should be 2 (valid mutations)</span>
+<span class="sd">    2</span>
+<span class="sd">    &gt;&gt;&gt; print(successful[&#39;mut_info&#39;].tolist())  # Formatted mutations</span>
+<span class="sd">    [&#39;A123S&#39;, &#39;C456D,E789F&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; print(len(failed))  # Should be 1 (invalid mutation)</span>
+<span class="sd">    1</span>
+<span class="sd">    &gt;&gt;&gt; print(failed[&#39;failed&#39;][&#39;error_message&#39;].iloc[0])  # Error message for failed mutation</span>
+<span class="sd">    &#39;ValueError: No valid mutations could be parsed...&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Validating and formatting mutations...&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mutation_column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mutation column &#39;</span><span class="si">{</span><span class="n">mutation_column</span><span class="si">}</span><span class="s2">&#39; not found&quot;</span><span class="p">)</span>
+
+    <span class="n">result</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">original_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="c1"># Global cache for parallel processing (shared memory)</span>
+    <span class="k">if</span> <span class="n">cache_results</span><span class="p">:</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">multiprocessing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Manager</span>
+
+        <span class="n">manager</span> <span class="o">=</span> <span class="n">Manager</span><span class="p">()</span>
+        <span class="n">cache</span> <span class="o">=</span> <span class="n">manager</span><span class="o">.</span><span class="n">dict</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">cache</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="c1"># Prepare arguments for parallel processing</span>
+    <span class="n">mutation_values</span> <span class="o">=</span> <span class="n">result</span><span class="p">[</span><span class="n">mutation_column</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+    <span class="n">args_list</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="p">(</span>
+            <span class="n">mut_info</span><span class="p">,</span>
+            <span class="n">format_mutations</span><span class="p">,</span>
+            <span class="n">mutation_sep</span><span class="p">,</span>
+            <span class="n">is_zero_based</span><span class="p">,</span>
+            <span class="n">cache</span> <span class="k">if</span> <span class="n">cache_results</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">mut_info</span> <span class="ow">in</span> <span class="n">mutation_values</span>
+    <span class="p">]</span>
+
+    <span class="c1"># Parallel processing</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;loky&quot;</span><span class="p">)(</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">valid_single_mutation</span><span class="p">)(</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">args</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">args_list</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Processing mutations&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Separate formatted mutations and error messages</span>
+    <span class="n">formatted_mutations</span><span class="p">,</span> <span class="n">error_messages</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">results</span><span class="p">))</span>
+
+    <span class="c1"># Add results to dataset</span>
+    <span class="n">result_dataset</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">result_dataset</span><span class="p">[</span><span class="s2">&quot;formatted_&quot;</span> <span class="o">+</span> <span class="n">mutation_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">formatted_mutations</span>
+    <span class="n">result_dataset</span><span class="p">[</span><span class="s2">&quot;error_message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">error_messages</span>
+
+    <span class="c1"># Create success mask based on whether formatted mutation is available</span>
+    <span class="n">success_mask</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">notnull</span><span class="p">(</span><span class="n">result_dataset</span><span class="p">[</span><span class="s2">&quot;formatted_&quot;</span> <span class="o">+</span> <span class="n">mutation_column</span><span class="p">])</span>
+
+    <span class="c1"># Create successful dataset</span>
+    <span class="n">successful_dataset</span> <span class="o">=</span> <span class="n">result_dataset</span><span class="p">[</span><span class="n">success_mask</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">format_mutations</span><span class="p">:</span>
+        <span class="c1"># Replace original mutation column with formatted version</span>
+        <span class="n">successful_dataset</span><span class="p">[</span><span class="n">mutation_column</span><span class="p">]</span> <span class="o">=</span> <span class="n">successful_dataset</span><span class="p">[</span>
+            <span class="s2">&quot;formatted_&quot;</span> <span class="o">+</span> <span class="n">mutation_column</span>
+        <span class="p">]</span>
+    <span class="n">successful_dataset</span> <span class="o">=</span> <span class="n">successful_dataset</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
+        <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;formatted_&quot;</span> <span class="o">+</span> <span class="n">mutation_column</span><span class="p">,</span> <span class="s2">&quot;error_message&quot;</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Create failed dataset</span>
+    <span class="n">failed_dataset</span> <span class="o">=</span> <span class="n">result_dataset</span><span class="p">[</span><span class="o">~</span><span class="n">success_mask</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">failed_dataset</span> <span class="o">=</span> <span class="n">failed_dataset</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;formatted_&quot;</span> <span class="o">+</span> <span class="n">mutation_column</span><span class="p">])</span>
+
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Mutation validation: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">successful_dataset</span><span class="p">)</span><span class="si">}</span><span class="s2"> successful, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_dataset</span><span class="p">)</span><span class="si">}</span><span class="s2"> failed &quot;</span>
+        <span class="sa">f</span><span class="s2">&quot;(out of </span><span class="si">{</span><span class="n">original_len</span><span class="si">}</span><span class="s2"> total, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">successful_dataset</span><span class="p">)</span><span class="o">/</span><span class="n">original_len</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% valid)&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">successful_dataset</span><span class="p">,</span> <span class="n">failed_dataset</span></div>
+
+
+
+<div class="viewcode-block" id="apply_mutations_to_sequences">
+<a class="viewcode-back" href="../../../tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.apply_mutations_to_sequences">[docs]</a>
+<span class="nd">@multiout_step</span><span class="p">(</span><span class="n">main</span><span class="o">=</span><span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="n">failed</span><span class="o">=</span><span class="s2">&quot;failed&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">apply_mutations_to_sequences</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">sequence_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;sequence&quot;</span><span class="p">,</span>
+    <span class="n">name_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+    <span class="n">mutation_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mut_info&quot;</span><span class="p">,</span>
+    <span class="n">position_columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mutation_sep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="p">,</span>
+    <span class="n">is_zero_based</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+    <span class="n">sequence_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;protein&quot;</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Apply mutations to sequences to generate mutated sequences.</span>
+
+<span class="sd">    This function takes mutation information and applies it to wild-type sequences</span>
+<span class="sd">    to generate the corresponding mutated sequences. It supports parallel processing</span>
+<span class="sd">    and can handle position-based sequence extraction.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : pd.DataFrame</span>
+<span class="sd">        Input dataset containing mutation information and sequence data</span>
+<span class="sd">    sequence_column : str, default=&#39;sequence&#39;</span>
+<span class="sd">        Column name containing wild-type sequences</span>
+<span class="sd">    name_column : str, default=&#39;name&#39;</span>
+<span class="sd">        Column name containing protein identifiers</span>
+<span class="sd">    mutation_column : str, default=&#39;mut_info&#39;</span>
+<span class="sd">        Column name containing mutation information</span>
+<span class="sd">    position_columns : Optional[Dict[str, str]], default=None</span>
+<span class="sd">        Position column mapping {&quot;start&quot;: &quot;start_col&quot;, &quot;end&quot;: &quot;end_col&quot;}</span>
+<span class="sd">        Used for extracting sequence regions</span>
+<span class="sd">    mutation_sep : str, default=&#39;,&#39;</span>
+<span class="sd">        Separator used to split multiple mutations in a single string</span>
+<span class="sd">    is_zero_based : bool, default=True</span>
+<span class="sd">        Whether origin mutation positions are zero-based</span>
+<span class="sd">    sequence_type : str, default=&#39;protein&#39;</span>
+<span class="sd">        Type of sequence (&#39;protein&#39;, &#39;dna&#39;, &#39;rna&#39;)</span>
+<span class="sd">    num_workers : int, default=4</span>
+<span class="sd">        Number of parallel workers for processing, set to -1 for all available CPUs</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple[pd.DataFrame, pd.DataFrame]</span>
+<span class="sd">        (successful_dataset, failed_dataset) - datasets with and without errors</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;name&#39;: [&#39;prot1&#39;, &#39;prot1&#39;, &#39;prot2&#39;],</span>
+<span class="sd">    ...     &#39;sequence&#39;: [&#39;AKCDEF&#39;, &#39;AKCDEF&#39;, &#39;FEGHIS&#39;],</span>
+<span class="sd">    ...     &#39;mut_info&#39;: [&#39;A0K&#39;, &#39;C2D&#39;, &#39;E1F&#39;],</span>
+<span class="sd">    ...     &#39;score&#39;: [1.0, 2.0, 3.0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; successful, failed = apply_mutations_to_sequences(df)</span>
+<span class="sd">    &gt;&gt;&gt; print(successful[&#39;mut_seq&#39;].tolist())</span>
+<span class="sd">    [&#39;KKCDEF&#39;, &#39;AKDDEF&#39;, &#39;FFGHIS&#39;]</span>
+<span class="sd">    &gt;&gt;&gt; print(len(failed))  # Should be 0 if all mutations are valid</span>
+<span class="sd">    0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Applying mutations to sequences...&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Validate required columns exist</span>
+    <span class="n">required_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">sequence_column</span><span class="p">,</span> <span class="n">name_column</span><span class="p">,</span> <span class="n">mutation_column</span><span class="p">]</span>
+    <span class="n">missing_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">required_columns</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">missing_columns</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required columns: </span><span class="si">{</span><span class="n">missing_columns</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Select appropriate sequence class based on sequence_type</span>
+    <span class="n">sequence_type</span> <span class="o">=</span> <span class="n">sequence_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">sequence_type</span> <span class="o">==</span> <span class="s2">&quot;protein&quot;</span><span class="p">:</span>
+        <span class="n">SequenceClass</span> <span class="o">=</span> <span class="n">ProteinSequence</span>
+    <span class="k">elif</span> <span class="n">sequence_type</span> <span class="o">==</span> <span class="s2">&quot;dna&quot;</span><span class="p">:</span>
+        <span class="n">SequenceClass</span> <span class="o">=</span> <span class="n">DNASequence</span>
+    <span class="k">elif</span> <span class="n">sequence_type</span> <span class="o">==</span> <span class="s2">&quot;rna&quot;</span><span class="p">:</span>
+        <span class="n">SequenceClass</span> <span class="o">=</span> <span class="n">RNASequence</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unsupported sequence type: </span><span class="si">{</span><span class="n">sequence_type</span><span class="si">}</span><span class="s2">. Must be &#39;protein&#39;, &#39;dna&#39;, or &#39;rna&#39;&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">_apply_single_mutation</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
+        <span class="n">apply_single_mutation</span><span class="p">,</span>
+        <span class="n">dataset_columns</span><span class="o">=</span><span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">,</span>
+        <span class="n">sequence_column</span><span class="o">=</span><span class="n">sequence_column</span><span class="p">,</span>
+        <span class="n">name_column</span><span class="o">=</span><span class="n">name_column</span><span class="p">,</span>
+        <span class="n">mutation_column</span><span class="o">=</span><span class="n">mutation_column</span><span class="p">,</span>
+        <span class="n">position_columns</span><span class="o">=</span><span class="n">position_columns</span><span class="p">,</span>
+        <span class="n">mutation_sep</span><span class="o">=</span><span class="n">mutation_sep</span><span class="p">,</span>
+        <span class="n">is_zero_based</span><span class="o">=</span><span class="n">is_zero_based</span><span class="p">,</span>
+        <span class="n">sequence_class</span><span class="o">=</span><span class="n">SequenceClass</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Parallel processing</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">itertuples</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;loky&quot;</span><span class="p">)(</span>
+        <span class="n">delayed</span><span class="p">(</span><span class="n">_apply_single_mutation</span><span class="p">)(</span><span class="n">row</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">rows</span><span class="p">,</span> <span class="n">total</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">dataset</span><span class="p">),</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Applying mutations&quot;</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Separate successful and failed results</span>
+    <span class="n">mutated_seqs</span><span class="p">,</span> <span class="n">error_messages</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">results</span><span class="p">))</span>
+
+    <span class="n">result_dataset</span> <span class="o">=</span> <span class="n">dataset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">result_dataset</span><span class="p">[</span><span class="s2">&quot;mut_seq&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">mutated_seqs</span>
+    <span class="n">result_dataset</span><span class="p">[</span><span class="s2">&quot;error_message&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">error_messages</span>
+
+    <span class="n">success_mask</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">notnull</span><span class="p">(</span><span class="n">result_dataset</span><span class="p">[</span><span class="s2">&quot;mut_seq&quot;</span><span class="p">])</span>
+    <span class="n">successful_dataset</span> <span class="o">=</span> <span class="n">result_dataset</span><span class="p">[</span><span class="n">success_mask</span><span class="p">]</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;error_message&quot;</span><span class="p">])</span>
+    <span class="n">failed_dataset</span> <span class="o">=</span> <span class="n">result_dataset</span><span class="p">[</span><span class="o">~</span><span class="n">success_mask</span><span class="p">]</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;mut_seq&quot;</span><span class="p">])</span>
+
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Mutation application: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">successful_dataset</span><span class="p">)</span><span class="si">}</span><span class="s2"> successful, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_dataset</span><span class="p">)</span><span class="si">}</span><span class="s2"> failed&quot;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">successful_dataset</span><span class="p">,</span> <span class="n">failed_dataset</span></div>
+
+
+
+<div class="viewcode-block" id="infer_wildtype_sequences">
+<a class="viewcode-back" href="../../../tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.infer_wildtype_sequences">[docs]</a>
+<span class="nd">@multiout_step</span><span class="p">(</span><span class="n">main</span><span class="o">=</span><span class="s2">&quot;successful&quot;</span><span class="p">,</span> <span class="n">failed</span><span class="o">=</span><span class="s2">&quot;failed&quot;</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">infer_wildtype_sequences</span><span class="p">(</span>
+    <span class="n">dataset</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">name_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+    <span class="n">mutation_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mut_info&quot;</span><span class="p">,</span>
+    <span class="n">sequence_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mut_seq&quot;</span><span class="p">,</span>
+    <span class="n">label_columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">wt_label</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+    <span class="n">mutation_sep</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;,&quot;</span><span class="p">,</span>
+    <span class="n">is_zero_based</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">sequence_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;protein&quot;</span><span class="p">,</span> <span class="s2">&quot;dna&quot;</span><span class="p">,</span> <span class="s2">&quot;rna&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;protein&quot;</span><span class="p">,</span>
+    <span class="n">handle_multiple_wt</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;separate&quot;</span><span class="p">,</span> <span class="s2">&quot;first&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;error&quot;</span><span class="p">,</span>
+    <span class="n">num_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Infer wild-type sequences from mutated sequences and add WT rows.</span>
+
+<span class="sd">    This function takes mutated sequences and their corresponding mutations to</span>
+<span class="sd">    infer the original wild-type sequences. For each protein, it adds WT row(s)</span>
+<span class="sd">    to the dataset with the inferred wild-type sequence.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    dataset : pd.DataFrame</span>
+<span class="sd">        Input dataset containing mutated sequences and mutation information</span>
+<span class="sd">    name_column : str, default=&#39;name&#39;</span>
+<span class="sd">        Column name containing protein identifiers</span>
+<span class="sd">    mutation_column : str, default=&#39;mut_info&#39;</span>
+<span class="sd">        Column name containing mutation information</span>
+<span class="sd">    sequence_column : str, default=&#39;mut_seq&#39;</span>
+<span class="sd">        Column name containing mutated sequences</span>
+<span class="sd">    label_columns : Optional[List[str]], default=None</span>
+<span class="sd">        List of label column names to preserve</span>
+<span class="sd">    wt_label : float, default=0.0</span>
+<span class="sd">        Wild type score for WT rows</span>
+<span class="sd">    mutation_sep : str, default=&#39;,&#39;</span>
+<span class="sd">        Separator used to split multiple mutations in a single string</span>
+<span class="sd">    is_zero_based : bool, default=False</span>
+<span class="sd">        Whether origin mutation positions are zero-based</span>
+<span class="sd">    sequence_type : str, default=&#39;protein&#39;</span>
+<span class="sd">        Type of sequence (&#39;protein&#39;, &#39;dna&#39;, &#39;rna&#39;)</span>
+<span class="sd">    handle_multiple_wt : Literal[&quot;error&quot;, &quot;separate&quot;, &quot;first&quot;], default=&#39;error&#39;</span>
+<span class="sd">        How to handle multiple wild-type sequences: &#39;separate&#39;, &#39;first&#39;, or &#39;error&#39;</span>
+<span class="sd">    num_workers : int, default=4</span>
+<span class="sd">        Number of parallel workers for processing, set to -1 for all available CPUs</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple[pd.DataFrame, pd.DataFrame]</span>
+<span class="sd">        (successful_dataset, problematic_dataset) - datasets with added WT rows</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+<span class="sd">    &gt;&gt;&gt; df = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;name&#39;: [&#39;prot1&#39;, &#39;prot1&#39;, &#39;prot2&#39;],</span>
+<span class="sd">    ...     &#39;mut_info&#39;: [&#39;A0S&#39;, &#39;C2D&#39;, &#39;E0F&#39;],</span>
+<span class="sd">    ...     &#39;mut_seq&#39;: [&#39;SQCDEF&#39;, &#39;AQDDEF&#39;, &#39;FGHIGHK&#39;],</span>
+<span class="sd">    ...     &#39;score&#39;: [1.0, 2.0, 3.0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; success, failed = infer_wildtype_sequences(</span>
+<span class="sd">    ...     df, label_columns=[&#39;score&#39;]</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(len(success))  # Should have original rows + WT rows</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;Inferring wildtype sequences...&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">label_columns</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">label_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">dataset</span><span class="o">.</span><span class="n">columns</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;label_&quot;</span><span class="p">)]</span>
+
+    <span class="c1"># Select appropriate sequence class based on sequence_type</span>
+    <span class="k">if</span> <span class="n">sequence_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;protein&quot;</span><span class="p">:</span>
+        <span class="n">SequenceClass</span> <span class="o">=</span> <span class="n">ProteinSequence</span>
+        <span class="n">AlphabetClass</span> <span class="o">=</span> <span class="n">ProteinAlphabet</span>
+    <span class="k">elif</span> <span class="n">sequence_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;dna&quot;</span><span class="p">:</span>
+        <span class="n">SequenceClass</span> <span class="o">=</span> <span class="n">DNASequence</span>
+        <span class="n">AlphabetClass</span> <span class="o">=</span> <span class="n">DNAAlphabet</span>
+    <span class="k">elif</span> <span class="n">sequence_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;rna&quot;</span><span class="p">:</span>
+        <span class="n">SequenceClass</span> <span class="o">=</span> <span class="n">RNASequence</span>
+        <span class="n">AlphabetClass</span> <span class="o">=</span> <span class="n">RNAAlphabet</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unsupported sequence type: </span><span class="si">{</span><span class="n">sequence_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">. Must be &#39;protein&#39;, &#39;dna&#39;, or &#39;rna&#39;&quot;</span>
+        <span class="p">)</span>
+
+    <span class="n">_process_protein_group</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
+        <span class="n">infer_wt_sequence_grouped</span><span class="p">,</span>
+        <span class="n">name_column</span><span class="o">=</span><span class="n">name_column</span><span class="p">,</span>
+        <span class="n">mutation_column</span><span class="o">=</span><span class="n">mutation_column</span><span class="p">,</span>
+        <span class="n">sequence_column</span><span class="o">=</span><span class="n">sequence_column</span><span class="p">,</span>
+        <span class="n">label_columns</span><span class="o">=</span><span class="n">label_columns</span><span class="p">,</span>
+        <span class="n">wt_label</span><span class="o">=</span><span class="n">wt_label</span><span class="p">,</span>
+        <span class="n">mutation_sep</span><span class="o">=</span><span class="n">mutation_sep</span><span class="p">,</span>
+        <span class="n">is_zero_based</span><span class="o">=</span><span class="n">is_zero_based</span><span class="p">,</span>
+        <span class="n">handle_multiple_wt</span><span class="o">=</span><span class="n">handle_multiple_wt</span><span class="p">,</span>
+        <span class="n">sequence_class</span><span class="o">=</span><span class="n">SequenceClass</span><span class="p">,</span>
+        <span class="n">alphabet_class</span><span class="o">=</span><span class="n">AlphabetClass</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Group by protein and process in parallel</span>
+    <span class="n">grouped</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">name_column</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">))</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="n">Parallel</span><span class="p">(</span><span class="n">n_jobs</span><span class="o">=</span><span class="n">num_workers</span><span class="p">,</span> <span class="n">backend</span><span class="o">=</span><span class="s2">&quot;loky&quot;</span><span class="p">)(</span>
+            <span class="n">delayed</span><span class="p">(</span><span class="n">_process_protein_group</span><span class="p">)(</span><span class="n">group_data</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">group_data</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">grouped</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Processing proteins&quot;</span><span class="p">)</span>
+        <span class="p">)</span>
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Warning: Parallel processing failed, falling back to sequential: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="c1"># Fallback to sequential processing</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">group_data</span> <span class="ow">in</span> <span class="n">tqdm</span><span class="p">(</span><span class="n">grouped</span><span class="p">,</span> <span class="n">desc</span><span class="o">=</span><span class="s2">&quot;Processing proteins (sequential)&quot;</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">result</span> <span class="o">=</span> <span class="n">_process_protein_group</span><span class="p">(</span><span class="n">group_data</span><span class="p">)</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">group_e</span><span class="p">:</span>
+                <span class="c1"># Create error entry for this specific group</span>
+                <span class="n">protein_name</span> <span class="o">=</span> <span class="n">group_data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">error_row</span> <span class="o">=</span> <span class="p">{</span>
+                    <span class="n">name_column</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">protein_name</span><span class="p">),</span>
+                    <span class="s2">&quot;error_message&quot;</span><span class="p">:</span> <span class="sa">f</span><span class="s2">&quot;Sequential processing error: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">group_e</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">group_e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span>
+                <span class="p">}</span>
+                <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(([</span><span class="n">error_row</span><span class="p">],</span> <span class="s2">&quot;failed&quot;</span><span class="p">))</span>
+
+    <span class="c1"># Filter out None results and validate structure</span>
+    <span class="n">valid_results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">invalid_count</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">result</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">results</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">invalid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Result </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> is None, skipping&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">result</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">result</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">invalid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Result </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> has invalid format, skipping: </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">rows_list</span><span class="p">,</span> <span class="n">category</span> <span class="o">=</span> <span class="n">result</span>
+        <span class="k">if</span> <span class="n">category</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;success&quot;</span><span class="p">,</span> <span class="s2">&quot;failed&quot;</span><span class="p">):</span>
+            <span class="n">invalid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Warning: Result </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> has invalid category &#39;</span><span class="si">{</span><span class="n">category</span><span class="si">}</span><span class="s2">&#39;, skipping&quot;</span>
+            <span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rows_list</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="n">invalid_count</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: Result </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> has invalid rows format, skipping&quot;</span><span class="p">)</span>
+            <span class="k">continue</span>
+
+        <span class="n">valid_results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">result</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">invalid_count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Warning: </span><span class="si">{</span><span class="n">invalid_count</span><span class="si">}</span><span class="s2"> invalid results were skipped&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Collect all rows</span>
+    <span class="n">successful_rows</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">failed_rows</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">rows_list</span><span class="p">,</span> <span class="n">category</span> <span class="ow">in</span> <span class="n">valid_results</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">category</span> <span class="o">==</span> <span class="s2">&quot;success&quot;</span><span class="p">:</span>
+            <span class="n">successful_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">rows_list</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">failed_rows</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">rows_list</span><span class="p">)</span>
+
+    <span class="c1"># Convert to DataFrame format</span>
+    <span class="n">successful_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">successful_rows</span><span class="p">)</span> <span class="k">if</span> <span class="n">successful_rows</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+    <span class="n">failed_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">failed_rows</span><span class="p">)</span> <span class="k">if</span> <span class="n">failed_rows</span> <span class="k">else</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Wildtype inference: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">successful_rows</span><span class="p">)</span><span class="si">}</span><span class="s2"> successful rows, </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_rows</span><span class="p">)</span><span class="si">}</span><span class="s2"> failed rows&quot;</span>
+    <span class="p">)</span>
+    <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Added WT rows for proteins. Success: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">successful_df</span><span class="p">)</span><span class="si">}</span><span class="s2">, Failed: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">failed_df</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">successful_df</span><span class="p">,</span> <span class="n">failed_df</span></div>
+
+
+
+<div class="viewcode-block" id="convert_to_mutation_dataset_format">
+<a class="viewcode-back" href="../../../tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.convert_to_mutation_dataset_format">[docs]</a>
+<span class="nd">@pipeline_step</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_to_mutation_dataset_format</span><span class="p">(</span>
+    <span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">name_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+    <span class="n">mutation_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mut_info&quot;</span><span class="p">,</span>
+    <span class="n">sequence_column</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">mutated_sequence_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mut_seq&quot;</span><span class="p">,</span>
+    <span class="n">sequence_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;protein&quot;</span><span class="p">,</span> <span class="s2">&quot;dna&quot;</span><span class="p">,</span> <span class="s2">&quot;rna&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;protein&quot;</span><span class="p">,</span>
+    <span class="n">label_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;score&quot;</span><span class="p">,</span>
+    <span class="n">include_wild_type</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">mutation_set_prefix</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;set&quot;</span><span class="p">,</span>
+    <span class="n">is_zero_based</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">additional_metadata</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Convert a mutation DataFrame to the format required by MutationDataset.from_dataframe().</span>
+
+<span class="sd">    This function supports two input formats:</span>
+<span class="sd">    1. Format with WT rows: Contains explicit &#39;WT&#39; entries with wild-type sequences</span>
+<span class="sd">    2. Format with sequence column: Each row contains the wild-type sequence</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    df : pd.DataFrame</span>
+<span class="sd">        Input DataFrame. Supports two formats:</span>
+
+<span class="sd">        Format 1 (with WT rows):</span>
+<span class="sd">        - name: protein identifier</span>
+<span class="sd">        - mut_info: mutation info (&#39;A0S&#39;) or &#39;WT&#39; for wild-type</span>
+<span class="sd">        - mut_seq: mutated or wild-type sequence</span>
+<span class="sd">        - score: numerical score</span>
+
+<span class="sd">        Format 2 (with sequence column):</span>
+<span class="sd">        - name: protein identifier</span>
+<span class="sd">        - sequence: wild-type sequence</span>
+<span class="sd">        - mut_info: mutation info (&#39;A0S&#39;)</span>
+<span class="sd">        - mut_seq: mutated sequence</span>
+<span class="sd">        - score: numerical score</span>
+
+<span class="sd">    name_column : str, default=&#39;name&#39;</span>
+<span class="sd">        Column name containing protein/sequence identifiers.</span>
+
+<span class="sd">    mutation_column : str, default=&#39;mut_info&#39;</span>
+<span class="sd">        Column name containing mutation information. Expected formats:</span>
+<span class="sd">        - &#39;A0S&#39;: amino acid mutation (wild_type + position + mutant_type)</span>
+<span class="sd">        - &#39;WT&#39;: wild-type sequence (only in Format 1)</span>
+
+<span class="sd">    sequence_column : Optional[str], default=None</span>
+<span class="sd">        Column name containing wild-type sequences (Format 2 only).</span>
+<span class="sd">        If provided, assumes Format 2. If None, assumes Format 1.</span>
+
+<span class="sd">    mutated_sequence_column : Optional[str], default=&#39;mut_seq&#39;</span>
+<span class="sd">        Column name containing the mutated sequences.</span>
+
+<span class="sd">    label_column : str, default=&#39;score&#39;</span>
+<span class="sd">        Column name containing scores or other numerical values.</span>
+
+<span class="sd">    include_wild_type : bool, default=False</span>
+<span class="sd">        Whether to include wild-type (WT) entries in the output. Only applies</span>
+<span class="sd">        to Format 1 with explicit WT rows.</span>
+
+<span class="sd">    mutation_set_prefix : str, default=&#39;set&#39;</span>
+<span class="sd">        Prefix used for generating mutation set IDs.</span>
+
+<span class="sd">    is_zero_based : bool, default=False</span>
+<span class="sd">        Whether mutation positions are zero-based.</span>
+
+<span class="sd">    additional_metadata : Optional[Dict[str, Any]], default=None</span>
+<span class="sd">        Additional metadata to add to all mutation sets.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple[pd.DataFrame, Dict[str, str]]</span>
+<span class="sd">        (converted_dataframe, reference_sequences_dict)</span>
+
+<span class="sd">        converted_dataframe: DataFrame in MutationDataset.from_dataframe() format</span>
+<span class="sd">        reference_sequences_dict: Dictionary mapping reference_id to wild-type sequences</span>
+<span class="sd">        (extracted from WT rows in Format 1 or sequence column in Format 2)</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If required columns are missing or mutation strings cannot be parsed.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import pandas as pd</span>
+
+<span class="sd">    Format 1: With WT rows and multi-mutations</span>
+
+<span class="sd">    &gt;&gt;&gt; df1 = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;name&#39;: [&#39;prot1&#39;, &#39;prot1&#39;, &#39;prot1&#39;, &#39;prot2&#39;, &#39;prot2&#39;],</span>
+<span class="sd">    ...     &#39;mut_info&#39;: [&#39;A0S,Q1D&#39;, &#39;C2D&#39;, &#39;WT&#39;, &#39;E0F&#39;, &#39;WT&#39;],</span>
+<span class="sd">    ...     &#39;mut_seq&#39;: [&#39;SDCDEF&#39;, &#39;AQDDEF&#39;, &#39;AQCDEF&#39;, &#39;FGHIGHK&#39;, &#39;EGHIGHK&#39;],</span>
+<span class="sd">    ...     &#39;score&#39;: [1.5, 2.0, 0.0, 3.0, 0.0]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; result_df1, ref_seqs1 = convert_to_mutation_dataset_format(df1)</span>
+<span class="sd">    &gt;&gt;&gt; # Input has 5 rows but output has 6 rows (A0S,Q1D -&gt; 2 rows)</span>
+
+<span class="sd">    Format 2: With sequence column and multi-mutations</span>
+
+<span class="sd">    &gt;&gt;&gt; df2 = pd.DataFrame({</span>
+<span class="sd">    ...     &#39;name&#39;: [&#39;prot1&#39;, &#39;prot1&#39;, &#39;prot2&#39;],</span>
+<span class="sd">    ...     &#39;sequence&#39;: [&#39;AKCDEF&#39;, &#39;AKCDEF&#39;, &#39;FEGHIS&#39;],</span>
+<span class="sd">    ...     &#39;mut_info&#39;: [&#39;A0K,C2D&#39;, &#39;Q1P&#39;, &#39;E1F&#39;],</span>
+<span class="sd">    ...     &#39;score&#39;: [1.5, 2.0, 3.0],</span>
+<span class="sd">    ...     &#39;mut_seq&#39;: [&#39;KKDDEF&#39;, &#39;APCDEF&#39;, &#39;FFGHIS&#39;]</span>
+<span class="sd">    ... })</span>
+<span class="sd">    &gt;&gt;&gt; result_df2, ref_seqs2 = convert_to_mutation_dataset_format(</span>
+<span class="sd">    ...     df2, sequence_column=&#39;sequence&#39;</span>
+<span class="sd">    ... )</span>
+<span class="sd">    &gt;&gt;&gt; print(ref_seqs2[&#39;prot1&#39;])</span>
+<span class="sd">    AKCDEF</span>
+<span class="sd">    &gt;&gt;&gt; # First row generates 2 output rows for A0K and C2D mutations</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Validate input DataFrame</span>
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Input DataFrame cannot be empty&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Check basic required columns first</span>
+    <span class="n">basic_required</span> <span class="o">=</span> <span class="p">[</span><span class="n">name_column</span><span class="p">,</span> <span class="n">mutation_column</span><span class="p">,</span> <span class="n">label_column</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">mutated_sequence_column</span><span class="p">:</span>
+        <span class="n">basic_required</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">mutated_sequence_column</span><span class="p">)</span>
+
+    <span class="n">missing_basic</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">basic_required</span> <span class="k">if</span> <span class="n">col</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">missing_basic</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required columns: </span><span class="si">{</span><span class="n">missing_basic</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># Select appropriate sequence class based on sequence_type</span>
+    <span class="k">if</span> <span class="n">sequence_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;protein&quot;</span><span class="p">:</span>
+        <span class="n">SequenceClass</span> <span class="o">=</span> <span class="n">ProteinSequence</span>
+    <span class="k">elif</span> <span class="n">sequence_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;dna&quot;</span><span class="p">:</span>
+        <span class="n">SequenceClass</span> <span class="o">=</span> <span class="n">DNASequence</span>
+    <span class="k">elif</span> <span class="n">sequence_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;rna&quot;</span><span class="p">:</span>
+        <span class="n">SequenceClass</span> <span class="o">=</span> <span class="n">RNASequence</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Unsupported sequence type: </span><span class="si">{</span><span class="n">sequence_type</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="si">}</span><span class="s2">. Must be &#39;protein&#39;, &#39;dna&#39;, or &#39;rna&#39;&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Intelligently determine input format based on actual data content</span>
+    <span class="n">has_sequence_column</span> <span class="o">=</span> <span class="n">sequence_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">sequence_column</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span>
+    <span class="n">has_wt_rows</span> <span class="o">=</span> <span class="n">mutation_column</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="ow">and</span> <span class="s2">&quot;WT&quot;</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="n">mutation_column</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+
+    <span class="c1"># Decision logic for format detection</span>
+    <span class="k">if</span> <span class="n">has_sequence_column</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_wt_rows</span><span class="p">:</span>
+        <span class="c1"># Clearly Format 2: has sequence column, no WT rows</span>
+        <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Detected Format 2: Found sequence column &#39;</span><span class="si">{</span><span class="n">sequence_column</span><span class="si">}</span><span class="s2">&#39;, no WT rows&quot;</span>
+        <span class="p">)</span>
+        <span class="n">sequence_column</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">sequence_column</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">convert_format_2</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span>
+            <span class="n">name_column</span><span class="p">,</span>
+            <span class="n">mutation_column</span><span class="p">,</span>
+            <span class="n">sequence_column</span><span class="p">,</span>
+            <span class="n">label_column</span><span class="p">,</span>
+            <span class="n">mutation_set_prefix</span><span class="p">,</span>
+            <span class="n">is_zero_based</span><span class="p">,</span>
+            <span class="n">additional_metadata</span><span class="p">,</span>
+            <span class="n">SequenceClass</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">has_wt_rows</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">has_sequence_column</span><span class="p">:</span>
+        <span class="c1"># Clearly Format 1: has WT rows, no sequence column</span>
+        <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Detected Format 1: Found WT rows, no sequence column&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">convert_format_1</span><span class="p">(</span>
+            <span class="n">df</span><span class="p">,</span>
+            <span class="n">name_column</span><span class="p">,</span>
+            <span class="n">mutation_column</span><span class="p">,</span>
+            <span class="n">mutated_sequence_column</span><span class="p">,</span>
+            <span class="n">label_column</span><span class="p">,</span>
+            <span class="n">include_wild_type</span><span class="p">,</span>
+            <span class="n">mutation_set_prefix</span><span class="p">,</span>
+            <span class="n">is_zero_based</span><span class="p">,</span>
+            <span class="n">additional_metadata</span><span class="p">,</span>
+            <span class="n">SequenceClass</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="k">elif</span> <span class="n">has_sequence_column</span> <span class="ow">and</span> <span class="n">has_wt_rows</span><span class="p">:</span>
+        <span class="c1"># Ambiguous: has both sequence column and WT rows</span>
+        <span class="c1"># Prefer Format 2 if sequence column was explicitly specified</span>
+        <span class="k">if</span> <span class="n">sequence_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Warning: Found both sequence column &#39;</span><span class="si">{</span><span class="n">sequence_column</span><span class="si">}</span><span class="s2">&#39; and WT rows. &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Using Format 2 as sequence_column was specified.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">convert_format_2</span><span class="p">(</span>
+                <span class="n">df</span><span class="p">,</span>
+                <span class="n">name_column</span><span class="p">,</span>
+                <span class="n">mutation_column</span><span class="p">,</span>
+                <span class="n">sequence_column</span><span class="p">,</span>
+                <span class="n">label_column</span><span class="p">,</span>
+                <span class="n">mutation_set_prefix</span><span class="p">,</span>
+                <span class="n">is_zero_based</span><span class="p">,</span>
+                <span class="n">additional_metadata</span><span class="p">,</span>
+                <span class="n">SequenceClass</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">tqdm</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="s2">&quot;Warning: Found WT rows but sequence column exists. Using Format 1.&quot;</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">convert_format_1</span><span class="p">(</span>
+                <span class="n">df</span><span class="p">,</span>
+                <span class="n">name_column</span><span class="p">,</span>
+                <span class="n">mutation_column</span><span class="p">,</span>
+                <span class="n">mutated_sequence_column</span><span class="p">,</span>
+                <span class="n">label_column</span><span class="p">,</span>
+                <span class="n">include_wild_type</span><span class="p">,</span>
+                <span class="n">mutation_set_prefix</span><span class="p">,</span>
+                <span class="n">is_zero_based</span><span class="p">,</span>
+                <span class="n">additional_metadata</span><span class="p">,</span>
+                <span class="n">SequenceClass</span><span class="p">,</span>
+            <span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># Neither format detected</span>
+        <span class="n">error_msg</span> <span class="o">=</span> <span class="s2">&quot;Cannot determine input format:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="k">if</span> <span class="n">sequence_column</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">error_msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  - Sequence column &#39;</span><span class="si">{</span><span class="n">sequence_column</span><span class="si">}</span><span class="s2">&#39; specified but not found in DataFrame</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">error_msg</span> <span class="o">+=</span> <span class="sa">f</span><span class="s2">&quot;  - No &#39;WT&#39; entries found in &#39;</span><span class="si">{</span><span class="n">mutation_column</span><span class="si">}</span><span class="s2">&#39; column</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">error_msg</span> <span class="o">+=</span> <span class="p">(</span>
+            <span class="s2">&quot;Please ensure your DataFrame matches one of the supported formats:</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+        <span class="n">error_msg</span> <span class="o">+=</span> <span class="s2">&quot;  Format 1: Include &#39;WT&#39; rows with wild-type sequences</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="n">error_msg</span> <span class="o">+=</span> <span class="s2">&quot;  Format 2: Include a sequence column with wild-type sequences&quot;</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">error_msg</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Yuxiang Tang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

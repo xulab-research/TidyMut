@@ -1,7 +1,8 @@
 # tidymut/core/alphabet.py
+from __future__ import annotations
 
 from abc import ABC
-from typing import Set
+from typing import TYPE_CHECKING
 
 from .constants import (
     STANDARD_DNA_BASES,
@@ -13,6 +14,15 @@ from .constants import (
     AA1_TO_3,
     AA3_TO_1,
 )
+
+if TYPE_CHECKING:
+    from typing import List, Set
+
+__all__ = ["BaseAlphabet", "DNAAlphabet", "RNAAlphabet", "ProteinAlphabet"]
+
+
+def __dir__() -> List[str]:
+    return __all__
 
 
 class BaseAlphabet(ABC):

@@ -5,10 +5,27 @@ This module provides flexible and efficient data type conversion capabilities
 with support for pandas, numpy, and Python built-in types.
 """
 
+from __future__ import annotations
+
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
-from typing import Callable, Dict, Tuple, Type, Union
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Callable, Dict, List, Tuple, Type, Union
+
+__all__ = [
+    "convert_data_types",
+    "convert_data_types_batch",
+    "convert_to_boolean",
+    "get_conversion_function",
+    "normalize_type_conversions",
+]
+
+
+def __dir__() -> List[str]:
+    return __all__
 
 
 def normalize_type_conversions(

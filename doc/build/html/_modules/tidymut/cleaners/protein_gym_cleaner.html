@@ -1,0 +1,433 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tidymut.cleaners.protein_gym_cleaner &mdash; tidymut 0.1.0-dev documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../../_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+      <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="../../../_static/documentation_options.js?v=ee2d09ae"></script>
+      <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+      <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            tidymut
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../tidymut.cleaners.html">tidymut.cleaners package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tidymut.core.html">tidymut.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../tidymut.utils.html">tidymut.utils package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">tidymut</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">tidymut.cleaners.protein_gym_cleaner</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for tidymut.cleaners.protein_gym_cleaner</h1><div class="highlight"><pre>
+<span></span><span class="c1"># tidymut/cleaners/protein_gym_cleaner_pipeline.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">dataclasses</span><span class="w"> </span><span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">field</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.base_config</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseCleanerConfig</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.basic_cleaners</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">extract_and_rename_columns</span><span class="p">,</span>
+    <span class="n">filter_and_clean_data</span><span class="p">,</span>
+    <span class="n">convert_data_types</span><span class="p">,</span>
+    <span class="n">validate_mutations</span><span class="p">,</span>
+    <span class="n">infer_wildtype_sequences</span><span class="p">,</span>
+    <span class="n">convert_to_mutation_dataset_format</span><span class="p">,</span>
+<span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.protein_gym_custom_cleaners</span><span class="w"> </span><span class="kn">import</span> <span class="n">read_protein_gym_data</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.dataset</span><span class="w"> </span><span class="kn">import</span> <span class="n">MutationDataset</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">..core.pipeline</span><span class="w"> </span><span class="kn">import</span> <span class="n">Pipeline</span><span class="p">,</span> <span class="n">create_pipeline</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="s2">&quot;ProteinGymCleanerConfig&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;create_protein_gym_cleaner&quot;</span><span class="p">,</span>
+    <span class="s2">&quot;clean_protein_gym_dataset&quot;</span><span class="p">,</span>
+<span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="fm">__dir__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">__all__</span>
+
+
+<span class="c1"># Create module logger</span>
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="ProteinGymCleanerConfig">
+<a class="viewcode-back" href="../../../tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.ProteinGymCleanerConfig">[docs]</a>
+<span class="nd">@dataclass</span>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProteinGymCleanerConfig</span><span class="p">(</span><span class="n">BaseCleanerConfig</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Configuration class for ProteinGym dataset cleaner</span>
+
+<span class="sd">    Inherits from BaseCleanerConfig and adds ProteinGym-specific configuration options.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    column_mapping : Dict[str, str]</span>
+<span class="sd">        Mapping from source to target column names</span>
+<span class="sd">    filters : Dict[str, Any]</span>
+<span class="sd">        Filter conditions for data cleaning</span>
+<span class="sd">    type_conversions : Dict[str, str]</span>
+<span class="sd">        Data type conversion specifications</span>
+<span class="sd">    is_zero_based : bool</span>
+<span class="sd">        Whether mutation positions are zero-based</span>
+<span class="sd">    validation_workers : int</span>
+<span class="sd">        Number of workers for mutation validation</span>
+<span class="sd">    infer_wt_workers : int</span>
+<span class="sd">        Number of workers for wildtype sequence inference</span>
+<span class="sd">    handle_multiple_wt : Literal[&quot;error&quot;, &quot;first&quot;, &quot;separate&quot;]</span>
+<span class="sd">        Strategy for handling multiple wildtype sequences</span>
+<span class="sd">    label_columns : List[str]</span>
+<span class="sd">        List of score columns to process</span>
+<span class="sd">    primary_label_column : str</span>
+<span class="sd">        Primary score column for the dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="c1"># Column mapping configuration</span>
+    <span class="n">column_mapping</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;name&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mutated_sequence&quot;</span><span class="p">:</span> <span class="s2">&quot;mut_seq&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;mutant&quot;</span><span class="p">:</span> <span class="s2">&quot;mut_info&quot;</span><span class="p">,</span>
+            <span class="s2">&quot;DMS_score&quot;</span><span class="p">:</span> <span class="s2">&quot;DMS_score&quot;</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Data filtering configuration - no specific filters needed for ProteinGym</span>
+    <span class="n">filters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="nb">dict</span><span class="p">)</span>
+
+    <span class="c1"># Type conversion configuration</span>
+    <span class="n">type_conversions</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span>
+        <span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">{</span><span class="s2">&quot;DMS_score&quot;</span><span class="p">:</span> <span class="s2">&quot;float&quot;</span><span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Mutation validation parameters</span>
+    <span class="n">validation_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">16</span>
+
+    <span class="c1"># Wildtype inference parameters</span>
+    <span class="n">infer_wt_workers</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">16</span>
+    <span class="n">handle_multiple_wt</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="s2">&quot;separate&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="s2">&quot;error&quot;</span>  <span class="c1"># ProteinGym default</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Score columns configuration</span>
+    <span class="n">label_columns</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="p">(</span><span class="n">default_factory</span><span class="o">=</span><span class="k">lambda</span><span class="p">:</span> <span class="p">[</span><span class="s2">&quot;DMS_score&quot;</span><span class="p">])</span>
+    <span class="n">primary_label_column</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;DMS_score&quot;</span>
+
+    <span class="c1"># Override default pipeline name</span>
+    <span class="n">pipeline_name</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;protein_gym_cleaner&quot;</span>
+
+<div class="viewcode-block" id="ProteinGymCleanerConfig.validate">
+<a class="viewcode-back" href="../../../tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.ProteinGymCleanerConfig.validate">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate ProteinGym-specific configuration parameters</span>
+
+<span class="sd">        Raises</span>
+<span class="sd">        ------</span>
+<span class="sd">        ValueError</span>
+<span class="sd">            If configuration is invalid</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="c1"># Call parent validation</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">validate</span><span class="p">()</span>
+
+        <span class="c1"># Validate handle_multiple_wt parameter</span>
+        <span class="n">valid_strategies</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;error&quot;</span><span class="p">,</span> <span class="s2">&quot;first&quot;</span><span class="p">,</span> <span class="s2">&quot;separate&quot;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">handle_multiple_wt</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">valid_strategies</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;handle_multiple_wt must be one of </span><span class="si">{</span><span class="n">valid_strategies</span><span class="si">}</span><span class="s2">, &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">handle_multiple_wt</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Validate score columns</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;label_columns cannot be empty&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">primary_label_column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">label_columns</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;primary_label_column &#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">primary_label_column</span><span class="si">}</span><span class="s2">&#39; &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;must be in label_columns </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">label_columns</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Validate column mapping</span>
+        <span class="n">required_mappings</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;mutated_sequence&quot;</span><span class="p">,</span> <span class="s2">&quot;mutant&quot;</span><span class="p">,</span> <span class="s2">&quot;DMS_score&quot;</span><span class="p">}</span>
+        <span class="n">missing</span> <span class="o">=</span> <span class="n">required_mappings</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">column_mapping</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Missing required column mappings: </span><span class="si">{</span><span class="n">missing</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+</div>
+
+
+
+<div class="viewcode-block" id="create_protein_gym_cleaner">
+<a class="viewcode-back" href="../../../tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.create_protein_gym_cleaner">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_protein_gym_cleaner</span><span class="p">(</span>
+    <span class="n">data_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span>
+    <span class="n">config</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">ProteinGymCleanerConfig</span><span class="p">,</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Pipeline</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create ProteinGym dataset cleaning pipeline</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    data_path : Union[str, Path]</span>
+<span class="sd">        Path to directory containing ProteinGym CSV files or path to zip file</span>
+<span class="sd">        - Download from: https://proteingym.org/download</span>
+<span class="sd">        - File: DMS_ProteinGym_substitutions.zip</span>
+<span class="sd">    config : Optional[Union[ProteinGymCleanerConfig, Dict[str, Any], str, Path]]</span>
+<span class="sd">        Configuration for the cleaning pipeline. Can be:</span>
+<span class="sd">        - ProteinGymCleanerConfig object</span>
+<span class="sd">        - Dictionary with configuration parameters (merged with defaults)</span>
+<span class="sd">        - Path to JSON configuration file (str or Path)</span>
+<span class="sd">        - None (uses default configuration)</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Pipeline</span>
+<span class="sd">        The cleaning pipeline</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    TypeError</span>
+<span class="sd">        If config has invalid type</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If configuration validation fails</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    Process directory of ProteinGym CSV files:</span>
+<span class="sd">    &gt;&gt;&gt; pipeline = create_protein_gym_cleaner(&quot;DMS_ProteinGym_substitutions/&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; pipeline, dataset = clean_protein_gym_dataset(pipeline)</span>
+
+<span class="sd">    Process zip file:</span>
+<span class="sd">    &gt;&gt;&gt; pipeline = create_protein_gym_cleaner(&quot;DMS_ProteinGym_substitutions.zip&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; pipeline, dataset = clean_protein_gym_dataset(pipeline)</span>
+
+<span class="sd">    Custom configuration:</span>
+<span class="sd">    &gt;&gt;&gt; config = {</span>
+<span class="sd">    ...     &quot;validation_workers&quot;: 8,</span>
+<span class="sd">    ...     &quot;handle_multiple_wt&quot;: &quot;first&quot;</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; pipeline = create_protein_gym_cleaner(&quot;data/&quot;, config=config)</span>
+
+<span class="sd">    Load configuration from file:</span>
+<span class="sd">    &gt;&gt;&gt; pipeline = create_protein_gym_cleaner(&quot;data/&quot;, config=&quot;config.json&quot;)</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># Validate input path</span>
+    <span class="n">path_obj</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">data_path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path_obj</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Data path does not exist: </span><span class="si">{</span><span class="n">data_path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="c1"># ProteinGym only supports directory or zip file input</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">path_obj</span><span class="o">.</span><span class="n">is_dir</span><span class="p">()</span> <span class="ow">or</span> <span class="n">path_obj</span><span class="o">.</span><span class="n">suffix</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s2">&quot;.zip&quot;</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;ProteinGym cleaner only supports directory or zip file input, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;got: </span><span class="si">{</span><span class="n">data_path</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Handle configuration parameter</span>
+    <span class="k">if</span> <span class="n">config</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">final_config</span> <span class="o">=</span> <span class="n">ProteinGymCleanerConfig</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="n">ProteinGymCleanerConfig</span><span class="p">):</span>
+        <span class="n">final_config</span> <span class="o">=</span> <span class="n">config</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="c1"># Partial configuration - merge with defaults</span>
+        <span class="n">default_config</span> <span class="o">=</span> <span class="n">ProteinGymCleanerConfig</span><span class="p">()</span>
+        <span class="n">final_config</span> <span class="o">=</span> <span class="n">default_config</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">config</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
+        <span class="c1"># Load from file</span>
+        <span class="n">final_config</span> <span class="o">=</span> <span class="n">ProteinGymCleanerConfig</span><span class="o">.</span><span class="n">from_json</span><span class="p">(</span><span class="n">config</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;config must be ProteinGymCleanerConfig, dict, str, Path or None, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">config</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+        <span class="p">)</span>
+
+    <span class="c1"># Log configuration summary</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;ProteinGym dataset will be cleaned with pipeline: </span><span class="si">{</span><span class="n">final_config</span><span class="o">.</span><span class="n">pipeline_name</span><span class="si">}</span><span class="s2">&quot;</span>
+    <span class="p">)</span>
+    <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Configuration:</span><span class="se">\n</span><span class="si">{</span><span class="n">final_config</span><span class="o">.</span><span class="n">get_summary</span><span class="p">()</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Create pipeline</span>
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="n">create_pipeline</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="n">final_config</span><span class="o">.</span><span class="n">pipeline_name</span><span class="p">)</span>
+
+        <span class="c1"># Add cleaning steps using basic_cleaners functions</span>
+        <span class="n">pipeline</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">pipeline</span><span class="o">.</span><span class="n">delayed_then</span><span class="p">(</span>
+                <span class="n">read_protein_gym_data</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">delayed_then</span><span class="p">(</span>
+                <span class="n">extract_and_rename_columns</span><span class="p">,</span>
+                <span class="n">column_mapping</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">column_mapping</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">delayed_then</span><span class="p">(</span>
+                <span class="n">filter_and_clean_data</span><span class="p">,</span>
+                <span class="n">filters</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">filters</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">delayed_then</span><span class="p">(</span>
+                <span class="n">convert_data_types</span><span class="p">,</span>
+                <span class="n">type_conversions</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">type_conversions</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">delayed_then</span><span class="p">(</span>
+                <span class="n">validate_mutations</span><span class="p">,</span>
+                <span class="n">mutation_column</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">column_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mutant&quot;</span><span class="p">,</span> <span class="s2">&quot;mutant&quot;</span><span class="p">),</span>
+                <span class="n">mutation_sep</span><span class="o">=</span><span class="s2">&quot;:&quot;</span><span class="p">,</span>
+                <span class="n">is_zero_based</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                <span class="n">num_workers</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">validation_workers</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">delayed_then</span><span class="p">(</span>
+                <span class="n">infer_wildtype_sequences</span><span class="p">,</span>
+                <span class="n">name_column</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">column_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">),</span>
+                <span class="n">mutation_column</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">column_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mutant&quot;</span><span class="p">,</span> <span class="s2">&quot;mutant&quot;</span><span class="p">),</span>
+                <span class="n">sequence_column</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">column_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s2">&quot;mutated_sequence&quot;</span><span class="p">,</span> <span class="s2">&quot;mutated_sequence&quot;</span>
+                <span class="p">),</span>
+                <span class="n">label_columns</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">label_columns</span><span class="p">,</span>
+                <span class="n">mutation_sep</span><span class="o">=</span><span class="s2">&quot;,&quot;</span><span class="p">,</span>
+                <span class="n">is_zero_based</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>  <span class="c1"># Always True after validate_mutations</span>
+                <span class="n">handle_multiple_wt</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">handle_multiple_wt</span><span class="p">,</span>
+                <span class="n">num_workers</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">infer_wt_workers</span><span class="p">,</span>
+            <span class="p">)</span>
+            <span class="o">.</span><span class="n">delayed_then</span><span class="p">(</span>
+                <span class="n">convert_to_mutation_dataset_format</span><span class="p">,</span>
+                <span class="n">name_column</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">column_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;name&quot;</span><span class="p">),</span>
+                <span class="n">mutation_column</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">column_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;mutant&quot;</span><span class="p">,</span> <span class="s2">&quot;mutant&quot;</span><span class="p">),</span>
+                <span class="n">mutated_sequence_column</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">column_mapping</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+                    <span class="s2">&quot;mutated_sequence&quot;</span><span class="p">,</span> <span class="s2">&quot;mutated_sequence&quot;</span>
+                <span class="p">),</span>
+                <span class="n">label_column</span><span class="o">=</span><span class="n">final_config</span><span class="o">.</span><span class="n">primary_label_column</span><span class="p">,</span>
+                <span class="n">is_zero_based</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pipeline</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in creating ProteinGym cleaning pipeline: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in creating ProteinGym cleaning pipeline: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="clean_protein_gym_dataset">
+<a class="viewcode-back" href="../../../tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.clean_protein_gym_dataset">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">clean_protein_gym_dataset</span><span class="p">(</span><span class="n">pipeline</span><span class="p">:</span> <span class="n">Pipeline</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Pipeline</span><span class="p">,</span> <span class="n">MutationDataset</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Clean ProteinGym dataset using configurable pipeline</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    pipeline : Pipeline</span>
+<span class="sd">        ProteinGym dataset cleaning pipeline</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Tuple[Pipeline, MutationDataset]</span>
+<span class="sd">        - Pipeline: The cleaned pipeline</span>
+<span class="sd">        - MutationDataset: The cleaned ProteinGym dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Run pipeline</span>
+        <span class="n">pipeline</span><span class="o">.</span><span class="n">execute</span><span class="p">()</span>
+
+        <span class="c1"># Extract results</span>
+        <span class="n">protein_gym_dataset_df</span><span class="p">,</span> <span class="n">protein_gym_ref_seq</span> <span class="o">=</span> <span class="n">pipeline</span><span class="o">.</span><span class="n">data</span>
+        <span class="n">protein_gym_dataset</span> <span class="o">=</span> <span class="n">MutationDataset</span><span class="o">.</span><span class="n">from_dataframe</span><span class="p">(</span>
+            <span class="n">protein_gym_dataset_df</span><span class="p">,</span> <span class="n">protein_gym_ref_seq</span>
+        <span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s2">&quot;Successfully cleaned ProteinGym dataset: &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">protein_gym_dataset_df</span><span class="p">)</span><span class="si">}</span><span class="s2"> mutations from </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">protein_gym_ref_seq</span><span class="p">)</span><span class="si">}</span><span class="s2"> proteins&quot;</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pipeline</span><span class="p">,</span> <span class="n">protein_gym_dataset</span>
+
+    <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">error</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in running ProteinGym cleaning pipeline: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Error in running ProteinGym cleaning pipeline: </span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Yuxiang Tang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

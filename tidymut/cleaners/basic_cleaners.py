@@ -1,23 +1,13 @@
 # tidymut/cleaners/basic_cleaners.py
+from __future__ import annotations
 
 import numpy as np
 import pandas as pd
 from functools import partial
 from joblib import Parallel, delayed
+from pathlib import Path
 from tqdm import tqdm
-from typing import (
-    Any,
-    Callable,
-    Dict,
-    List,
-    Literal,
-    Optional,
-    Sequence,
-    Tuple,
-    Type,
-    Union,
-    cast,
-)
+from typing import cast, TYPE_CHECKING
 
 from ..core.alphabet import ProteinAlphabet, DNAAlphabet, RNAAlphabet
 from ..core.pipeline import pipeline_step, multiout_step
@@ -32,6 +22,232 @@ from ..utils.type_converter import (
     convert_data_types as _convert_data_types,
     convert_data_types_batch as _convert_data_types_batch,
 )
+
+if TYPE_CHECKING:
+    from typing import (
+        Any,
+        Callable,
+        Dict,
+        List,
+        Literal,
+        Optional,
+        Sequence,
+        Tuple,
+        Type,
+        Union,
+    )
+
+__all__ = [
+    "read_dataset",
+    "merge_columns",
+    "extract_and_rename_columns",
+    "filter_and_clean_data",
+    "convert_data_types",
+    "validate_mutations",
+    "apply_mutations_to_sequences",
+    "infer_wildtype_sequences",
+    "convert_to_mutation_dataset_format",
+]
+
+
+def __dir__() -> List[str]:
+    return __all__
+
+
+@pipeline_step
+def read_dataset(
+    file_path: Union[str, Path], file_format: Optional[str] = None, **kwargs
+) -> pd.DataFrame:
+    """
+    Read dataset from specified file format and return as a pandas DataFrame.
+
+    Parameters
+    ----------
+    file_path : Union[str, Path]
+        Path to the dataset file
+    file_format : str
+        Format of the dataset file ("csv", "tsv", "xlsx", etc.)
+    kwargs : Dict[str, Any]
+        Additional keyword arguments for file reading
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataset loaded from the specified file
+
+    Example
+    -------
+    >>> # Specify file_format parameter
+    >>> df = read_dataset("data.csv", "csv")
+    >>>
+    >>> # Detect file_format automatically
+    >>> df = read_dataset("data.csv")
+    """
+    if file_format is None:
+        file_format = Path(file_path).suffix.lstrip(".").lower()
+
+    readers = {
+        "csv": lambda path, **kw: pd.read_csv(path, **kw),
+        "tsv": lambda path, **kw: pd.read_csv(path, sep="\t", **kw),
+        "xlsx": lambda path, **kw: pd.read_excel(path, **kw),
+    }
+
+    tqdm.write(f"Reading dataset from {file_path}...")
+    try:
+        return readers[file_format](file_path, **kwargs)
+    except KeyError:
+        raise ValueError(f"Unsupported file format: {file_format}")
+
+
+@pipeline_step
+def merge_columns(
+    dataset: pd.DataFrame,
+    columns_to_merge: List[str],
+    new_column_name: str,
+    separator: str = "_",
+    drop_original: bool = False,
+    na_rep: Optional[str] = None,
+    prefix: Optional[str] = None,
+    suffix: Optional[str] = None,
+    custom_formatter: Optional[Callable[[pd.Series], str]] = None,
+) -> pd.DataFrame:
+    """Merge multiple columns into a single column using a separator
+
+    This function combines values from multiple columns into a new column,
+    with flexible formatting options.
+
+    Parameters
+    ----------
+    dataset : pd.DataFrame
+        Input dataset
+    columns_to_merge : List[str]
+        List of column names to merge
+    new_column_name : str
+        Name for the new merged column
+    separator : str, default='_'
+        Separator to use between values
+    drop_original : bool, default=False
+        Whether to drop the original columns after merging
+    na_rep : Optional[str], default=None
+        String representation of NaN values. If None, NaN values are skipped.
+    prefix : Optional[str], default=None
+        Prefix to add to the merged value
+    suffix : Optional[str], default=None
+        Suffix to add to the merged value
+    custom_formatter : Optional[Callable], default=None
+        Custom function to format each row. Takes a pd.Series and returns a string.
+        If provided, ignores separator, prefix, suffix parameters.
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataset with the new merged column
+
+    Examples
+    --------
+    Basic usage:
+    >>> df = pd.DataFrame({
+    ...     'gene': ['BRCA1', 'TP53', 'EGFR'],
+    ...     'position': [100, 200, 300],
+    ...     'mutation': ['A', 'T', 'G']
+    ... })
+    >>> result = merge_columns(df, ['gene', 'position', 'mutation'], 'mutation_id', separator='_')
+    >>> print(result['mutation_id'])
+    0    BRCA1_100_A
+    1     TP53_200_T
+    2     EGFR_300_G
+
+    With prefix and suffix:
+    >>> result = merge_columns(
+    ...     df, ['gene', 'position'], 'gene_pos',
+    ...     separator=':', prefix='[', suffix=']'
+    ... )
+    >>> print(result['gene_pos'])
+    0    [BRCA1:100]
+    1     [TP53:200]
+    2     [EGFR:300]
+
+    Handling NaN values:
+    >>> df_with_nan = pd.DataFrame({
+    ...     'col1': ['A', 'B', None],
+    ...     'col2': ['X', None, 'Z'],
+    ...     'col3': [1, 2, 3]
+    ... })
+    >>> result = merge_columns(
+    ...     df_with_nan, ['col1', 'col2', 'col3'], 'merged',
+    ...     separator='-', na_rep='NA'
+    ... )
+    >>> print(result['merged'])
+    0    A-X-1
+    1    B-NA-2
+    2    NA-Z-3
+
+    Custom formatter:
+    >>> def format_mutation(row):
+    ...     return f"{row['gene']}:{row['position']}{row['mutation']}"
+    >>> result = merge_columns(
+    ...     df, ['gene', 'position', 'mutation'], 'hgvs',
+    ...     custom_formatter=format_mutation
+    ... )
+    >>> print(result['hgvs'])
+    0    BRCA1:100A
+    1     TP53:200T
+    2     EGFR:300G
+    """
+    tqdm.write(f"Merging columns {columns_to_merge} into '{new_column_name}'...")
+
+    # Validate columns exist
+    missing_cols = [col for col in columns_to_merge if col not in dataset.columns]
+    if missing_cols:
+        raise ValueError(f"Columns not found in dataset: {missing_cols}")
+
+    # Create a copy to avoid modifying original
+    result = dataset.copy()
+
+    if custom_formatter is not None:
+        # Use custom formatter
+        tqdm.write("Using custom formatter...")
+        tqdm.pandas()
+        result[new_column_name] = result.progress_apply(custom_formatter, axis=1)  # type: ignore
+    else:
+        # Standard merging with separator
+        df_to_merge = result[columns_to_merge].copy()
+
+        if na_rep is not None:
+            # Replace NaN with na_rep
+            df_to_merge = df_to_merge.fillna(na_rep).astype(str)
+        else:
+            # Convert to string and replace NaN with empty string
+            df_to_merge = df_to_merge.astype(str)
+            mask = result[columns_to_merge].isna()
+            df_to_merge = df_to_merge.mask(mask, "")
+
+        # Vectorized merge
+        merged = df_to_merge.agg(separator.join, axis=1)
+
+        # Skip rows with all NaN values
+        if na_rep is None:
+            all_na = result[columns_to_merge].isna().all(axis=1)
+            merged[all_na] = np.nan
+
+        # Add prefix and suffix if specified
+        if prefix is not None or suffix is not None:
+            # Add prefix and suffix to non-NaN values
+            non_na_mask = merged.notna()
+            if prefix is not None:
+                merged[non_na_mask] = prefix + merged[non_na_mask]
+            if suffix is not None:
+                merged[non_na_mask] = merged[non_na_mask] + suffix
+
+        result[new_column_name] = merged
+
+    # Drop original columns if requested
+    if drop_original:
+        result = result.drop(columns=columns_to_merge)
+        tqdm.write(f"Dropped original columns: {columns_to_merge}")
+
+    tqdm.write(f"Successfully created merged column '{new_column_name}'")
+    return result
 
 
 @pipeline_step
@@ -327,7 +543,7 @@ def validate_mutations(
     cache_results : bool, default=True
         Whether to cache formatting results for performance
     num_workers : int, default=4
-        Number of parallel workers for processing
+        Number of parallel workers for processing, set to -1 for all available CPUs
 
     Returns
     -------
@@ -430,6 +646,7 @@ def apply_mutations_to_sequences(
     mutation_column: str = "mut_info",
     position_columns: Optional[Dict[str, str]] = None,
     mutation_sep: str = ",",
+    is_zero_based: bool = True,
     sequence_type: str = "protein",
     num_workers: int = 4,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -455,10 +672,12 @@ def apply_mutations_to_sequences(
         Used for extracting sequence regions
     mutation_sep : str, default=','
         Separator used to split multiple mutations in a single string
+    is_zero_based : bool, default=True
+        Whether origin mutation positions are zero-based
     sequence_type : str, default='protein'
         Type of sequence ('protein', 'dna', 'rna')
     num_workers : int, default=4
-        Number of parallel workers for processing
+        Number of parallel workers for processing, set to -1 for all available CPUs
 
     Returns
     -------
@@ -509,6 +728,7 @@ def apply_mutations_to_sequences(
         mutation_column=mutation_column,
         position_columns=position_columns,
         mutation_sep=mutation_sep,
+        is_zero_based=is_zero_based,
         sequence_class=SequenceClass,
     )
 
@@ -580,7 +800,7 @@ def infer_wildtype_sequences(
     handle_multiple_wt : Literal["error", "separate", "first"], default='error'
         How to handle multiple wild-type sequences: 'separate', 'first', or 'error'
     num_workers : int, default=4
-        Number of parallel workers for processing
+        Number of parallel workers for processing, set to -1 for all available CPUs
 
     Returns
     -------
@@ -727,7 +947,7 @@ def convert_to_mutation_dataset_format(
     sequence_column: Optional[str] = None,
     mutated_sequence_column: str = "mut_seq",
     sequence_type: Literal["protein", "dna", "rna"] = "protein",
-    score_column: str = "score",
+    label_column: str = "score",
     include_wild_type: bool = False,
     mutation_set_prefix: str = "set",
     is_zero_based: bool = False,
@@ -773,7 +993,7 @@ def convert_to_mutation_dataset_format(
     mutated_sequence_column : Optional[str], default='mut_seq'
         Column name containing the mutated sequences.
 
-    score_column : str, default='score'
+    label_column : str, default='score'
         Column name containing scores or other numerical values.
 
     include_wild_type : bool, default=False
@@ -806,8 +1026,9 @@ def convert_to_mutation_dataset_format(
     Examples
     --------
     >>> import pandas as pd
-    >>>
-    >>> # Format 1: With WT rows and multi-mutations
+
+    Format 1: With WT rows and multi-mutations
+
     >>> df1 = pd.DataFrame({
     ...     'name': ['prot1', 'prot1', 'prot1', 'prot2', 'prot2'],
     ...     'mut_info': ['A0S,Q1D', 'C2D', 'WT', 'E0F', 'WT'],
@@ -816,8 +1037,9 @@ def convert_to_mutation_dataset_format(
     ... })
     >>> result_df1, ref_seqs1 = convert_to_mutation_dataset_format(df1)
     >>> # Input has 5 rows but output has 6 rows (A0S,Q1D -> 2 rows)
-    >>>
-    >>> # Format 2: With sequence column and multi-mutations
+
+    Format 2: With sequence column and multi-mutations
+
     >>> df2 = pd.DataFrame({
     ...     'name': ['prot1', 'prot1', 'prot2'],
     ...     'sequence': ['AKCDEF', 'AKCDEF', 'FEGHIS'],
@@ -837,7 +1059,7 @@ def convert_to_mutation_dataset_format(
         raise ValueError("Input DataFrame cannot be empty")
 
     # Check basic required columns first
-    basic_required = [name_column, mutation_column, score_column]
+    basic_required = [name_column, mutation_column, label_column]
     if mutated_sequence_column:
         basic_required.append(mutated_sequence_column)
 
@@ -873,7 +1095,7 @@ def convert_to_mutation_dataset_format(
             name_column,
             mutation_column,
             sequence_column,
-            score_column,
+            label_column,
             mutation_set_prefix,
             is_zero_based,
             additional_metadata,
@@ -887,7 +1109,7 @@ def convert_to_mutation_dataset_format(
             name_column,
             mutation_column,
             mutated_sequence_column,
-            score_column,
+            label_column,
             include_wild_type,
             mutation_set_prefix,
             is_zero_based,
@@ -907,7 +1129,7 @@ def convert_to_mutation_dataset_format(
                 name_column,
                 mutation_column,
                 sequence_column,
-                score_column,
+                label_column,
                 mutation_set_prefix,
                 is_zero_based,
                 additional_metadata,
@@ -922,7 +1144,7 @@ def convert_to_mutation_dataset_format(
                 name_column,
                 mutation_column,
                 mutated_sequence_column,
-                score_column,
+                label_column,
                 include_wild_type,
                 mutation_set_prefix,
                 is_zero_based,

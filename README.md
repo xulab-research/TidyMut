@@ -19,6 +19,7 @@ TidyMut is designed for bioinformaticians, computational biologists, and researc
 ### Requirements
 - Python 3.13+
 - pandas
+- tqdm
 
 ### Install via pip
 ```bash
@@ -39,16 +40,18 @@ pip install -e .
 Here's a complete example demonstrating TidyMut's capabilities with the K50 mutation dataset:
 
 ```python
-import pandas as pd
-from tidymut.cleaners.k50_cleaner import clean_k50_dataset
+from tidymut import k50_cleaner
 
-# Load the K50 dataset
+
+# Create K50 cleaning pipeline using TidyMut's default pipeline
 # Download from: https://zenodo.org/records/799292
 # File: `Tsuboyama2023_Dataset2_Dataset3_20230416.csv` in `Processed_K50_dG_datasets.zip`
-raw_data = pd.read_csv("path/to/Tsuboyama2023_Dataset2_Dataset3_20230416.csv")
+k50_cleaning_pipeline = k50_cleaner.create_k50_cleaner(
+    "path/to/Tsuboyama2023_Dataset2_Dataset3_20230416.csv"
+)
 
-# Clean and process the dataset using TidyMut's default pipeline
-k50_dataset = clean_k50_dataset(raw_data)
+# Clean and process the dataset 
+k50_dataset = clean_k50_dataset(k50_cleaning_pipeline)
 
 # Save the processed dataset
 k50_dataset.save("output/cleaned_k50_data")
@@ -121,6 +124,8 @@ from tidymut.cleaners.basic_cleaners import (
 from tidymut.core.dataset import MutationDataset
 from tidymut.core.pipeline import Pipeline, create_pipeline
 
+dataset = pd.read_csv("path/to/Tsuboyama2023_Dataset2_Dataset3_20230416.csv")
+
 pipeline = create_pipeline(dataset, "k50_cleaner")
 clean_result = (
     pipeline.then(
@@ -170,14 +175,6 @@ artifacts = pipeline.artifacts
 pipeline.save_structured_data("k50_cleaner_pipeline.pkl")
 ```
 
-## Contributing
-
-We welcome contributions! Please see our [Contributing Guidelines](CONTRIBUTING.md) for details on:
-- Code style and standards
-- Testing requirements
-- Pull request process
-- Issue reporting
-
 ## Citation
 
 If you use TidyMut in your research, please cite:
@@ -186,17 +183,16 @@ If you use TidyMut in your research, please cite:
 @software{tidymut,
   title={TidyMut: A Python Package for Biological Sequence Data Processing},
   author={Your Name and Contributors},
-  year={2024},
+  year={2025},
   url={https://github.com/xulab-research/tidymut}
 }
 ```
 
 ## License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the BSD 3-Clause License - see the [LICENSE](LICENSE) file for details.
 
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/xulab-research/tidymut/issues)
 - **Discussions**: [GitHub Discussions](https://github.com/xulab-research/tidymut/discussions)
-- **Email**: 

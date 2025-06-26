@@ -1,0 +1,1051 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tidymut.cleaners package &mdash; tidymut 0.1.0-dev documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=ee2d09ae"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="tidymut.cleaners.base_config module" href="tidymut.cleaners.base_config.html" />
+    <link rel="prev" title="tidymut documentation" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            tidymut
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="current reference internal" href="#">tidymut.cleaners package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html">tidymut.cleaners.base_config module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html">tidymut.cleaners.basic_cleaners module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html">tidymut.cleaners.human_domainome_cleaner module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_custom_cleaners.html">tidymut.cleaners.human_domainome_custom_cleaners module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html">tidymut.cleaners.k50_cleaner module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html">tidymut.cleaners.protein_gym_cleaner module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_custom_cleaners.html">tidymut.cleaners.protein_gym_custom_cleaners module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="#module-tidymut.cleaners">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.sequence_dict_path"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.sequence_dict_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.header_parser"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.header_parser</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.column_mapping"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.type_conversions"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.drop_na_columns"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.drop_na_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.is_zero_based"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.is_zero_based</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.process_workers"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.process_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.label_columns"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.primary_label_column"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id0"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id1"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.drop_na_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id2"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.header_parser()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id3"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.is_zero_based</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id4"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.pipeline_name"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.pipeline_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id5"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id6"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.process_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id7"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.sequence_dict_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id8"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.validate"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tidymut.cleaners.K50CleanerConfig"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.K50CleanerConfig.column_mapping"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.K50CleanerConfig.filters"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.filters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.K50CleanerConfig.type_conversions"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.K50CleanerConfig.validation_workers"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.validation_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.K50CleanerConfig.infer_wt_workers"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.infer_wt_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.K50CleanerConfig.handle_multiple_wt"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.handle_multiple_wt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.K50CleanerConfig.label_columns"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.K50CleanerConfig.primary_label_column"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id9"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id10"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.filters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id11"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.handle_multiple_wt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id12"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.infer_wt_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id13"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.K50CleanerConfig.pipeline_name"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.pipeline_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id14"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id15"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.K50CleanerConfig.validate"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id16"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.validation_workers</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig.column_mapping"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig.filters"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.filters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig.type_conversions"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig.is_zero_based"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.is_zero_based</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig.validation_workers"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.validation_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig.infer_wt_workers"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.infer_wt_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig.handle_multiple_wt"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.handle_multiple_wt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig.label_columns"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig.primary_label_column"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id17"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id18"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.filters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id19"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.handle_multiple_wt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id20"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.infer_wt_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id21"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig.pipeline_name"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.pipeline_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id22"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id23"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig.validate"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#id24"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.validation_workers</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="#tidymut.cleaners.clean_human_domainome_dataset"><code class="docutils literal notranslate"><span class="pre">clean_human_domainome_dataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tidymut.cleaners.clean_k50_dataset"><code class="docutils literal notranslate"><span class="pre">clean_k50_dataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tidymut.cleaners.clean_protein_gym_dataset"><code class="docutils literal notranslate"><span class="pre">clean_protein_gym_dataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tidymut.cleaners.create_human_domainome_cleaner"><code class="docutils literal notranslate"><span class="pre">create_human_domainome_cleaner()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tidymut.cleaners.create_k50_cleaner"><code class="docutils literal notranslate"><span class="pre">create_k50_cleaner()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="#tidymut.cleaners.create_protein_gym_cleaner"><code class="docutils literal notranslate"><span class="pre">create_protein_gym_cleaner()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.core.html">tidymut.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.utils.html">tidymut.utils package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tidymut</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">tidymut.cleaners package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tidymut.cleaners.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tidymut-cleaners-package">
+<h1>tidymut.cleaners package<a class="headerlink" href="#tidymut-cleaners-package" title="Link to this heading"></a></h1>
+<section id="submodules">
+<h2>Submodules<a class="headerlink" href="#submodules" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.cleaners.base_config.html">tidymut.cleaners.base_config module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.base_config.html#tidymut.cleaners.base_config.BaseCleanerConfig"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#tidymut.cleaners.base_config.BaseCleanerConfig.pipeline_name"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.pipeline_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#tidymut.cleaners.base_config.BaseCleanerConfig.strict_mode"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.strict_mode</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#tidymut.cleaners.base_config.BaseCleanerConfig.num_workers"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.num_workers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#tidymut.cleaners.base_config.BaseCleanerConfig.validate_config"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.validate_config</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#tidymut.cleaners.base_config.BaseCleanerConfig.from_dict"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.from_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#tidymut.cleaners.base_config.BaseCleanerConfig.from_json"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.from_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#tidymut.cleaners.base_config.BaseCleanerConfig.get_summary"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.get_summary()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#tidymut.cleaners.base_config.BaseCleanerConfig.merge"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.merge()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#id0"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.num_workers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#id1"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.pipeline_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#id2"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.strict_mode</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#tidymut.cleaners.base_config.BaseCleanerConfig.to_dict"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.to_dict()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#tidymut.cleaners.base_config.BaseCleanerConfig.to_json"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.to_json()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#tidymut.cleaners.base_config.BaseCleanerConfig.validate"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.validate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html#id3"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig.validate_config</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html">tidymut.cleaners.basic_cleaners module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.apply_mutations_to_sequences"><code class="docutils literal notranslate"><span class="pre">apply_mutations_to_sequences()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.convert_data_types"><code class="docutils literal notranslate"><span class="pre">convert_data_types()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.convert_to_mutation_dataset_format"><code class="docutils literal notranslate"><span class="pre">convert_to_mutation_dataset_format()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.extract_and_rename_columns"><code class="docutils literal notranslate"><span class="pre">extract_and_rename_columns()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.filter_and_clean_data"><code class="docutils literal notranslate"><span class="pre">filter_and_clean_data()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.infer_wildtype_sequences"><code class="docutils literal notranslate"><span class="pre">infer_wildtype_sequences()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.merge_columns"><code class="docutils literal notranslate"><span class="pre">merge_columns()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.read_dataset"><code class="docutils literal notranslate"><span class="pre">read_dataset()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.validate_mutations"><code class="docutils literal notranslate"><span class="pre">validate_mutations()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html">tidymut.cleaners.human_domainome_cleaner module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.HumanDomainomeCleanerConfig"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.HumanDomainomeCleanerConfig.sequence_dict_path"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.sequence_dict_path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.HumanDomainomeCleanerConfig.header_parser"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.header_parser</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.HumanDomainomeCleanerConfig.column_mapping"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.HumanDomainomeCleanerConfig.type_conversions"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.HumanDomainomeCleanerConfig.drop_na_columns"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.drop_na_columns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.HumanDomainomeCleanerConfig.is_zero_based"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.is_zero_based</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.HumanDomainomeCleanerConfig.process_workers"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.process_workers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.HumanDomainomeCleanerConfig.label_columns"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.HumanDomainomeCleanerConfig.primary_label_column"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#id0"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#id1"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.drop_na_columns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#id2"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.header_parser()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#id3"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.is_zero_based</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#id4"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.HumanDomainomeCleanerConfig.pipeline_name"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.pipeline_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#id5"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#id6"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.process_workers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#id7"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.sequence_dict_path</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#id8"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.HumanDomainomeCleanerConfig.validate"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.clean_human_domainome_dataset"><code class="docutils literal notranslate"><span class="pre">clean_human_domainome_dataset()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.create_human_domainome_cleaner"><code class="docutils literal notranslate"><span class="pre">create_human_domainome_cleaner()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.cleaners.human_domainome_custom_cleaners.html">tidymut.cleaners.human_domainome_custom_cleaners module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.human_domainome_custom_cleaners.html#tidymut.cleaners.human_domainome_custom_cleaners.add_sequences_to_dataset"><code class="docutils literal notranslate"><span class="pre">add_sequences_to_dataset()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.human_domainome_custom_cleaners.html#tidymut.cleaners.human_domainome_custom_cleaners.extract_domain_sequences"><code class="docutils literal notranslate"><span class="pre">extract_domain_sequences()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.human_domainome_custom_cleaners.html#tidymut.cleaners.human_domainome_custom_cleaners.process_domain_positions"><code class="docutils literal notranslate"><span class="pre">process_domain_positions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html">tidymut.cleaners.k50_cleaner module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.K50CleanerConfig"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.K50CleanerConfig.column_mapping"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.K50CleanerConfig.filters"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.filters</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.K50CleanerConfig.type_conversions"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.K50CleanerConfig.validation_workers"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.validation_workers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.K50CleanerConfig.infer_wt_workers"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.infer_wt_workers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.K50CleanerConfig.handle_multiple_wt"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.handle_multiple_wt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.K50CleanerConfig.label_columns"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.K50CleanerConfig.primary_label_column"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#id0"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#id1"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.filters</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#id2"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.handle_multiple_wt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#id3"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.infer_wt_workers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#id4"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.K50CleanerConfig.pipeline_name"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.pipeline_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#id5"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#id6"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.K50CleanerConfig.validate"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.validate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#id7"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.validation_workers</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.clean_k50_dataset"><code class="docutils literal notranslate"><span class="pre">clean_k50_dataset()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.create_k50_cleaner"><code class="docutils literal notranslate"><span class="pre">create_k50_cleaner()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html">tidymut.cleaners.protein_gym_cleaner module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig</span></code></a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.column_mapping"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.filters"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.filters</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.type_conversions"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.is_zero_based"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.is_zero_based</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.validation_workers"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.validation_workers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.infer_wt_workers"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.infer_wt_workers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.handle_multiple_wt"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.handle_multiple_wt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.label_columns"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.primary_label_column"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#id0"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#id1"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.filters</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#id2"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.handle_multiple_wt</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#id3"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.infer_wt_workers</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#id4"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.pipeline_name"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.pipeline_name</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#id5"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#id6"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.validate"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.validate()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#id7"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.validation_workers</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.clean_protein_gym_dataset"><code class="docutils literal notranslate"><span class="pre">clean_protein_gym_dataset()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.create_protein_gym_cleaner"><code class="docutils literal notranslate"><span class="pre">create_protein_gym_cleaner()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.cleaners.protein_gym_custom_cleaners.html">tidymut.cleaners.protein_gym_custom_cleaners module</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.protein_gym_custom_cleaners.html#tidymut.cleaners.protein_gym_custom_cleaners.read_protein_gym_data"><code class="docutils literal notranslate"><span class="pre">read_protein_gym_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="module-tidymut.cleaners">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-tidymut.cleaners" title="Link to this heading"></a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="tidymut.cleaners.HumanDomainomeCleanerConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.</span></span><span class="sig-name descname"><span class="pre">HumanDomainomeCleanerConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">num_workers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">16,</span> <span class="pre">validate_config:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True,</span> <span class="pre">*,</span> <span class="pre">pipeline_name:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'human_domainome_cleaner',</span> <span class="pre">sequence_dict_path:</span> <span class="pre">Union[str,</span> <span class="pre">Path],</span> <span class="pre">header_parser:</span> <span class="pre">Callable[[str],</span> <span class="pre">Tuple[str,</span> <span class="pre">Dict[str,</span> <span class="pre">str]]]</span> <span class="pre">=</span> <span class="pre">&lt;function</span> <span class="pre">parse_uniprot_header&gt;,</span> <span class="pre">column_mapping:</span> <span class="pre">Dict[str,</span> <span class="pre">str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">type_conversions:</span> <span class="pre">Dict[str,</span> <span class="pre">str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">drop_na_columns:</span> <span class="pre">List</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">is_zero_based:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">False,</span> <span class="pre">process_workers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">16,</span> <span class="pre">label_columns:</span> <span class="pre">List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;,</span> <span class="pre">primary_label_column:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'label_humanDomainome'</span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tidymut/cleaners/human_domainome_cleaner.html#HumanDomainomeCleanerConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.HumanDomainomeCleanerConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCleanerConfig</span></code></p>
+<p>Configuration class for HumanDomainome dataset cleaner</p>
+<p>Inherits from BaseCleanerConfig and adds HumanDomainome-specific configuration options.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.HumanDomainomeCleanerConfig.sequence_dict_path">
+<span class="sig-name descname"><span class="pre">sequence_dict_path</span></span><a class="headerlink" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.sequence_dict_path" title="Link to this definition"></a></dt>
+<dd><p>Path to the file containing UniProt ID to sequence mapping</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Union[str, Path]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.HumanDomainomeCleanerConfig.header_parser">
+<span class="sig-name descname"><span class="pre">header_parser</span></span><a class="headerlink" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.header_parser" title="Link to this definition"></a></dt>
+<dd><p>Parse Header in fasta files and extract relevant information</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Callable[[str], Tuple[str, Dict[str, str]]]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.HumanDomainomeCleanerConfig.column_mapping">
+<span class="sig-name descname"><span class="pre">column_mapping</span></span><a class="headerlink" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.column_mapping" title="Link to this definition"></a></dt>
+<dd><p>Mapping from source to target column names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.HumanDomainomeCleanerConfig.type_conversions">
+<span class="sig-name descname"><span class="pre">type_conversions</span></span><a class="headerlink" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.type_conversions" title="Link to this definition"></a></dt>
+<dd><p>Data type conversion specifications</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.HumanDomainomeCleanerConfig.drop_na_columns">
+<span class="sig-name descname"><span class="pre">drop_na_columns</span></span><a class="headerlink" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.drop_na_columns" title="Link to this definition"></a></dt>
+<dd><p>List of column names where null values should be dropped</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.HumanDomainomeCleanerConfig.is_zero_based">
+<span class="sig-name descname"><span class="pre">is_zero_based</span></span><a class="headerlink" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.is_zero_based" title="Link to this definition"></a></dt>
+<dd><p>Whether mutation positions are zero-based</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.HumanDomainomeCleanerConfig.process_workers">
+<span class="sig-name descname"><span class="pre">process_workers</span></span><a class="headerlink" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.process_workers" title="Link to this definition"></a></dt>
+<dd><p>Number of workers for parallel processing</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.HumanDomainomeCleanerConfig.label_columns">
+<span class="sig-name descname"><span class="pre">label_columns</span></span><a class="headerlink" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.label_columns" title="Link to this definition"></a></dt>
+<dd><p>List of score columns to process</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.HumanDomainomeCleanerConfig.primary_label_column">
+<span class="sig-name descname"><span class="pre">primary_label_column</span></span><a class="headerlink" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.primary_label_column" title="Link to this definition"></a></dt>
+<dd><p>Primary score column for the dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">column_mapping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">drop_na_columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">header_parser</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd><p>Parse UniProt FASTA header to extract ID and metadata</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>header</strong> (<em>str</em>) – FASTA header line (without ‘&gt;’)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(sequence_id, metadata_dict)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[str, Dict[str, str]]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_uniprot_header</span><span class="p">(</span><span class="s2">&quot;sp|P12345|PROT_HUMAN Protein description OS=Homo sapiens&quot;</span><span class="p">)</span>
+<span class="go">(&#39;P12345&#39;, {&#39;db&#39;: &#39;sp&#39;, &#39;entry_name&#39;: &#39;PROT_HUMAN&#39;, &#39;description&#39;: &#39;Protein description OS=Homo sapiens&#39;})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_uniprot_header</span><span class="p">(</span><span class="s2">&quot;P12345|PROT_HUMAN Description&quot;</span><span class="p">)</span>
+<span class="go">(&#39;P12345&#39;, {&#39;entry_name&#39;: &#39;PROT_HUMAN&#39;, &#39;description&#39;: &#39;Description&#39;})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_uniprot_header</span><span class="p">(</span><span class="s2">&quot;P12345&quot;</span><span class="p">)</span>
+<span class="go">(&#39;P12345&#39;, {})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">is_zero_based</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">bool</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">False</span></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">label_columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.HumanDomainomeCleanerConfig.pipeline_name">
+<span class="sig-name descname"><span class="pre">pipeline_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'human_domainome_cleaner'</span></em><a class="headerlink" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.pipeline_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">primary_label_column</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'label_humanDomainome'</span></em><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">process_workers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">sequence_dict_path</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></em><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id8">
+<span class="sig-name descname"><span class="pre">type_conversions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id8" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tidymut.cleaners.HumanDomainomeCleanerConfig.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/tidymut/cleaners/human_domainome_cleaner.html#HumanDomainomeCleanerConfig.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.HumanDomainomeCleanerConfig.validate" title="Link to this definition"></a></dt>
+<dd><p>Validate HumanDomainome-specific configuration parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If configuration is invalid</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tidymut.cleaners.K50CleanerConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.</span></span><span class="sig-name descname"><span class="pre">K50CleanerConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_name:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'k50_cleaner'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_config:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_mapping:</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters:</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">~typing.Callable]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_conversions:</span> <span class="pre">~typing.Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_workers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infer_wt_workers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handle_multiple_wt:</span> <span class="pre">~typing.Literal['error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'first'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'separate']</span> <span class="pre">=</span> <span class="pre">'error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_columns:</span> <span class="pre">~typing.List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_label_column:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'ddG'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tidymut/cleaners/k50_cleaner.html#K50CleanerConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.K50CleanerConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCleanerConfig</span></code></p>
+<p>Configuration class for K50 dataset cleaner</p>
+<p>Inherits from BaseCleanerConfig and adds K50-specific configuration options.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.K50CleanerConfig.column_mapping">
+<span class="sig-name descname"><span class="pre">column_mapping</span></span><a class="headerlink" href="#tidymut.cleaners.K50CleanerConfig.column_mapping" title="Link to this definition"></a></dt>
+<dd><p>Mapping from source to target column names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.K50CleanerConfig.filters">
+<span class="sig-name descname"><span class="pre">filters</span></span><a class="headerlink" href="#tidymut.cleaners.K50CleanerConfig.filters" title="Link to this definition"></a></dt>
+<dd><p>Filter conditions for data cleaning</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Callable]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.K50CleanerConfig.type_conversions">
+<span class="sig-name descname"><span class="pre">type_conversions</span></span><a class="headerlink" href="#tidymut.cleaners.K50CleanerConfig.type_conversions" title="Link to this definition"></a></dt>
+<dd><p>Data type conversion specifications</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.K50CleanerConfig.validation_workers">
+<span class="sig-name descname"><span class="pre">validation_workers</span></span><a class="headerlink" href="#tidymut.cleaners.K50CleanerConfig.validation_workers" title="Link to this definition"></a></dt>
+<dd><p>Number of workers for mutation validation, set to -1 to use all available CPUs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.K50CleanerConfig.infer_wt_workers">
+<span class="sig-name descname"><span class="pre">infer_wt_workers</span></span><a class="headerlink" href="#tidymut.cleaners.K50CleanerConfig.infer_wt_workers" title="Link to this definition"></a></dt>
+<dd><p>Number of workers for wildtype sequence inference, set to -1 to use all available CPUs</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.K50CleanerConfig.handle_multiple_wt">
+<span class="sig-name descname"><span class="pre">handle_multiple_wt</span></span><a class="headerlink" href="#tidymut.cleaners.K50CleanerConfig.handle_multiple_wt" title="Link to this definition"></a></dt>
+<dd><p>Strategy for handling multiple wildtype sequences (‘error’, ‘first’, ‘separate’)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Literal[“error”, “first”, “separate”], default=”error”</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.K50CleanerConfig.label_columns">
+<span class="sig-name descname"><span class="pre">label_columns</span></span><a class="headerlink" href="#tidymut.cleaners.K50CleanerConfig.label_columns" title="Link to this definition"></a></dt>
+<dd><p>List of score columns to process</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.K50CleanerConfig.primary_label_column">
+<span class="sig-name descname"><span class="pre">primary_label_column</span></span><a class="headerlink" href="#tidymut.cleaners.K50CleanerConfig.primary_label_column" title="Link to this definition"></a></dt>
+<dd><p>Primary score column for the dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id9">
+<span class="sig-name descname"><span class="pre">column_mapping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id9" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id10">
+<span class="sig-name descname"><span class="pre">filters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Callable</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id10" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id11">
+<span class="sig-name descname"><span class="pre">handle_multiple_wt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'error'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'first'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'separate'</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'error'</span></em><a class="headerlink" href="#id11" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id12">
+<span class="sig-name descname"><span class="pre">infer_wt_workers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#id12" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id13">
+<span class="sig-name descname"><span class="pre">label_columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id13" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.K50CleanerConfig.pipeline_name">
+<span class="sig-name descname"><span class="pre">pipeline_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'k50_cleaner'</span></em><a class="headerlink" href="#tidymut.cleaners.K50CleanerConfig.pipeline_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id14">
+<span class="sig-name descname"><span class="pre">primary_label_column</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'ddG'</span></em><a class="headerlink" href="#id14" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id15">
+<span class="sig-name descname"><span class="pre">type_conversions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id15" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tidymut.cleaners.K50CleanerConfig.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/tidymut/cleaners/k50_cleaner.html#K50CleanerConfig.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.K50CleanerConfig.validate" title="Link to this definition"></a></dt>
+<dd><p>Validate K50-specific configuration parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If configuration is invalid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id16">
+<span class="sig-name descname"><span class="pre">validation_workers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#id16" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="tidymut.cleaners.ProteinGymCleanerConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.</span></span><span class="sig-name descname"><span class="pre">ProteinGymCleanerConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_name:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'protein_gym_cleaner'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_config:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_mapping:</span> <span class="pre">Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters:</span> <span class="pre">Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Any]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_conversions:</span> <span class="pre">Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_workers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infer_wt_workers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handle_multiple_wt:</span> <span class="pre">Literal['error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'first'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'separate']</span> <span class="pre">=</span> <span class="pre">'error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_columns:</span> <span class="pre">List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_label_column:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'DMS_score'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tidymut/cleaners/protein_gym_cleaner.html#ProteinGymCleanerConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.ProteinGymCleanerConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCleanerConfig</span></code></p>
+<p>Configuration class for ProteinGym dataset cleaner</p>
+<p>Inherits from BaseCleanerConfig and adds ProteinGym-specific configuration options.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.ProteinGymCleanerConfig.column_mapping">
+<span class="sig-name descname"><span class="pre">column_mapping</span></span><a class="headerlink" href="#tidymut.cleaners.ProteinGymCleanerConfig.column_mapping" title="Link to this definition"></a></dt>
+<dd><p>Mapping from source to target column names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.ProteinGymCleanerConfig.filters">
+<span class="sig-name descname"><span class="pre">filters</span></span><a class="headerlink" href="#tidymut.cleaners.ProteinGymCleanerConfig.filters" title="Link to this definition"></a></dt>
+<dd><p>Filter conditions for data cleaning</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Any]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.ProteinGymCleanerConfig.type_conversions">
+<span class="sig-name descname"><span class="pre">type_conversions</span></span><a class="headerlink" href="#tidymut.cleaners.ProteinGymCleanerConfig.type_conversions" title="Link to this definition"></a></dt>
+<dd><p>Data type conversion specifications</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.ProteinGymCleanerConfig.is_zero_based">
+<span class="sig-name descname"><span class="pre">is_zero_based</span></span><a class="headerlink" href="#tidymut.cleaners.ProteinGymCleanerConfig.is_zero_based" title="Link to this definition"></a></dt>
+<dd><p>Whether mutation positions are zero-based</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.ProteinGymCleanerConfig.validation_workers">
+<span class="sig-name descname"><span class="pre">validation_workers</span></span><a class="headerlink" href="#tidymut.cleaners.ProteinGymCleanerConfig.validation_workers" title="Link to this definition"></a></dt>
+<dd><p>Number of workers for mutation validation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.ProteinGymCleanerConfig.infer_wt_workers">
+<span class="sig-name descname"><span class="pre">infer_wt_workers</span></span><a class="headerlink" href="#tidymut.cleaners.ProteinGymCleanerConfig.infer_wt_workers" title="Link to this definition"></a></dt>
+<dd><p>Number of workers for wildtype sequence inference</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.ProteinGymCleanerConfig.handle_multiple_wt">
+<span class="sig-name descname"><span class="pre">handle_multiple_wt</span></span><a class="headerlink" href="#tidymut.cleaners.ProteinGymCleanerConfig.handle_multiple_wt" title="Link to this definition"></a></dt>
+<dd><p>Strategy for handling multiple wildtype sequences</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Literal[“error”, “first”, “separate”]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.ProteinGymCleanerConfig.label_columns">
+<span class="sig-name descname"><span class="pre">label_columns</span></span><a class="headerlink" href="#tidymut.cleaners.ProteinGymCleanerConfig.label_columns" title="Link to this definition"></a></dt>
+<dd><p>List of score columns to process</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.ProteinGymCleanerConfig.primary_label_column">
+<span class="sig-name descname"><span class="pre">primary_label_column</span></span><a class="headerlink" href="#tidymut.cleaners.ProteinGymCleanerConfig.primary_label_column" title="Link to this definition"></a></dt>
+<dd><p>Primary score column for the dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id17">
+<span class="sig-name descname"><span class="pre">column_mapping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id17" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id18">
+<span class="sig-name descname"><span class="pre">filters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id18" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id19">
+<span class="sig-name descname"><span class="pre">handle_multiple_wt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'error'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'first'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'separate'</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'error'</span></em><a class="headerlink" href="#id19" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id20">
+<span class="sig-name descname"><span class="pre">infer_wt_workers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#id20" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id21">
+<span class="sig-name descname"><span class="pre">label_columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id21" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.ProteinGymCleanerConfig.pipeline_name">
+<span class="sig-name descname"><span class="pre">pipeline_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'protein_gym_cleaner'</span></em><a class="headerlink" href="#tidymut.cleaners.ProteinGymCleanerConfig.pipeline_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id22">
+<span class="sig-name descname"><span class="pre">primary_label_column</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DMS_score'</span></em><a class="headerlink" href="#id22" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id23">
+<span class="sig-name descname"><span class="pre">type_conversions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id23" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tidymut.cleaners.ProteinGymCleanerConfig.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/tidymut/cleaners/protein_gym_cleaner.html#ProteinGymCleanerConfig.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.ProteinGymCleanerConfig.validate" title="Link to this definition"></a></dt>
+<dd><p>Validate ProteinGym-specific configuration parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If configuration is invalid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id24">
+<span class="sig-name descname"><span class="pre">validation_workers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#id24" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.cleaners.clean_human_domainome_dataset">
+<span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.</span></span><span class="sig-name descname"><span class="pre">clean_human_domainome_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline"><span class="pre">Pipeline</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline"><span class="pre">Pipeline</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset" title="tidymut.core.MutationDataset"><span class="pre">MutationDataset</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/tidymut/cleaners/human_domainome_cleaner.html#clean_human_domainome_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.clean_human_domainome_dataset" title="Link to this definition"></a></dt>
+<dd><p>Clean HumanDomainome dataset using configurable pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pipeline</strong> (<a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline"><em>Pipeline</em></a>) – HumanDomainome dataset cleaning pipeline</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Pipeline: The cleaned pipeline</p></li>
+<li><p>MutationDataset: The cleaned HumanDomainome dataset</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[<a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline">Pipeline</a>, <a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset" title="tidymut.core.MutationDataset">MutationDataset</a>]</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>RuntimeError</strong> – If pipeline execution fails</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.cleaners.clean_k50_dataset">
+<span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.</span></span><span class="sig-name descname"><span class="pre">clean_k50_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tidymut.core.pipeline.html#tidymut.core.pipeline.Pipeline" title="tidymut.core.pipeline.Pipeline"><span class="pre">Pipeline</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tidymut.core.pipeline.html#tidymut.core.pipeline.Pipeline" title="tidymut.core.pipeline.Pipeline"><span class="pre">Pipeline</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="tidymut.core.dataset.html#tidymut.core.dataset.MutationDataset" title="tidymut.core.dataset.MutationDataset"><span class="pre">MutationDataset</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/tidymut/cleaners/k50_cleaner.html#clean_k50_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.clean_k50_dataset" title="Link to this definition"></a></dt>
+<dd><p>Clean K50 dataset using configurable pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pipeline</strong> (<a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline"><em>Pipeline</em></a>) – K50 dataset cleaning pipeline</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Pipeline: The cleaned pipeline</p></li>
+<li><p>MutationDataset: The cleaned K50 dataset</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[<a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline">Pipeline</a>, <a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset" title="tidymut.core.MutationDataset">MutationDataset</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.cleaners.clean_protein_gym_dataset">
+<span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.</span></span><span class="sig-name descname"><span class="pre">clean_protein_gym_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline"><span class="pre">Pipeline</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline"><span class="pre">Pipeline</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset" title="tidymut.core.MutationDataset"><span class="pre">MutationDataset</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/tidymut/cleaners/protein_gym_cleaner.html#clean_protein_gym_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.clean_protein_gym_dataset" title="Link to this definition"></a></dt>
+<dd><p>Clean ProteinGym dataset using configurable pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pipeline</strong> (<a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline"><em>Pipeline</em></a>) – ProteinGym dataset cleaning pipeline</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Pipeline: The cleaned pipeline</p></li>
+<li><p>MutationDataset: The cleaned ProteinGym dataset</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[<a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline">Pipeline</a>, <a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset" title="tidymut.core.MutationDataset">MutationDataset</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.cleaners.create_human_domainome_cleaner">
+<span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.</span></span><span class="sig-name descname"><span class="pre">create_human_domainome_cleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_or_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_dict_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig" title="tidymut.cleaners.HumanDomainomeCleanerConfig"><span class="pre">HumanDomainomeCleanerConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline"><span class="pre">Pipeline</span></a></span></span><a class="reference internal" href="_modules/tidymut/cleaners/human_domainome_cleaner.html#create_human_domainome_cleaner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.create_human_domainome_cleaner" title="Link to this definition"></a></dt>
+<dd><p>Create HumanDomainome dataset cleaning pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_or_path</strong> (<em>Union</em><em>[</em><em>pd.DataFrame</em><em>, </em><em>str</em><em>, </em><em>Path</em><em>]</em>) – <p>Raw HumanDomainome dataset DataFrame or file path to K50 HumanDomainome
+- File: <cite>SupplementaryTable4.txt</cite> from the article</p>
+<blockquote>
+<div><p>’Site-saturation mutagenesis of 500 human protein domains’</p>
+</div></blockquote>
+</p></li>
+<li><p><strong>sequence_dict_path</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em>) – Path to file containing UniProt ID to sequence mapping</p></li>
+<li><p><strong>config</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><a class="reference internal" href="#tidymut.cleaners.HumanDomainomeCleanerConfig" title="tidymut.cleaners.HumanDomainomeCleanerConfig"><em>HumanDomainomeCleanerConfig</em></a><em>, </em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>, </em><em>str</em><em>, </em><em>Path</em><em>]</em><em>]</em>) – Configuration for the cleaning pipeline. Can be:
+- HumanDomainomeCleanerConfig object
+- Dictionary with configuration parameters (merged with defaults)
+- Path to JSON configuration file (str or Path)
+- None (uses default configuration)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cleaning pipeline</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline">Pipeline</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>FileNotFoundError</strong> – If data file or sequence dictionary file not found</p></li>
+<li><p><strong>TypeError</strong> – If config has invalid type</p></li>
+<li><p><strong>ValueError</strong> – If configuration validation fails</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Basic usage:
+&gt;&gt;&gt; pipeline = create_human_domainome_cleaner(
+…     “human_domainome.csv”,
+…     “uniprot_sequences.fasta”
+… )
+&gt;&gt;&gt; pipeline, dataset = clean_human_domainome_dataset(pipeline)</p>
+<p>Custom configuration:
+&gt;&gt;&gt; config = {
+…     “process_workers”: 8,
+…     “type_conversions”: {“label_humanDomainome”: “float32”}
+… }
+&gt;&gt;&gt; pipeline = create_human_domainome_cleaner(
+…     “human_domainome.csv”,
+…     “sequences.csv”,
+…     config=config
+… )</p>
+<p>Load configuration from file:
+&gt;&gt;&gt; pipeline = create_human_domainome_cleaner(
+…     “data.csv”,
+…     “sequences.fasta”,
+…     config=”config.json”
+… )</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.cleaners.create_k50_cleaner">
+<span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.</span></span><span class="sig-name descname"><span class="pre">create_k50_cleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset_or_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">DataFrame</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.K50CleanerConfig" title="tidymut.cleaners.k50_cleaner.K50CleanerConfig"><span class="pre">K50CleanerConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tidymut.core.pipeline.html#tidymut.core.pipeline.Pipeline" title="tidymut.core.pipeline.Pipeline"><span class="pre">Pipeline</span></a></span></span><a class="reference internal" href="_modules/tidymut/cleaners/k50_cleaner.html#create_k50_cleaner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.create_k50_cleaner" title="Link to this definition"></a></dt>
+<dd><p>Create K50 dataset cleaning pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset_or_path</strong> (<em>Union</em><em>[</em><em>pd.DataFrame</em><em>, </em><em>str</em><em>, </em><em>Path</em><em>]</em>) – Raw K50 dataset DataFrame or file path to K50 dataset
+- Download from: <a class="reference external" href="https://zenodo.org/records/799292">https://zenodo.org/records/799292</a>
+- File: <cite>Tsuboyama2023_Dataset2_Dataset3_20230416.csv</cite> in <cite>Processed_K50_dG_datasets.zip</cite></p></li>
+<li><p><strong>config</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><a class="reference internal" href="#tidymut.cleaners.K50CleanerConfig" title="tidymut.cleaners.K50CleanerConfig"><em>K50CleanerConfig</em></a><em>, </em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>, </em><em>str</em><em>, </em><em>Path</em><em>]</em><em>]</em>) – Configuration for the cleaning pipeline. Can be:
+- K50CleanerConfig object
+- Dictionary with configuration parameters (merged with defaults)
+- Path to JSON configuration file (str or Path)
+- None (uses default configuration)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Pipeline: The cleaning pipeline used</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline">Pipeline</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If config has invalid type</p></li>
+<li><p><strong>ValueError</strong> – If configuration validation fails</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Use default configuration:
+&gt;&gt;&gt; pipeline, dataset = clean_k50_dataset(df)</p>
+<p>Use partial configuration:
+&gt;&gt;&gt; pipeline, dataset = clean_k50_dataset(df, config={
+…     “validation_workers”: 8,
+…     “handle_multiple_wt”: “first”
+… })</p>
+<p>Load configuration from file:
+&gt;&gt;&gt; pipeline, dataset = clean_k50_dataset(df, config=”config.json”)</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.cleaners.create_protein_gym_cleaner">
+<span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.</span></span><span class="sig-name descname"><span class="pre">create_protein_gym_cleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig" title="tidymut.cleaners.ProteinGymCleanerConfig"><span class="pre">ProteinGymCleanerConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline"><span class="pre">Pipeline</span></a></span></span><a class="reference internal" href="_modules/tidymut/cleaners/protein_gym_cleaner.html#create_protein_gym_cleaner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.create_protein_gym_cleaner" title="Link to this definition"></a></dt>
+<dd><p>Create ProteinGym dataset cleaning pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_path</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em>) – Path to directory containing ProteinGym CSV files or path to zip file
+- Download from: <a class="reference external" href="https://proteingym.org/download">https://proteingym.org/download</a>
+- File: DMS_ProteinGym_substitutions.zip</p></li>
+<li><p><strong>config</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><a class="reference internal" href="#tidymut.cleaners.ProteinGymCleanerConfig" title="tidymut.cleaners.ProteinGymCleanerConfig"><em>ProteinGymCleanerConfig</em></a><em>, </em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>, </em><em>str</em><em>, </em><em>Path</em><em>]</em><em>]</em>) – Configuration for the cleaning pipeline. Can be:
+- ProteinGymCleanerConfig object
+- Dictionary with configuration parameters (merged with defaults)
+- Path to JSON configuration file (str or Path)
+- None (uses default configuration)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cleaning pipeline</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline">Pipeline</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If config has invalid type</p></li>
+<li><p><strong>ValueError</strong> – If configuration validation fails</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Process directory of ProteinGym CSV files:
+&gt;&gt;&gt; pipeline = create_protein_gym_cleaner(“DMS_ProteinGym_substitutions/”)
+&gt;&gt;&gt; pipeline, dataset = clean_protein_gym_dataset(pipeline)</p>
+<p>Process zip file:
+&gt;&gt;&gt; pipeline = create_protein_gym_cleaner(“DMS_ProteinGym_substitutions.zip”)
+&gt;&gt;&gt; pipeline, dataset = clean_protein_gym_dataset(pipeline)</p>
+<p>Custom configuration:
+&gt;&gt;&gt; config = {
+…     “validation_workers”: 8,
+…     “handle_multiple_wt”: “first”
+… }
+&gt;&gt;&gt; pipeline = create_protein_gym_cleaner(“data/”, config=config)</p>
+<p>Load configuration from file:
+&gt;&gt;&gt; pipeline = create_protein_gym_cleaner(“data/”, config=”config.json”)</p>
+</dd></dl>
+
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="tidymut documentation" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tidymut.cleaners.base_config.html" class="btn btn-neutral float-right" title="tidymut.cleaners.base_config module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Yuxiang Tang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

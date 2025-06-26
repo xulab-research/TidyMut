@@ -1,11 +1,43 @@
-# Ignore vscode config
-.vscode
+# Editor temporary/working/backup files #
+#########################################
+.#*
+*\#*\#
+[#]*#
+*~
+*$
+*.bak
+*flymake*
+*.iml
+*.kdev4
+*.log
+*.swp
+*.pdb
+*.zip
+.project
+.pydevproject
+.settings
+.idea
+.vagrant
+.noseids
+.ipynb_checkpoints
+.tags
+.cache/
+.vscode/
 
-# Ignore pytest related files
-.pytest_cache
+# Python files #
+################
+__pycache__/
+# pytest
+/.pytest_cache
+# egg metadata
+*.egg-info
+*.eggs
+# coverage
 .coverage
-tidymut.egg-info
+coverage.xml
+coverage_html_report
 htmlcov
 
-# Ignore Python bytecode cache
-__pycache__/
+# Build artifacts #
+###################
+dist/

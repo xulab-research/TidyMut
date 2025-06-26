@@ -1,27 +1,38 @@
 # tidymut/core/dataset.py
+from __future__ import annotations
 
 import pickle
 import json
 import pandas as pd
 from pathlib import Path
 from tqdm import tqdm
-from typing import List, Optional, Dict, Any, Literal, Type, Sequence, Union
+from typing import cast, Any, Dict, TYPE_CHECKING
 
 from .mutation import (
     MutationSet,
     AminoAcidMutationSet,
     CodonMutationSet,
-    BaseMutation,
     AminoAcidMutation,
     CodonMutation,
 )
 from .sequence import (
-    BaseSequence,
-    ProteinSequence,
     DNASequence,
+    ProteinSequence,
     RNASequence,
     load_sequences_from_fasta,
 )
+
+if TYPE_CHECKING:
+    from typing import List, Literal, Optional, Sequence, Type, Union
+
+    from .mutation import BaseMutation
+    from .sequence import BaseSequence
+
+__all__ = ["MutationDataset"]
+
+
+def __dir__() -> List[str]:
+    return __all__
 
 
 SEQUENCE_TYPE_MAP = {
@@ -64,6 +75,41 @@ class MutationDataset:
         self.mutation_set_labels: Dict[int, Any] = {}  # mutation_set_index -> label
         self.metadata: Dict[str, Any] = {}
         self._df: Optional[pd.DataFrame] = None
+
+    def __len__(self) -> int:
+        return len(self.mutation_sets)
+
+    def __iter__(self):
+        """
+        Iterate over mutation sets and their reference sequence IDs.
+
+        Yields:
+            Tuple[MutationSet, str]: (mutation_set, reference_id) pairs
+
+        Example:
+            for mutation_set, ref_id in dataset:
+                print(f"Processing {len(mutation_set)} mutations for {ref_id}")
+                ref_seq = dataset.get_reference_sequence(ref_id)
+                # ... analysis code
+        """
+        for i, mutation_set in enumerate(self.mutation_sets):
+            reference_id = self.mutation_set_references[i]
+            yield mutation_set, reference_id
+
+    def __str__(self) -> str:
+        stats = self.get_statistics()
+        ref_count = stats["num_reference_sequences"]
+        ref_info = (
+            f" ({ref_count} reference sequences)"
+            if ref_count > 0
+            else " (no references)"
+        )
+
+        return (
+            f"MutationDataset({self.name}){ref_info}: "
+            f"{stats['total_mutation_sets']} mutation sets, "
+            f"{stats['total_mutations']} mutations"
+        )
 
     def add_reference_sequence(self, sequence_id: str, sequence: BaseSequence):
         """Add a reference sequence with a unique identifier"""
@@ -747,7 +793,7 @@ class MutationDataset:
         base_path = Path(base_dir)
         base_path.mkdir(parents=True, exist_ok=True)
 
-        print(f"Saving dataset by reference to: {base_path}")
+        tqdm.write(f"Saving dataset by reference to: {base_path}")
 
         # Group mutation sets by reference_id
         ref_groups = {}
@@ -783,7 +829,7 @@ class MutationDataset:
                     mutated_sequence = ref_sequence.apply_mutation(mutation_set)
                     mutated_seq_str = str(mutated_sequence)
                 except Exception as e:
-                    print(
+                    tqdm.write(
                         f"Warning: Could not apply mutations for {mutation_name}: {e}"
                     )
                     mutated_seq_str = "ERROR_APPLYING_MUTATION"
@@ -837,11 +883,6 @@ class MutationDataset:
             metadata_path = ref_dir / "metadata.json"
             with open(metadata_path, "w") as f:
                 json.dump(metadata, f, indent=2, default=str)
-
-            print(f"  Saved {ref_id} -> {sanitized_ref_id}/")
-            print(f"    Data: {len(csv_data)} mutation sets")
-            print(f"    Sequence length: {len(ref_sequence)}")
-            # print(f"    Labels: {label_counts}")
 
     def save(
         self,
@@ -897,17 +938,17 @@ class MutationDataset:
             with open(meta_path, "w") as f:
                 json.dump(dataset_meta, f, indent=2)
 
-            print(f"Dataset saved to:")
-            print(f"  Mutations: {csv_path}")
-            print(f"  References: {refs_path}")
-            print(f"  Metadata: {meta_path}")
+            tqdm.write(f"Dataset saved to:")
+            tqdm.write(f"  Mutations: {csv_path}")
+            tqdm.write(f"  References: {refs_path}")
+            tqdm.write(f"  Metadata: {meta_path}")
 
         elif save_type == "pickle":
             # Save entire dataset as pickle
             pkl_path = base_path.with_suffix(".pkl")
             with open(pkl_path, "wb") as f:
                 pickle.dump(self, f)
-            print(f"Dataset saved to: {pkl_path}")
+            tqdm.write(f"Dataset saved to: {pkl_path}")
 
         elif save_type == "tidymut":
             # Save as TidyMut format
@@ -966,7 +1007,7 @@ class MutationDataset:
         if not base_path.is_dir():
             raise ValueError(f"Path is not a directory: {base_path}")
 
-        print(f"Loading dataset from: {base_path}")
+        tqdm.write(f"Loading dataset from: {base_path}")
 
         # Find all reference directories
         ref_dirs = [d for d in base_path.iterdir() if d.is_dir()]
@@ -985,10 +1026,10 @@ class MutationDataset:
 
             # Check required files exist
             if not data_path.exists():
-                print(f"Warning: Skipping {ref_dir.name} - data.csv not found")
+                tqdm.write(f"Warning: Skipping {ref_dir.name} - data.csv not found")
                 continue
             if not fasta_path.exists():
-                print(f"Warning: Skipping {ref_dir.name} - wt.fasta not found")
+                tqdm.write(f"Warning: Skipping {ref_dir.name} - wt.fasta not found")
                 continue
 
             # Load metadata to get original reference_id
@@ -999,7 +1040,9 @@ class MutationDataset:
                         metadata = json.load(f)
                     original_ref_id = metadata.get("reference_id", ref_dir.name)
                 except Exception as e:
-                    print(f"Warning: Could not load metadata for {ref_dir.name}: {e}")
+                    tqdm.write(
+                        f"Warning: Could not load metadata for {ref_dir.name}: {e}"
+                    )
 
             # Load reference sequence from FASTA
             sequence_type = SEQUENCE_TYPE_MAP.get(
@@ -1023,7 +1066,7 @@ class MutationDataset:
                     col for col in required_cols if col not in df_ref.columns
                 ]
                 if missing_cols:
-                    print(
+                    tqdm.write(
                         f"Warning: Skipping {ref_dir.name} - missing columns: {missing_cols}"
                     )
                     continue
@@ -1040,21 +1083,21 @@ class MutationDataset:
                         )
                         dataset.add_mutation_set(mutation_set, original_ref_id, label)
                     except Exception as e:
-                        print(
+                        tqdm.write(
                             f"Warning: Could not parse mutation '{mutation_name}': {e}"
                         )
                         continue
 
-                print(f"  Loaded {original_ref_id}: {len(df_ref)} mutation sets")
+                tqdm.write(f"  Loaded {original_ref_id}: {len(df_ref)} mutation sets")
 
             except Exception as e:
-                print(f"Warning: Could not load data for {ref_dir.name}: {e}")
+                tqdm.write(f"Warning: Could not load data for {ref_dir.name}: {e}")
                 continue
 
         if len(dataset) == 0:
             raise ValueError("No valid mutation sets were loaded")
 
-        print(f"Successfully loaded dataset with {len(dataset)} mutation sets")
+        tqdm.write(f"Successfully loaded dataset with {len(dataset)} mutation sets")
         return dataset
 
     @classmethod
@@ -1137,11 +1180,11 @@ class MutationDataset:
             dataset = cls.from_dataframe(df, reference_sequences, dataset_name)
             dataset.metadata = dataset_metadata
 
-            print(f"Dataset loaded from:")
-            print(f"  Mutations: {csv_path}")
-            print(f"  References: {refs_path}")
+            tqdm.write(f"Dataset loaded from:")
+            tqdm.write(f"  Mutations: {csv_path}")
+            tqdm.write(f"  References: {refs_path}")
             if meta_path.exists():
-                print(f"  Metadata: {meta_path}")
+                tqdm.write(f"  Metadata: {meta_path}")
 
             return dataset
 
@@ -1153,7 +1196,7 @@ class MutationDataset:
             with open(pkl_path, "rb") as f:
                 dataset = pickle.load(f)
 
-            print(f"Dataset loaded from: {pkl_path}")
+            tqdm.write(f"Dataset loaded from: {pkl_path}")
             return dataset
 
         elif load_type == "tidymut":
@@ -1170,6 +1213,7 @@ class MutationDataset:
         df: pd.DataFrame,
         reference_sequences: Dict[str, BaseSequence],
         name: Optional[str] = None,
+        specific_mutation_type: Optional[Type[BaseMutation]] = None,
     ) -> "MutationDataset":
         """
         Create a MutationDataset from a DataFrame containing mutation data.
@@ -1205,6 +1249,10 @@ class MutationDataset:
 
         name : Optional[str], default=None
             Optional name for the created MutationDataset.
+
+        specific_mutation_type : Optional[BaseMutation], default=None
+            The type of mutations to create. If None, will infer from first mutation
+            must be provided when the mutation type is neither 'amino_acid' nor any 'codon_*' type.
 
         Returns
         -------
@@ -1289,8 +1337,27 @@ class MutationDataset:
             if ref_id in df_ref_ids:  # Only add sequences that are actually used
                 dataset.add_reference_sequence(ref_id, sequence)
 
+        # Rocognize metadata columns
+        set_metadata_cols = [
+            col
+            for col in df.columns
+            if col.startswith("set_") and col != "set_metadata"
+        ]
+        mutation_metadata_cols = [
+            col
+            for col in df.columns
+            if col.startswith("mutation_")
+            and col
+            not in {
+                "mutation_id",
+                "mutation_type",
+                "mutation_string",
+                "mutation_category",
+            }
+        ]
+
         # Group by mutation set to rebuild mutation sets
-        grouped = df.groupby("mutation_set_id")
+        grouped = df.groupby("mutation_set_id", sort=False)
 
         for _, group in tqdm(grouped, desc="Reconstructing mutation sets"):
             # Get mutation set info
@@ -1300,18 +1367,20 @@ class MutationDataset:
             label = set_info.get("label")
 
             # Extract set metadata
-            set_metadata = {}
-            for col in group.columns:
-                if col.startswith("set_") and col != "set_metadata":
-                    key = col[4:]  # Remove 'set_' prefix
-                    value = set_info[col]
-                    if pd.notna(value):
-                        set_metadata[key] = value
+            set_metadata = {
+                col[4:]: value
+                for col in set_metadata_cols
+                if pd.notna(value := set_info[col])
+            }
 
             # Create mutations from group
             mutations = []
-            for _, row in group.iterrows():
-                mutation = cls._create_mutation_from_row(row)
+            columns = list(group.columns)
+            for values in group.values:
+                row_dict = dict(zip(columns, values))
+                mutation = cls._create_mutation_from_dict(
+                    row_dict, mutation_metadata_cols, specific_mutation_type
+                )
                 mutations.append(mutation)
 
             # Create appropriate mutation set type
@@ -1320,11 +1389,11 @@ class MutationDataset:
 
                 if mutation_type == AminoAcidMutation:
                     mutation_set = AminoAcidMutationSet(
-                        mutations=mutations, name=set_name, metadata=set_metadata
+                        mutations=mutations, name=set_name, metadata=set_metadata  # type: ignore
                     )
                 elif mutation_type == CodonMutation:
                     mutation_set = CodonMutationSet(
-                        mutations=mutations, name=set_name, metadata=set_metadata
+                        mutations=mutations, name=set_name, metadata=set_metadata  # type: ignore
                     )
                 else:
                     mutation_set = MutationSet(
@@ -1340,17 +1409,20 @@ class MutationDataset:
         return dataset
 
     @staticmethod
-    def _create_mutation_from_row(row: pd.Series) -> BaseMutation:
+    def _create_mutation_from_dict(
+        row_dict: Dict[str, Any],
+        metadata_cols: List[str],
+        specific_mutation_type: Optional[Type[BaseMutation]] = None,
+    ) -> BaseMutation:
         """
-        Create a mutation object from a DataFrame row
+        Create a mutation object from a DataFrame row dict
         Used by the from_dataframe() method
 
         Parameters
         ----------
-        row : pd.Series
-            A pandas Series containing mutation data with the following required fields:
+        row_dict: Dict[str, Any]
+            A pandas row dict containing mutation data with the following required fields:
             - 'mutation_type': Type of mutation ('amino_acid', 'codon_*', or other)
-            - 'position': Position of the mutation (will be converted to int)
 
             For amino acid mutations, also requires:
             - 'wild_amino_acid': Wild-type amino acid
@@ -1367,6 +1439,12 @@ class MutationDataset:
             - Any column starting with 'mutation_' (excluding specific reserved names)
             will be added as metadata to the mutation object
 
+        mutation_metadata_cols : List[str]
+            Metadata columns to be extracted and added to the mutation object
+
+        specific_mutation_type : Optional[Type[BaseMutation]], default=None
+            Only used when the mutation type is neither 'amino_acid' nor any 'codon_*' type.
+
         Returns
         -------
         BaseMutation
@@ -1375,82 +1453,46 @@ class MutationDataset:
             - CodonMutation for types starting with 'codon_'
             - Inferred mutation type for other types (parsed from mutation_string)
         """
-        mutation_type = row["mutation_type"]
-        position = int(row["position"])
+        mutation_type = row_dict["mutation_type"]
+        position = int(row_dict["position"])
 
-        # Extract mutation metadata
-        mutation_metadata = {}
-        for col_name, value in row.items():
-            if col_name.startswith("mutation_") and col_name not in [  # type: ignore
-                "mutation_id",
-                "mutation_type",
-                "mutation_string",
-                "mutation_category",
-            ]:
-                key = col_name[9:]  # Remove 'mutation_' prefix  # type: ignore
-                if pd.notna(value):
-                    mutation_metadata[key] = value
+        # Filter metadata
+        mutation_metadata = {
+            key[9:]: row_dict[key]  # Remove "mutation_" prefix
+            for key in metadata_cols
+            if not pd.isna(row_dict[key])
+        }
 
         if mutation_type == "amino_acid":
-            wild_aa = row["wild_amino_acid"]
-            mutant_aa = row["mutant_amino_acid"]
             return AminoAcidMutation(
-                wild_type=wild_aa,
+                wild_type=row_dict["wild_amino_acid"],
                 position=position,
-                mutant_type=mutant_aa,
+                mutant_type=row_dict["mutant_amino_acid"],
                 metadata=mutation_metadata,
             )
 
         elif mutation_type.startswith("codon_"):
-            wild_codon = row["wild_codon"]
-            mutant_codon = row["mutant_codon"]
             return CodonMutation(
-                wild_type=wild_codon,
+                wild_type=row_dict["wild_codon"],
                 position=position,
-                mutant_type=mutant_codon,
+                mutant_type=row_dict["mutant_codon"],
                 metadata=mutation_metadata,
             )
 
         else:
             # FIXME: need to handle other mutation types
             # Try to parse from mutation string as fallback
-            mutation_string = row["mutation_string"]
+            if specific_mutation_type is None:
+                raise ValueError(
+                    f"Unsupported mutation type: {mutation_type}, "
+                    f"you must provide a specific mutation type"
+                )
+            mutation_string = row_dict["mutation_string"]
             try:
-                return MutationSet._infer_and_create_mutation(mutation_string)
+                return MutationSet._create_mutation(
+                    mutation_string,
+                    mutation_type=specific_mutation_type,
+                    is_zero_based=True,
+                )
             except Exception as e:
                 raise ValueError(f"Cannot create mutation from row: {e}")
-
-    def __len__(self) -> int:
-        return len(self.mutation_sets)
-
-    def __iter__(self):
-        """
-        Iterate over mutation sets and their reference sequence IDs.
-
-        Yields:
-            Tuple[MutationSet, str]: (mutation_set, reference_id) pairs
-
-        Example:
-            for mutation_set, ref_id in dataset:
-                print(f"Processing {len(mutation_set)} mutations for {ref_id}")
-                ref_seq = dataset.get_reference_sequence(ref_id)
-                # ... analysis code
-        """
-        for i, mutation_set in enumerate(self.mutation_sets):
-            reference_id = self.mutation_set_references[i]
-            yield mutation_set, reference_id
-
-    def __str__(self) -> str:
-        stats = self.get_statistics()
-        ref_count = stats["num_reference_sequences"]
-        ref_info = (
-            f" ({ref_count} reference sequences)"
-            if ref_count > 0
-            else " (no references)"
-        )
-
-        return (
-            f"MutationDataset({self.name}){ref_info}: "
-            f"{stats['total_mutation_sets']} mutation sets, "
-            f"{stats['total_mutations']} mutations"
-        )

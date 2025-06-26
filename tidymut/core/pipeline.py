@@ -1,20 +1,29 @@
-from typing import (
-    Any,
-    Callable,
-    List,
-    Dict,
-    Optional,
-    Union,
-    Tuple,
-    NamedTuple,
-    cast,
-)
+# tidymut/core/pipeline.py
+from __future__ import annotations
+
+from typing import Callable, NamedTuple, cast, TYPE_CHECKING
 from copy import deepcopy
 import logging
 from functools import wraps
 import time
 import pickle
 from dataclasses import dataclass
+
+if TYPE_CHECKING:
+    from typing import (
+        Any,
+        List,
+        Dict,
+        Optional,
+        Union,
+        Tuple,
+    )
+
+__all__ = ["Pipeline", "create_pipeline", "multiout_step", "pipeline_step"]
+
+
+def __dir__() -> List[str]:
+    return __all__
 
 
 class MultiOutput(NamedTuple):
@@ -34,6 +43,20 @@ class PipelineOutput:
     def __getitem__(self, key: str):
         """Allow dictionary-style access to artifacts"""
         return self.artifacts.get(key)
+
+
+@dataclass
+class DelayedStep:
+    """Represents a delayed step that hasn't been executed yet"""
+
+    name: str
+    function: Callable
+    args: tuple
+    kwargs: dict
+
+    def to_pipeline_step(self) -> "PipelineStep":
+        """Convert to a PipelineStep for execution"""
+        return PipelineStep(self.name, self.function, *self.args, **self.kwargs)
 
 
 class PipelineStep:
@@ -129,6 +152,7 @@ class Pipeline:
         self._data = data  # Store actual data
         self._artifacts: Dict[str, Any] = {}  # Store artifacts separately
         self.steps: List[PipelineStep] = []
+        self.delayed_steps: List[DelayedStep] = []  # store delayed steps
         self.results: List[Any] = []
 
         # Setup logging
@@ -179,8 +203,26 @@ class Pipeline:
             return self._data
         return PipelineOutput(data=self._data, artifacts=self._artifacts.copy())
 
+    @property
+    def has_pending_steps(self) -> bool:
+        """Check if there are delayed steps waiting to be executed"""
+        return len(self.delayed_steps) > 0
+
     def then(self, func: Callable, *args, **kwargs) -> "Pipeline":
         """Apply a function to the current data (pandas.pipe style)"""
+        # Check if there are pending delayed steps
+        if self.delayed_steps:
+            import warnings
+
+            warnings.warn(
+                f"Pipeline has {len(self.delayed_steps)} pending delayed steps. "
+                f"Using then() will execute immediately without running delayed steps first. "
+                f"Consider using execute() to run delayed steps first, or use delayed_then() "
+                f"to add this step to the delayed queue.",
+                UserWarning,
+                stacklevel=2,
+            )
+
         # Use custom step name if available from decorator
         if hasattr(func, "_step_name"):
             step_name = func._step_name
@@ -233,6 +275,255 @@ class Pipeline:
             ) from e
 
         return self
+
+    def delayed_then(self, func: Callable, *args, **kwargs) -> "Pipeline":
+        """Add a function to the delayed execution queue without running it immediately"""
+        # Use custom step name if available from decorator
+        if hasattr(func, "_step_name"):
+            step_name = func._step_name
+        else:
+            step_name = getattr(func, "__name__", str(func))
+
+        # Create delayed step
+        delayed_step = DelayedStep(step_name, func, args, kwargs)
+        self.delayed_steps.append(delayed_step)
+
+        self.logger.debug(f"Added delayed step: {step_name}")
+
+        return self
+
+    def add_delayed_step(
+        self, func: Callable, index: Optional[int] = None, *args, **kwargs
+    ) -> "Pipeline":
+        """
+        Add a delayed step before a specific position in the delayed execution queue.
+
+        Performs a similar action to the `list.insert()` method.
+
+        Parameters
+        ----------
+        func : Callable
+            Function to add as delayed step
+        index : Optional[int]
+            Position to insert the step. If None, appends to the end.
+            Supports negative indexing.
+        *args, **kwargs
+            Arguments to pass to the function
+
+        Returns
+        -------
+        Pipeline
+            Self for method chaining
+
+        Examples
+        --------
+        >>> # Add step at the beginning
+        >>> pipeline.add_delayed_step(func1, 0)
+
+        >>> # Add step at the end (same as delayed_then)
+        >>> pipeline.add_delayed_step(func2)
+
+        >>> # Insert step at position 2
+        >>> pipeline.add_delayed_step(func3, 2)
+
+        >>> # Insert step before the last one
+        >>> pipeline.add_delayed_step(func4, -1)
+        """
+        # Use custom step name if available from decorator
+        if hasattr(func, "_step_name"):
+            step_name = func._step_name
+        else:
+            step_name = getattr(func, "__name__", str(func))
+
+        # Create delayed step
+        delayed_step = DelayedStep(step_name, func, args, kwargs)
+
+        if index is None:
+            # Append to the end (same as delayed_then)
+            self.delayed_steps.append(delayed_step)
+            self.logger.debug(
+                f"Added delayed step '{step_name}' at end (position {len(self.delayed_steps)-1})"
+            )
+        else:
+            # Insert at specific position
+            if index < 0:
+                # Handle negative indexing
+                actual_index = len(self.delayed_steps) + index
+            else:
+                actual_index = index
+
+            # Validate index
+            if actual_index < 0:
+                actual_index = 0
+            elif actual_index > len(self.delayed_steps):
+                actual_index = len(self.delayed_steps)
+
+            self.delayed_steps.insert(actual_index, delayed_step)
+            self.logger.debug(
+                f"Inserted delayed step '{step_name}' at position {actual_index}"
+            )
+
+        return self
+
+    def remove_delayed_step(self, index_or_name: Union[int, str]) -> "Pipeline":
+        """
+        Remove a delayed step at the specified index.
+
+        Parameters
+        ----------
+        index : int
+            Index of the delayed step to remove
+
+        Returns
+        -------
+        Pepline
+            Self for method chaining
+
+        Raises
+        ------
+        ValueError
+            If no delayed step is found with the specified index or name
+        """
+        if isinstance(index_or_name, int):
+            index = index_or_name
+        elif isinstance(index_or_name, str):
+            # Find index by name
+            index = next(
+                (
+                    i
+                    for i, step in enumerate(self.delayed_steps)
+                    if step.name == index_or_name
+                ),
+                None,
+            )
+            if index is None:
+                self.logger.debug(
+                    f"Cannot remove delayed step with name '{index_or_name}'. No such step found."
+                )
+                raise ValueError(
+                    f"Cannot remove delayed step with name '{index_or_name}'. No such step found."
+                )
+        else:
+            raise TypeError(
+                f"Expect int or str for type(index_or_name), got {type(index_or_name)}"
+            )
+
+        if index >= len(self.delayed_steps):
+            self.logger.debug(
+                f"Cannot remove delayed step at index {index}. Index out of range."
+            )
+            raise ValueError(
+                f"Cannot remove delayed step at index {index}. Index out of range."
+            )
+
+        self.logger.debug(f"Removed delayed step at position {index}")
+        del self.delayed_steps[index]
+        return self
+
+    def execute(self, steps: Optional[Union[int, List[int]]] = None) -> "Pipeline":
+        """
+        Execute delayed steps.
+
+        Parameters
+        ----------
+        steps : Optional[Union[int, List[int]]]
+            Which delayed steps to execute:
+            - None: execute all delayed steps
+            - int: execute the first N delayed steps
+            - List[int]: execute specific delayed steps by index
+
+        Returns
+        -------
+        Pipeline
+            Self for method chaining
+        """
+        if not self.delayed_steps:
+            self.logger.info("No delayed steps to execute")
+            return self
+
+        if self._data is None:
+            raise ValueError("No data to process. Initialize pipeline with data.")
+
+        # Determine which steps to execute
+        if steps is None:
+            # Execute all delayed steps
+            steps_to_execute = self.delayed_steps.copy()
+            self.delayed_steps = []
+        elif isinstance(steps, int):
+            # Execute first N steps
+            steps_to_execute = self.delayed_steps[:steps]
+            self.delayed_steps = self.delayed_steps[steps:]
+        elif isinstance(steps, list):
+            # Execute specific steps by index
+            steps_to_execute = []
+            remaining_steps = []
+            for i, delayed_step in enumerate(self.delayed_steps):
+                if i in steps:
+                    steps_to_execute.append(delayed_step)
+                else:
+                    remaining_steps.append(delayed_step)
+            self.delayed_steps = remaining_steps
+        else:
+            raise ValueError("steps parameter must be None, int, or List[int]")
+
+        self.logger.info(f"Executing {len(steps_to_execute)} delayed steps")
+
+        # Execute the selected steps
+        for delayed_step in steps_to_execute:
+            # Convert delayed step to pipeline step and execute
+            step = delayed_step.to_pipeline_step()
+            self.steps.append(step)
+
+            self.logger.info(f"Executing delayed step: {step.name}")
+
+            try:
+                # Execute step - always pass actual data to function
+                result = step.execute(self.data)
+
+                # Update internal data
+                self._data = result
+
+                # Store side outputs in artifacts
+                if step.side_outputs:
+                    for key, value in step.side_outputs.items():
+                        artifact_key = f"{step.name}.{key}" if key else step.name
+                        self._artifacts[artifact_key] = value
+
+                # Store result for history
+                self.results.append(self.data)
+
+                self.logger.info(
+                    f"Delayed step '{step.name}' completed in {step.execution_time:.3f}s"
+                )
+
+                # Log side outputs if any
+                if step.side_outputs:
+                    self.logger.info(
+                        f"Delayed step '{step.name}' produced {len(step.side_outputs)} side outputs"
+                    )
+
+            except Exception as e:
+                self.logger.error(f"Delayed step '{step.name}' failed: {str(e)}")
+                raise RuntimeError(
+                    f"Pipeline failed at delayed step '{step.name}': {str(e)}"
+                ) from e
+
+        return self
+
+    def get_delayed_steps_info(self) -> List[Dict[str, Any]]:
+        """Get information about delayed steps"""
+        return [
+            {
+                "index": i,
+                "name": step.name,
+                "function": step.function.__name__,
+                "args_count": len(step.args),
+                "kwargs_keys": list(step.kwargs.keys()),
+                "step_type": getattr(step.function, "_step_type", "unknown"),
+                "is_pipeline_step": getattr(step.function, "_is_pipeline_step", False),
+            }
+            for i, step in enumerate(self.delayed_steps)
+        ]
 
     def apply(self, func: Callable, *args, **kwargs) -> "Pipeline":
         """Apply function and return new Pipeline (functional style)"""
@@ -321,8 +612,9 @@ class Pipeline:
             f"{self.name}_copy",
             logging_level=logging.getLevelName(self.logger.level),
         )
-        # Copy artifacts but not steps and results
+        # Copy artifacts and delayed steps
         new_pipeline._artifacts = deepcopy(self.artifacts)
+        new_pipeline.delayed_steps = deepcopy(self.delayed_steps)
         return new_pipeline
 
     def get_data(self) -> Any:
@@ -369,11 +661,13 @@ class Pipeline:
         summary = {
             "pipeline_name": self.name,
             "total_steps": len(self.steps),
+            "delayed_steps": len(self.delayed_steps),
             "successful_steps": sum(1 for s in self.steps if s.success),
             "failed_steps": sum(1 for s in self.steps if s.error is not None),
             "total_execution_time": sum(s.execution_time or 0 for s in self.steps),
             "artifacts_count": len(self.artifacts),
             "steps": [],
+            "delayed_steps_info": self.get_delayed_steps_info(),
         }
 
         for i, step in enumerate(self.steps):
@@ -395,6 +689,7 @@ class Pipeline:
         """Generate a text visualization of the pipeline"""
         lines = [f"Pipeline: {self.name}", "=" * 40]
 
+        # Show executed steps
         for i, step in enumerate(self.steps):
             status = "✓" if step.success else "✗" if step.error else "○"
             time_str = (
@@ -419,9 +714,30 @@ class Pipeline:
                 for key in step.side_outputs:
                     lines.append(f"   └─ side output: {key}")
 
+        # Show delayed steps
+        if self.delayed_steps:
+            lines.append("\nDelayed Steps:")
+            lines.append("-" * 20)
+            for i, delayed_step in enumerate(self.delayed_steps):
+                is_pipeline_step = getattr(
+                    delayed_step.function, "_is_pipeline_step", False
+                )
+                status_str = "[validated]" if is_pipeline_step else ""
+                lines.append(f"⏸ Delayed {i+1}: {delayed_step.name} {status_str}")
+
+                # Add description if available
+                if (
+                    hasattr(delayed_step.function, "_step_description")
+                    and delayed_step.function._step_description
+                ):
+                    lines.append(
+                        f"   └─ {delayed_step.function._step_description.strip()}"
+                    )
+
         lines.append("=" * 40)
         lines.append(f"Current data type: {type(self.data).__name__}")
         lines.append(f"Artifacts stored: {len(self.artifacts)}")
+        lines.append(f"Delayed steps: {len(self.delayed_steps)}")
 
         return "\n".join(lines)
 
@@ -535,10 +851,13 @@ class Pipeline:
     def __str__(self) -> str:
         success_count = sum(1 for s in self.steps if s.success)
         artifacts_str = f", {len(self.artifacts)} artifacts" if self.artifacts else ""
-        return f"Pipeline('{self.name}'): {success_count}/{len(self.steps)} steps executed{artifacts_str}"
+        delayed_str = (
+            f", {len(self.delayed_steps)} delayed" if self.delayed_steps else ""
+        )
+        return f"Pipeline('{self.name}'): {success_count}/{len(self.steps)} steps executed{artifacts_str}{delayed_str}"
 
     def __repr__(self) -> str:
-        return f"<Pipeline name='{self.name}' steps={len(self.steps)} data_type={type(self.data).__name__} artifacts={len(self.artifacts)}>"
+        return f"<Pipeline name='{self.name}' steps={len(self.steps)} delayed={len(self.delayed_steps)} data_type={type(self.data).__name__} artifacts={len(self.artifacts)}>"
 
 
 def create_pipeline(data: Any, name: Optional[str] = None, **kwargs) -> Pipeline:
@@ -689,18 +1008,3 @@ def multiout_step(**outputs: str):
         return cast(Callable[..., MultiOutput], wrapper)
 
     return decorator
-
-
-# Helper function to create multi-output values directly
-def create_multi_output(main_data, **side_outputs: Any) -> MultiOutput:
-    """
-    Helper function to create MultiOutput values directly.
-
-    Args:
-        main_data: The main data to pass to next pipeline step
-        **side_outputs: Named side outputs to store as artifacts
-
-    Returns:
-        MultiOutput object with main and side data
-    """
-    return MultiOutput(main=main_data, side=side_outputs)

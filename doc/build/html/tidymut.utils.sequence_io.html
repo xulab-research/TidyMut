@@ -1,0 +1,347 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tidymut.utils.sequence_io module &mdash; tidymut 0.1.0-dev documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=ee2d09ae"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="tidymut.utils.type_converter module" href="tidymut.utils.type_converter.html" />
+    <link rel="prev" title="tidymut.utils.mutation_converter module" href="tidymut.utils.mutation_converter.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            tidymut
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="tidymut.cleaners.html">tidymut.cleaners package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.core.html">tidymut.core package</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="tidymut.utils.html">tidymut.utils package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="tidymut.utils.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="tidymut.utils.cleaner_workers.html">tidymut.utils.cleaner_workers module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.utils.dataset_builders.html">tidymut.utils.dataset_builders module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.utils.mutation_converter.html">tidymut.utils.mutation_converter module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">tidymut.utils.sequence_io module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.utils.sequence_io.load_sequences"><code class="docutils literal notranslate"><span class="pre">load_sequences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.utils.sequence_io.parse_custom_delimiter_header"><code class="docutils literal notranslate"><span class="pre">parse_custom_delimiter_header()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.utils.sequence_io.parse_fasta"><code class="docutils literal notranslate"><span class="pre">parse_fasta()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.utils.sequence_io.parse_ncbi_header"><code class="docutils literal notranslate"><span class="pre">parse_ncbi_header()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.utils.sequence_io.parse_simple_header"><code class="docutils literal notranslate"><span class="pre">parse_simple_header()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.utils.sequence_io.parse_uniprot_header"><code class="docutils literal notranslate"><span class="pre">parse_uniprot_header()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.utils.sequence_io.write_fasta"><code class="docutils literal notranslate"><span class="pre">write_fasta()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.utils.type_converter.html">tidymut.utils.type_converter module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.utils.html#module-tidymut.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tidymut</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="tidymut.utils.html">tidymut.utils package</a></li>
+      <li class="breadcrumb-item active">tidymut.utils.sequence_io module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tidymut.utils.sequence_io.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-tidymut.utils.sequence_io">
+<span id="tidymut-utils-sequence-io-module"></span><h1>tidymut.utils.sequence_io module<a class="headerlink" href="#module-tidymut.utils.sequence_io" title="Link to this heading"></a></h1>
+<p>Utilities for reading and writing sequence files without BioPython dependency.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.utils.sequence_io.load_sequences">
+<span class="sig-prename descclassname"><span class="pre">tidymut.utils.sequence_io.</span></span><span class="sig-name descname"><span class="pre">load_sequences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">format</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/tidymut/utils/sequence_io.html#load_sequences"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.utils.sequence_io.load_sequences" title="Link to this definition"></a></dt>
+<dd><p>Load sequences from various file formats</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em>) – Path to sequence file</p></li>
+<li><p><strong>header_parser</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>]</em><em>, </em><em>default=None</em>) – Function to parse FASTA headers (only used for FASTA format)</p></li>
+<li><p><strong>format</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>default=None</em>) – File format. If None, inferred from extension.
+Supported: ‘fasta’, ‘csv’, ‘tsv’, ‘json’</p></li>
+<li><p><strong>id_column</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>default=None</em>) – Column name for sequence IDs (CSV/TSV only)</p></li>
+<li><p><strong>sequence_column</strong> (<em>Optional</em><em>[</em><em>str</em><em>]</em><em>, </em><em>default=None</em>) – Column name for sequences (CSV/TSV only)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary mapping sequence IDs to sequences</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, str]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Load UniProt FASTA</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seqs</span> <span class="o">=</span> <span class="n">load_sequences</span><span class="p">(</span><span class="s2">&quot;uniprot.fasta&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Load FASTA with custom parser</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seqs</span> <span class="o">=</span> <span class="n">load_sequences</span><span class="p">(</span><span class="s2">&quot;genes.fasta&quot;</span><span class="p">,</span> <span class="n">header_parser</span><span class="o">=</span><span class="n">parse_simple_header</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Load CSV with specified columns</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seqs</span> <span class="o">=</span> <span class="n">load_sequences</span><span class="p">(</span><span class="s2">&quot;sequences.csv&quot;</span><span class="p">,</span> <span class="n">id_column</span><span class="o">=</span><span class="s2">&quot;protein_id&quot;</span><span class="p">,</span> <span class="n">sequence_column</span><span class="o">=</span><span class="s2">&quot;aa_sequence&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Load with automatic column detection</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seqs</span> <span class="o">=</span> <span class="n">load_sequences</span><span class="p">(</span><span class="s2">&quot;sequences.csv&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.utils.sequence_io.parse_custom_delimiter_header">
+<span class="sig-prename descclassname"><span class="pre">tidymut.utils.sequence_io.</span></span><span class="sig-name descname"><span class="pre">parse_custom_delimiter_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">delimiter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'|'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">id_position</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Callable</span></span></span><a class="reference internal" href="_modules/tidymut/utils/sequence_io.html#parse_custom_delimiter_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.utils.sequence_io.parse_custom_delimiter_header" title="Link to this definition"></a></dt>
+<dd><p>Create a header parser for custom delimiter-based formats</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>delimiter</strong> (<em>str</em><em>, </em><em>default='</em><em>|</em><em>'</em>) – Delimiter character to split the header</p></li>
+<li><p><strong>id_position</strong> (<em>int</em><em>, </em><em>default=0</em>) – Position of the ID in the split parts (0-based)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Header parser function</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Callable</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span> <span class="o">=</span> <span class="n">parse_custom_delimiter_header</span><span class="p">(</span><span class="s1">&#39;|&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parser</span><span class="p">(</span><span class="s2">&quot;db|GENE1|other|info&quot;</span><span class="p">)</span>
+<span class="go">(&#39;GENE1&#39;, {&#39;parts&#39;: [&#39;db&#39;, &#39;other&#39;, &#39;info&#39;]})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.utils.sequence_io.parse_fasta">
+<span class="sig-prename descclassname"><span class="pre">tidymut.utils.sequence_io.</span></span><span class="sig-name descname"><span class="pre">parse_fasta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_parser</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">clean_sequence</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">bool</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/tidymut/utils/sequence_io.html#parse_fasta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.utils.sequence_io.parse_fasta" title="Link to this definition"></a></dt>
+<dd><p>Parse FASTA file with custom header parsing</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file_path</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em>) – Path to FASTA file</p></li>
+<li><p><strong>header_parser</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>]</em><em>, </em><em>default=None</em>) – Function to parse headers. Should take header string and return (id, metadata).
+If None, uses parse_uniprot_header as default.</p></li>
+<li><p><strong>clean_sequence</strong> (<em>bool</em><em>, </em><em>default=True</em>) – Whether to clean sequences (remove whitespace, numbers, etc.)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Dictionary mapping sequence IDs to {‘sequence’: str, ‘metadata’: dict}</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Dict[str, Any]]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Use default UniProt parser</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sequences</span> <span class="o">=</span> <span class="n">parse_fasta</span><span class="p">(</span><span class="s2">&quot;proteins.fasta&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Use NCBI parser</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sequences</span> <span class="o">=</span> <span class="n">parse_fasta</span><span class="p">(</span><span class="s2">&quot;ncbi_proteins.fasta&quot;</span><span class="p">,</span> <span class="n">header_parser</span><span class="o">=</span><span class="n">parse_ncbi_header</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Use simple parser</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sequences</span> <span class="o">=</span> <span class="n">parse_fasta</span><span class="p">(</span><span class="s2">&quot;genes.fasta&quot;</span><span class="p">,</span> <span class="n">header_parser</span><span class="o">=</span><span class="n">parse_simple_header</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Custom parser</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">def</span><span class="w"> </span><span class="nf">my_parser</span><span class="p">(</span><span class="n">header</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="k">return</span> <span class="n">header</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;_&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span> <span class="p">{</span><span class="s1">&#39;full_header&#39;</span><span class="p">:</span> <span class="n">header</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sequences</span> <span class="o">=</span> <span class="n">parse_fasta</span><span class="p">(</span><span class="s2">&quot;custom.fasta&quot;</span><span class="p">,</span> <span class="n">header_parser</span><span class="o">=</span><span class="n">my_parser</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.utils.sequence_io.parse_ncbi_header">
+<span class="sig-prename descclassname"><span class="pre">tidymut.utils.sequence_io.</span></span><span class="sig-name descname"><span class="pre">parse_ncbi_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/tidymut/utils/sequence_io.html#parse_ncbi_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.utils.sequence_io.parse_ncbi_header" title="Link to this definition"></a></dt>
+<dd><p>Parse NCBI FASTA header to extract ID and metadata</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>header</strong> (<em>str</em>) – FASTA header line (without ‘&gt;’)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(sequence_id, metadata_dict)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[str, Dict[str, str]]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_ncbi_header</span><span class="p">(</span><span class="s2">&quot;gi|123456|ref|NP_000001.1| protein description [Homo sapiens]&quot;</span><span class="p">)</span>
+<span class="go">(&#39;NP_000001.1&#39;, {&#39;gi&#39;: &#39;123456&#39;, &#39;db&#39;: &#39;ref&#39;, &#39;description&#39;: &#39;protein description [Homo sapiens]&#39;})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_ncbi_header</span><span class="p">(</span><span class="s2">&quot;NP_000001.1 protein description&quot;</span><span class="p">)</span>
+<span class="go">(&#39;NP_000001.1&#39;, {&#39;description&#39;: &#39;protein description&#39;})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.utils.sequence_io.parse_simple_header">
+<span class="sig-prename descclassname"><span class="pre">tidymut.utils.sequence_io.</span></span><span class="sig-name descname"><span class="pre">parse_simple_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/tidymut/utils/sequence_io.html#parse_simple_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.utils.sequence_io.parse_simple_header" title="Link to this definition"></a></dt>
+<dd><p>Simple header parser that uses the first word as ID</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>header</strong> (<em>str</em>) – FASTA header line (without ‘&gt;’)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(sequence_id, metadata_dict)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[str, Dict[str, str]]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_simple_header</span><span class="p">(</span><span class="s2">&quot;GENE1 some description text&quot;</span><span class="p">)</span>
+<span class="go">(&#39;GENE1&#39;, {&#39;description&#39;: &#39;some description text&#39;})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_simple_header</span><span class="p">(</span><span class="s2">&quot;GENE1&quot;</span><span class="p">)</span>
+<span class="go">(&#39;GENE1&#39;, {})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.utils.sequence_io.parse_uniprot_header">
+<span class="sig-prename descclassname"><span class="pre">tidymut.utils.sequence_io.</span></span><span class="sig-name descname"><span class="pre">parse_uniprot_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">header</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/tidymut/utils/sequence_io.html#parse_uniprot_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.utils.sequence_io.parse_uniprot_header" title="Link to this definition"></a></dt>
+<dd><p>Parse UniProt FASTA header to extract ID and metadata</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>header</strong> (<em>str</em>) – FASTA header line (without ‘&gt;’)</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(sequence_id, metadata_dict)</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[str, Dict[str, str]]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">parse_uniprot_header</span><span class="p">(</span><span class="s2">&quot;sp|P12345|PROT_HUMAN Protein description OS=Homo sapiens&quot;</span><span class="p">)</span>
+<span class="go">(&#39;P12345&#39;, {&#39;db&#39;: &#39;sp&#39;, &#39;entry_name&#39;: &#39;PROT_HUMAN&#39;, &#39;description&#39;: &#39;Protein description OS=Homo sapiens&#39;})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_uniprot_header</span><span class="p">(</span><span class="s2">&quot;P12345|PROT_HUMAN Description&quot;</span><span class="p">)</span>
+<span class="go">(&#39;P12345&#39;, {&#39;entry_name&#39;: &#39;PROT_HUMAN&#39;, &#39;description&#39;: &#39;Description&#39;})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">parse_uniprot_header</span><span class="p">(</span><span class="s2">&quot;P12345&quot;</span><span class="p">)</span>
+<span class="go">(&#39;P12345&#39;, {})</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.utils.sequence_io.write_fasta">
+<span class="sig-prename descclassname"><span class="pre">tidymut.utils.sequence_io.</span></span><span class="sig-name descname"><span class="pre">write_fasta</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sequences</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">wrap_length</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">60</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header_formatter</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Callable</span><span class="p"><span class="pre">[</span></span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/tidymut/utils/sequence_io.html#write_fasta"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.utils.sequence_io.write_fasta" title="Link to this definition"></a></dt>
+<dd><p>Write sequences to FASTA file</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sequences</strong> (<em>Union</em><em>[</em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em><em>, </em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>]</em><em>]</em>) – Dictionary mapping IDs to sequences or {‘sequence’: str, ‘metadata’: dict}</p></li>
+<li><p><strong>file_path</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em>) – Output file path</p></li>
+<li><p><strong>wrap_length</strong> (<em>int</em><em>, </em><em>default=60</em>) – Line length for sequence wrapping (0 for no wrapping)</p></li>
+<li><p><strong>header_formatter</strong> (<em>Optional</em><em>[</em><em>Callable</em><em>]</em><em>, </em><em>default=None</em>) – Function to format headers. Takes (id, metadata) and returns header string.</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># Simple sequences</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seqs</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;GENE1&#39;</span><span class="p">:</span> <span class="s1">&#39;ACDEF&#39;</span><span class="p">,</span> <span class="s1">&#39;GENE2&#39;</span><span class="p">:</span> <span class="s1">&#39;KLMNO&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">write_fasta</span><span class="p">(</span><span class="n">seqs</span><span class="p">,</span> <span class="s1">&#39;output.fasta&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="c1"># With metadata</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seqs</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s1">&#39;P12345&#39;</span><span class="p">:</span> <span class="p">{</span>
+<span class="gp">... </span>        <span class="s1">&#39;sequence&#39;</span><span class="p">:</span> <span class="s1">&#39;ACDEF&#39;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s1">&#39;metadata&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Protein 1&#39;</span><span class="p">,</span> <span class="s1">&#39;organism&#39;</span><span class="p">:</span> <span class="s1">&#39;Human&#39;</span><span class="p">}</span>
+<span class="gp">... </span>    <span class="p">}</span>
+<span class="gp">... </span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">write_fasta</span><span class="p">(</span><span class="n">seqs</span><span class="p">,</span> <span class="s1">&#39;output.fasta&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tidymut.utils.mutation_converter.html" class="btn btn-neutral float-left" title="tidymut.utils.mutation_converter module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tidymut.utils.type_converter.html" class="btn btn-neutral float-right" title="tidymut.utils.type_converter module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Yuxiang Tang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

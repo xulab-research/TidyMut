@@ -19,13 +19,24 @@ Functions are used in tidymut.cleaners.basic_cleaners.convert_to_mutation_datase
 ...     'mut_seq': ['KKDDEF', 'APCDEF', 'FFGHIS']
 ... })
 """
+from __future__ import annotations
 
 import pandas as pd
 from tqdm import tqdm
-from typing import Any, Dict, Optional, Type, Tuple, Union
+from typing import TYPE_CHECKING
 
 from ..core.mutation import MutationSet
-from ..core.sequence import ProteinSequence, DNASequence, RNASequence
+
+if TYPE_CHECKING:
+    from typing import Any, Dict, List, Optional, Type, Tuple, Union
+
+    from ..core.sequence import ProteinSequence, DNASequence, RNASequence
+
+__all__ = ["convert_format_1", "convert_format_2"]
+
+
+def __dir__() -> List[str]:
+    return __all__
 
 
 def convert_format_1(
@@ -67,10 +78,10 @@ def convert_format_1(
     # Process mutations (now supporting multi-mutations)
     output_rows = []
     total_rows = len(input_df)
-    for idx, (_, row) in tqdm(enumerate(input_df.iterrows()), total=total_rows):
-        mut_info = row[mutation_column]
-        name = row[name_column]
-        score = row[score_column]
+    for idx, row in tqdm(enumerate(input_df.itertuples()), total=total_rows):
+        mut_info = getattr(row, mutation_column)
+        name = getattr(row, name_column)
+        score = getattr(row, score_column)
 
         # Skip wild-type if it somehow made it through filtering
         if mut_info == "WT":
@@ -119,10 +130,8 @@ def convert_format_2(
 
     # Extract reference sequences from sequence column
     reference_sequences = {}
-    for name in input_df[name_column].unique():
-        name_rows = input_df[input_df[name_column] == name]
-        # All rows for the same protein should have the same wild-type sequence
-        sequences = name_rows[sequence_column].unique()
+    for name, group in tqdm(input_df.groupby(name_column)):
+        sequences = group[sequence_column].unique()
         if len(sequences) > 1:
             raise ValueError(
                 f"Multiple different sequences found for protein '{name}': {sequences}"
@@ -132,10 +141,10 @@ def convert_format_2(
     # Process mutations (now supporting multi-mutations)
     output_rows = []
     total_rows = len(input_df)
-    for idx, (_, row) in tqdm(enumerate(input_df.iterrows()), total=total_rows):
-        mut_info = row[mutation_column]
-        name = row[name_column]
-        score = row[score_column]
+    for idx, row in tqdm(enumerate(input_df.itertuples()), total=total_rows):
+        mut_info = getattr(row, mutation_column)
+        name = getattr(row, name_column)
+        score = getattr(row, score_column)
 
         # Parse mutations (single or multiple)
         try:

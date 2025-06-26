@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tidymut.core.codon &#8212; tidymut 0.1.0-dev documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=ee2d09ae"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for tidymut.core.codon</h1><div class="highlight"><pre>
+<span></span><span class="c1"># tidymut/core/codon_table.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Collection</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.constants</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">STANDARD_GENETIC_CODE_DNA</span><span class="p">,</span>
+    <span class="n">STANDARD_START_CODONS_DNA</span><span class="p">,</span>
+    <span class="n">STANDARD_GENETIC_CODE_RNA</span><span class="p">,</span>
+    <span class="n">STANDARD_START_CODONS_RNA</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;CodonTable&quot;</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="fm">__dir__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">__all__</span>
+
+
+<div class="viewcode-block" id="CodonTable">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.codon.CodonTable">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CodonTable</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;codon table used to translate codons to amino acids&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">codon_map</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
+        <span class="n">start_codons</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Collection</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">stop_codons</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Collection</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">codon_map</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="o">.</span><span class="n">upper</span><span class="p">():</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">codon_map</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+
+        <span class="c1"># auto detect stop codons</span>
+        <span class="k">if</span> <span class="n">stop_codons</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stop_codons</span> <span class="o">=</span> <span class="p">[</span>
+                <span class="n">codon</span> <span class="k">for</span> <span class="n">codon</span><span class="p">,</span> <span class="n">aa</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">codon_map</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">aa</span> <span class="o">==</span> <span class="s2">&quot;*&quot;</span>
+            <span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">stop_codons</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">stop_codons</span><span class="p">])</span>
+
+        <span class="c1"># set start codons</span>
+        <span class="k">if</span> <span class="n">start_codons</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_codons</span> <span class="o">=</span> <span class="n">STANDARD_START_CODONS_DNA</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">start_codons</span> <span class="o">=</span> <span class="nb">set</span><span class="p">([</span><span class="n">c</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">start_codons</span><span class="p">])</span>
+
+<div class="viewcode-block" id="CodonTable.translate_codon">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.codon.CodonTable.translate_codon">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">translate_codon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">codon</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;translate single codon to corresponding amino acid&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">codon_map</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">codon</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="s2">&quot;X&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CodonTable.is_stop_codon">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.codon.CodonTable.is_stop_codon">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_stop_codon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">codon</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;check if codon is a stop codon&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">codon</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">stop_codons</span></div>
+
+
+<div class="viewcode-block" id="CodonTable.is_start_codon">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.codon.CodonTable.is_start_codon">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_start_codon</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">codon</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;check if codon is a start codon&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">codon</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">start_codons</span></div>
+
+
+<div class="viewcode-block" id="CodonTable.get_standard_table">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.codon.CodonTable.get_standard_table">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_standard_table</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">seq_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;DNA&quot;</span><span class="p">,</span> <span class="s2">&quot;RNA&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;DNA&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CodonTable&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;get standard codon table (NCBI standard)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">seq_type</span> <span class="o">==</span> <span class="s2">&quot;DNA&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="s2">&quot;Standard&quot;</span><span class="p">,</span> <span class="n">STANDARD_GENETIC_CODE_DNA</span><span class="p">,</span> <span class="n">STANDARD_START_CODONS_DNA</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">seq_type</span> <span class="o">==</span> <span class="s2">&quot;RNA&quot;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="s2">&quot;Standard&quot;</span><span class="p">,</span> <span class="n">STANDARD_GENETIC_CODE_RNA</span><span class="p">,</span> <span class="n">STANDARD_START_CODONS_RNA</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Invalid sequence type&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CodonTable.get_table_by_name">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.codon.CodonTable.get_table_by_name">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_table_by_name</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">seq_type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s2">&quot;DNA&quot;</span><span class="p">,</span> <span class="s2">&quot;RNA&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;DNA&quot;</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;CodonTable&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;get codon table by name&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s2">&quot;Standard&quot;</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">get_standard_table</span><span class="p">(</span><span class="n">seq_type</span><span class="p">),</span>
+            <span class="c1"># TODO: add more tables here</span>
+        <span class="p">}[</span><span class="n">name</span><span class="p">]</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">tidymut</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">tidymut</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Yuxiang Tang.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

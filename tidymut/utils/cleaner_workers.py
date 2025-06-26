@@ -1,14 +1,31 @@
 # tidymut/utils/cleaner_workers.py
+from __future__ import annotations
 
 import pandas as pd
-from pandas import Index
+
 from tqdm import tqdm
-from typing import Any, Dict, List, Literal, Optional, Tuple, Type, Union
+from typing import TYPE_CHECKING
 
 from .mutation_converter import invert_mutation_set
-from ..core.alphabet import ProteinAlphabet, DNAAlphabet, RNAAlphabet
 from ..core.mutation import MutationSet
-from ..core.sequence import ProteinSequence, DNASequence, RNASequence
+
+if TYPE_CHECKING:
+    from pandas import Index
+    from typing import Any, Dict, List, Literal, Optional, Tuple, Type, Union
+
+    from ..core.alphabet import ProteinAlphabet, DNAAlphabet, RNAAlphabet
+    from ..core.sequence import ProteinSequence, DNASequence, RNASequence
+
+__all__ = [
+    "valid_single_mutation",
+    "apply_single_mutation",
+    "infer_wt_sequence_grouped",
+    "merge_skip_na",
+]
+
+
+def __dir__() -> List[str]:
+    return __all__
 
 
 def valid_single_mutation(args: Tuple) -> Tuple[Optional[str], Optional[str]]:
@@ -79,6 +96,7 @@ def apply_single_mutation(
     mutation_column: str,
     position_columns: Optional[Dict[str, str]],
     mutation_sep: str,
+    is_zero_based: bool,
     sequence_class: Type[Union[ProteinSequence, DNASequence, RNASequence]],
 ) -> Tuple[Optional[str], Optional[str]]:
     """
@@ -100,6 +118,8 @@ def apply_single_mutation(
         Position column mapping for sequence extraction
     mutation_sep : str
         Separator for splitting multiple mutations
+    is_zero_based : bool
+        Whether the mutation position is zero-based.
     sequence_class : Type[Union[ProteinSequence, DNASequence, RNASequence]]
         Sequence class to use for mutation application
 
@@ -129,7 +149,9 @@ def apply_single_mutation(
                 sequence_str = sequence_str[int(start_pos) : int(end_pos)]
 
         sequence = sequence_class(sequence_str, name=name)
-        mutation_set = MutationSet.from_string(mut_info, sep=mutation_sep)
+        mutation_set = MutationSet.from_string(
+            mut_info, sep=mutation_sep, is_zero_based=is_zero_based
+        )
         mutated_sequence = sequence.apply_mutation(mutation_set)
 
         return str(mutated_sequence), None

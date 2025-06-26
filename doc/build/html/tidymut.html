@@ -1,0 +1,439 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tidymut package &mdash; tidymut 0.1.0-dev documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=ee2d09ae"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            tidymut
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.cleaners.html">tidymut.cleaners package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.core.html">tidymut.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.utils.html">tidymut.utils package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tidymut</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">tidymut package</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tidymut.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="tidymut-package">
+<h1>tidymut package<a class="headerlink" href="#tidymut-package" title="Link to this heading"></a></h1>
+<section id="subpackages">
+<h2>Subpackages<a class="headerlink" href="#subpackages" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.cleaners.html">tidymut.cleaners package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html">tidymut.cleaners.base_config module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.base_config.html#tidymut.cleaners.base_config.BaseCleanerConfig"><code class="docutils literal notranslate"><span class="pre">BaseCleanerConfig</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html">tidymut.cleaners.basic_cleaners module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.apply_mutations_to_sequences"><code class="docutils literal notranslate"><span class="pre">apply_mutations_to_sequences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.convert_data_types"><code class="docutils literal notranslate"><span class="pre">convert_data_types()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.convert_to_mutation_dataset_format"><code class="docutils literal notranslate"><span class="pre">convert_to_mutation_dataset_format()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.extract_and_rename_columns"><code class="docutils literal notranslate"><span class="pre">extract_and_rename_columns()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.filter_and_clean_data"><code class="docutils literal notranslate"><span class="pre">filter_and_clean_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.infer_wildtype_sequences"><code class="docutils literal notranslate"><span class="pre">infer_wildtype_sequences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.merge_columns"><code class="docutils literal notranslate"><span class="pre">merge_columns()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.read_dataset"><code class="docutils literal notranslate"><span class="pre">read_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html#tidymut.cleaners.basic_cleaners.validate_mutations"><code class="docutils literal notranslate"><span class="pre">validate_mutations()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html">tidymut.cleaners.human_domainome_cleaner module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.HumanDomainomeCleanerConfig"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.clean_human_domainome_dataset"><code class="docutils literal notranslate"><span class="pre">clean_human_domainome_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html#tidymut.cleaners.human_domainome_cleaner.create_human_domainome_cleaner"><code class="docutils literal notranslate"><span class="pre">create_human_domainome_cleaner()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_custom_cleaners.html">tidymut.cleaners.human_domainome_custom_cleaners module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.human_domainome_custom_cleaners.html#tidymut.cleaners.human_domainome_custom_cleaners.add_sequences_to_dataset"><code class="docutils literal notranslate"><span class="pre">add_sequences_to_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.human_domainome_custom_cleaners.html#tidymut.cleaners.human_domainome_custom_cleaners.extract_domain_sequences"><code class="docutils literal notranslate"><span class="pre">extract_domain_sequences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.human_domainome_custom_cleaners.html#tidymut.cleaners.human_domainome_custom_cleaners.process_domain_positions"><code class="docutils literal notranslate"><span class="pre">process_domain_positions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html">tidymut.cleaners.k50_cleaner module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.K50CleanerConfig"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.clean_k50_dataset"><code class="docutils literal notranslate"><span class="pre">clean_k50_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html#tidymut.cleaners.k50_cleaner.create_k50_cleaner"><code class="docutils literal notranslate"><span class="pre">create_k50_cleaner()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html">tidymut.cleaners.protein_gym_cleaner module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.clean_protein_gym_dataset"><code class="docutils literal notranslate"><span class="pre">clean_protein_gym_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html#tidymut.cleaners.protein_gym_cleaner.create_protein_gym_cleaner"><code class="docutils literal notranslate"><span class="pre">create_protein_gym_cleaner()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_custom_cleaners.html">tidymut.cleaners.protein_gym_custom_cleaners module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.protein_gym_custom_cleaners.html#tidymut.cleaners.protein_gym_custom_cleaners.read_protein_gym_data"><code class="docutils literal notranslate"><span class="pre">read_protein_gym_data()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.html#module-tidymut.cleaners">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.HumanDomainomeCleanerConfig"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.HumanDomainomeCleanerConfig.sequence_dict_path"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.sequence_dict_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.HumanDomainomeCleanerConfig.header_parser"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.header_parser</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.HumanDomainomeCleanerConfig.column_mapping"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.HumanDomainomeCleanerConfig.type_conversions"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.HumanDomainomeCleanerConfig.drop_na_columns"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.drop_na_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.HumanDomainomeCleanerConfig.is_zero_based"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.is_zero_based</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.HumanDomainomeCleanerConfig.process_workers"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.process_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.HumanDomainomeCleanerConfig.label_columns"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.HumanDomainomeCleanerConfig.primary_label_column"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id0"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id1"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.drop_na_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id2"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.header_parser()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id3"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.is_zero_based</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id4"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.HumanDomainomeCleanerConfig.pipeline_name"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.pipeline_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id5"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id6"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.process_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id7"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.sequence_dict_path</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id8"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.HumanDomainomeCleanerConfig.validate"><code class="docutils literal notranslate"><span class="pre">HumanDomainomeCleanerConfig.validate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.K50CleanerConfig"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.K50CleanerConfig.column_mapping"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.K50CleanerConfig.filters"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.filters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.K50CleanerConfig.type_conversions"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.K50CleanerConfig.validation_workers"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.validation_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.K50CleanerConfig.infer_wt_workers"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.infer_wt_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.K50CleanerConfig.handle_multiple_wt"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.handle_multiple_wt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.K50CleanerConfig.label_columns"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.K50CleanerConfig.primary_label_column"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id9"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id10"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.filters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id11"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.handle_multiple_wt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id12"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.infer_wt_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id13"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.K50CleanerConfig.pipeline_name"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.pipeline_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id14"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id15"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.K50CleanerConfig.validate"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id16"><code class="docutils literal notranslate"><span class="pre">K50CleanerConfig.validation_workers</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.ProteinGymCleanerConfig"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.ProteinGymCleanerConfig.column_mapping"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.ProteinGymCleanerConfig.filters"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.filters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.ProteinGymCleanerConfig.type_conversions"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.ProteinGymCleanerConfig.is_zero_based"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.is_zero_based</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.ProteinGymCleanerConfig.validation_workers"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.validation_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.ProteinGymCleanerConfig.infer_wt_workers"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.infer_wt_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.ProteinGymCleanerConfig.handle_multiple_wt"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.handle_multiple_wt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.ProteinGymCleanerConfig.label_columns"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.ProteinGymCleanerConfig.primary_label_column"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id17"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.column_mapping</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id18"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.filters</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id19"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.handle_multiple_wt</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id20"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.infer_wt_workers</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id21"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.label_columns</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.ProteinGymCleanerConfig.pipeline_name"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.pipeline_name</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id22"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.primary_label_column</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id23"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.type_conversions</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.ProteinGymCleanerConfig.validate"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.cleaners.html#id24"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig.validation_workers</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.clean_human_domainome_dataset"><code class="docutils literal notranslate"><span class="pre">clean_human_domainome_dataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.clean_k50_dataset"><code class="docutils literal notranslate"><span class="pre">clean_k50_dataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.clean_protein_gym_dataset"><code class="docutils literal notranslate"><span class="pre">clean_protein_gym_dataset()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.create_human_domainome_cleaner"><code class="docutils literal notranslate"><span class="pre">create_human_domainome_cleaner()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.create_k50_cleaner"><code class="docutils literal notranslate"><span class="pre">create_k50_cleaner()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.html#tidymut.cleaners.create_protein_gym_cleaner"><code class="docutils literal notranslate"><span class="pre">create_protein_gym_cleaner()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.core.html">tidymut.core package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.core.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.alphabet.html">tidymut.core.alphabet module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.alphabet.html#tidymut.core.alphabet.BaseAlphabet"><code class="docutils literal notranslate"><span class="pre">BaseAlphabet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.alphabet.html#tidymut.core.alphabet.DNAAlphabet"><code class="docutils literal notranslate"><span class="pre">DNAAlphabet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.alphabet.html#tidymut.core.alphabet.ProteinAlphabet"><code class="docutils literal notranslate"><span class="pre">ProteinAlphabet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.alphabet.html#tidymut.core.alphabet.RNAAlphabet"><code class="docutils literal notranslate"><span class="pre">RNAAlphabet</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.codon.html">tidymut.core.codon module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.codon.html#tidymut.core.codon.CodonTable"><code class="docutils literal notranslate"><span class="pre">CodonTable</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.constants.html">tidymut.core.constants module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.dataset.html">tidymut.core.dataset module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.dataset.html#tidymut.core.dataset.MutationDataset"><code class="docutils literal notranslate"><span class="pre">MutationDataset</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.mutation.html">tidymut.core.mutation module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.mutation.html#tidymut.core.mutation.AminoAcidMutation"><code class="docutils literal notranslate"><span class="pre">AminoAcidMutation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.mutation.html#tidymut.core.mutation.AminoAcidMutationSet"><code class="docutils literal notranslate"><span class="pre">AminoAcidMutationSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.mutation.html#tidymut.core.mutation.BaseMutation"><code class="docutils literal notranslate"><span class="pre">BaseMutation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.mutation.html#tidymut.core.mutation.CodonMutation"><code class="docutils literal notranslate"><span class="pre">CodonMutation</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.mutation.html#tidymut.core.mutation.CodonMutationSet"><code class="docutils literal notranslate"><span class="pre">CodonMutationSet</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.mutation.html#tidymut.core.mutation.MutationSet"><code class="docutils literal notranslate"><span class="pre">MutationSet</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.pipeline.html">tidymut.core.pipeline module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.pipeline.html#tidymut.core.pipeline.Pipeline"><code class="docutils literal notranslate"><span class="pre">Pipeline</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.pipeline.html#tidymut.core.pipeline.create_pipeline"><code class="docutils literal notranslate"><span class="pre">create_pipeline()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.pipeline.html#tidymut.core.pipeline.multiout_step"><code class="docutils literal notranslate"><span class="pre">multiout_step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.pipeline.html#tidymut.core.pipeline.pipeline_step"><code class="docutils literal notranslate"><span class="pre">pipeline_step()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.sequence.html">tidymut.core.sequence module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.sequence.html#tidymut.core.sequence.BaseSequence"><code class="docutils literal notranslate"><span class="pre">BaseSequence</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.sequence.html#tidymut.core.sequence.DNASequence"><code class="docutils literal notranslate"><span class="pre">DNASequence</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.sequence.html#tidymut.core.sequence.ProteinSequence"><code class="docutils literal notranslate"><span class="pre">ProteinSequence</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.sequence.html#tidymut.core.sequence.RNASequence"><code class="docutils literal notranslate"><span class="pre">RNASequence</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.types.html">tidymut.core.types module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.core.html#module-tidymut.core">Module contents</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.AminoAcidMutationSet"><code class="docutils literal notranslate"><span class="pre">AminoAcidMutationSet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.AminoAcidMutationSet.count_by_effect_type"><code class="docutils literal notranslate"><span class="pre">AminoAcidMutationSet.count_by_effect_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.AminoAcidMutationSet.get_missense_mutations"><code class="docutils literal notranslate"><span class="pre">AminoAcidMutationSet.get_missense_mutations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.AminoAcidMutationSet.get_nonsense_mutations"><code class="docutils literal notranslate"><span class="pre">AminoAcidMutationSet.get_nonsense_mutations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.AminoAcidMutationSet.get_synonymous_mutations"><code class="docutils literal notranslate"><span class="pre">AminoAcidMutationSet.get_synonymous_mutations()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.AminoAcidMutationSet.has_stop_codon_mutations"><code class="docutils literal notranslate"><span class="pre">AminoAcidMutationSet.has_stop_codon_mutations()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.CodonMutationSet"><code class="docutils literal notranslate"><span class="pre">CodonMutationSet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.CodonMutationSet.seq_type"><code class="docutils literal notranslate"><span class="pre">CodonMutationSet.seq_type</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.CodonMutationSet.to_amino_acid_mutation_set"><code class="docutils literal notranslate"><span class="pre">CodonMutationSet.to_amino_acid_mutation_set()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.CodonTable"><code class="docutils literal notranslate"><span class="pre">CodonTable</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.CodonTable.get_standard_table"><code class="docutils literal notranslate"><span class="pre">CodonTable.get_standard_table()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.CodonTable.get_table_by_name"><code class="docutils literal notranslate"><span class="pre">CodonTable.get_table_by_name()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.CodonTable.is_start_codon"><code class="docutils literal notranslate"><span class="pre">CodonTable.is_start_codon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.CodonTable.is_stop_codon"><code class="docutils literal notranslate"><span class="pre">CodonTable.is_stop_codon()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.CodonTable.translate_codon"><code class="docutils literal notranslate"><span class="pre">CodonTable.translate_codon()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.DNAAlphabet"><code class="docutils literal notranslate"><span class="pre">DNAAlphabet</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.DNASequence"><code class="docutils literal notranslate"><span class="pre">DNASequence</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.DNASequence.reverse_complement"><code class="docutils literal notranslate"><span class="pre">DNASequence.reverse_complement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.DNASequence.transcribe"><code class="docutils literal notranslate"><span class="pre">DNASequence.transcribe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.DNASequence.translate"><code class="docutils literal notranslate"><span class="pre">DNASequence.translate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset"><code class="docutils literal notranslate"><span class="pre">MutationDataset</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.add_mutation_set"><code class="docutils literal notranslate"><span class="pre">MutationDataset.add_mutation_set()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.add_mutation_sets"><code class="docutils literal notranslate"><span class="pre">MutationDataset.add_mutation_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.add_reference_sequence"><code class="docutils literal notranslate"><span class="pre">MutationDataset.add_reference_sequence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.convert_codon_to_amino_acid_sets"><code class="docutils literal notranslate"><span class="pre">MutationDataset.convert_codon_to_amino_acid_sets()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.filter_by_effect_type"><code class="docutils literal notranslate"><span class="pre">MutationDataset.filter_by_effect_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.filter_by_mutation_type"><code class="docutils literal notranslate"><span class="pre">MutationDataset.filter_by_mutation_type()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.filter_by_reference"><code class="docutils literal notranslate"><span class="pre">MutationDataset.filter_by_reference()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.from_dataframe"><code class="docutils literal notranslate"><span class="pre">MutationDataset.from_dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.get_mutation_set_label"><code class="docutils literal notranslate"><span class="pre">MutationDataset.get_mutation_set_label()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.get_mutation_set_reference"><code class="docutils literal notranslate"><span class="pre">MutationDataset.get_mutation_set_reference()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.get_position_coverage"><code class="docutils literal notranslate"><span class="pre">MutationDataset.get_position_coverage()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.get_reference_sequence"><code class="docutils literal notranslate"><span class="pre">MutationDataset.get_reference_sequence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.get_statistics"><code class="docutils literal notranslate"><span class="pre">MutationDataset.get_statistics()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.list_reference_sequences"><code class="docutils literal notranslate"><span class="pre">MutationDataset.list_reference_sequences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.load"><code class="docutils literal notranslate"><span class="pre">MutationDataset.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.load_by_reference"><code class="docutils literal notranslate"><span class="pre">MutationDataset.load_by_reference()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.remove_mutation_set"><code class="docutils literal notranslate"><span class="pre">MutationDataset.remove_mutation_set()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.remove_reference_sequence"><code class="docutils literal notranslate"><span class="pre">MutationDataset.remove_reference_sequence()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.save"><code class="docutils literal notranslate"><span class="pre">MutationDataset.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.save_by_reference"><code class="docutils literal notranslate"><span class="pre">MutationDataset.save_by_reference()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.set_mutation_set_label"><code class="docutils literal notranslate"><span class="pre">MutationDataset.set_mutation_set_label()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.set_mutation_set_reference"><code class="docutils literal notranslate"><span class="pre">MutationDataset.set_mutation_set_reference()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.to_dataframe"><code class="docutils literal notranslate"><span class="pre">MutationDataset.to_dataframe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset.validate_against_references"><code class="docutils literal notranslate"><span class="pre">MutationDataset.validate_against_references()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline"><code class="docutils literal notranslate"><span class="pre">Pipeline</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.add_delayed_step"><code class="docutils literal notranslate"><span class="pre">Pipeline.add_delayed_step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.apply"><code class="docutils literal notranslate"><span class="pre">Pipeline.apply()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.artifacts"><code class="docutils literal notranslate"><span class="pre">Pipeline.artifacts</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.assign"><code class="docutils literal notranslate"><span class="pre">Pipeline.assign()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.copy"><code class="docutils literal notranslate"><span class="pre">Pipeline.copy()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.data"><code class="docutils literal notranslate"><span class="pre">Pipeline.data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.delayed_then"><code class="docutils literal notranslate"><span class="pre">Pipeline.delayed_then()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.execute"><code class="docutils literal notranslate"><span class="pre">Pipeline.execute()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.filter"><code class="docutils literal notranslate"><span class="pre">Pipeline.filter()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.get_all_artifacts"><code class="docutils literal notranslate"><span class="pre">Pipeline.get_all_artifacts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.get_artifact"><code class="docutils literal notranslate"><span class="pre">Pipeline.get_artifact()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.get_data"><code class="docutils literal notranslate"><span class="pre">Pipeline.get_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.get_delayed_steps_info"><code class="docutils literal notranslate"><span class="pre">Pipeline.get_delayed_steps_info()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.get_execution_summary"><code class="docutils literal notranslate"><span class="pre">Pipeline.get_execution_summary()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.get_step_result"><code class="docutils literal notranslate"><span class="pre">Pipeline.get_step_result()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.has_pending_steps"><code class="docutils literal notranslate"><span class="pre">Pipeline.has_pending_steps</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.load"><code class="docutils literal notranslate"><span class="pre">Pipeline.load()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.load_structured_data"><code class="docutils literal notranslate"><span class="pre">Pipeline.load_structured_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.peek"><code class="docutils literal notranslate"><span class="pre">Pipeline.peek()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.remove_delayed_step"><code class="docutils literal notranslate"><span class="pre">Pipeline.remove_delayed_step()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.save"><code class="docutils literal notranslate"><span class="pre">Pipeline.save()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.save_artifacts"><code class="docutils literal notranslate"><span class="pre">Pipeline.save_artifacts()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.save_structured_data"><code class="docutils literal notranslate"><span class="pre">Pipeline.save_structured_data()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.store"><code class="docutils literal notranslate"><span class="pre">Pipeline.store()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.structured_data"><code class="docutils literal notranslate"><span class="pre">Pipeline.structured_data</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.then"><code class="docutils literal notranslate"><span class="pre">Pipeline.then()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.transform"><code class="docutils literal notranslate"><span class="pre">Pipeline.transform()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.validate"><code class="docutils literal notranslate"><span class="pre">Pipeline.validate()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline.visualize_pipeline"><code class="docutils literal notranslate"><span class="pre">Pipeline.visualize_pipeline()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.ProteinAlphabet"><code class="docutils literal notranslate"><span class="pre">ProteinAlphabet</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.ProteinAlphabet.get_one_letter_code"><code class="docutils literal notranslate"><span class="pre">ProteinAlphabet.get_one_letter_code()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.ProteinAlphabet.get_three_letter_code"><code class="docutils literal notranslate"><span class="pre">ProteinAlphabet.get_three_letter_code()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.ProteinSequence"><code class="docutils literal notranslate"><span class="pre">ProteinSequence</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.ProteinSequence.find_motif"><code class="docutils literal notranslate"><span class="pre">ProteinSequence.find_motif()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.ProteinSequence.get_residue"><code class="docutils literal notranslate"><span class="pre">ProteinSequence.get_residue()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.RNAAlphabet"><code class="docutils literal notranslate"><span class="pre">RNAAlphabet</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.RNASequence"><code class="docutils literal notranslate"><span class="pre">RNASequence</span></code></a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.RNASequence.back_transcribe"><code class="docutils literal notranslate"><span class="pre">RNASequence.back_transcribe()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.RNASequence.reverse_complement"><code class="docutils literal notranslate"><span class="pre">RNASequence.reverse_complement()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.core.html#tidymut.core.RNASequence.translate"><code class="docutils literal notranslate"><span class="pre">RNASequence.translate()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.create_pipeline"><code class="docutils literal notranslate"><span class="pre">create_pipeline()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.multiout_step"><code class="docutils literal notranslate"><span class="pre">multiout_step()</span></code></a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.core.html#tidymut.core.pipeline_step"><code class="docutils literal notranslate"><span class="pre">pipeline_step()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.utils.html">tidymut.utils package</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.utils.html#submodules">Submodules</a><ul>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.utils.cleaner_workers.html">tidymut.utils.cleaner_workers module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.cleaner_workers.html#tidymut.utils.cleaner_workers.apply_single_mutation"><code class="docutils literal notranslate"><span class="pre">apply_single_mutation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.cleaner_workers.html#tidymut.utils.cleaner_workers.infer_wt_sequence_grouped"><code class="docutils literal notranslate"><span class="pre">infer_wt_sequence_grouped()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.cleaner_workers.html#tidymut.utils.cleaner_workers.valid_single_mutation"><code class="docutils literal notranslate"><span class="pre">valid_single_mutation()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.utils.dataset_builders.html">tidymut.utils.dataset_builders module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.dataset_builders.html#tidymut.utils.dataset_builders.convert_format_1"><code class="docutils literal notranslate"><span class="pre">convert_format_1()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.dataset_builders.html#tidymut.utils.dataset_builders.convert_format_2"><code class="docutils literal notranslate"><span class="pre">convert_format_2()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.utils.mutation_converter.html">tidymut.utils.mutation_converter module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.mutation_converter.html#tidymut.utils.mutation_converter.invert_mutation"><code class="docutils literal notranslate"><span class="pre">invert_mutation()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.mutation_converter.html#tidymut.utils.mutation_converter.invert_mutation_set"><code class="docutils literal notranslate"><span class="pre">invert_mutation_set()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.utils.sequence_io.html">tidymut.utils.sequence_io module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.sequence_io.html#tidymut.utils.sequence_io.load_sequences"><code class="docutils literal notranslate"><span class="pre">load_sequences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.sequence_io.html#tidymut.utils.sequence_io.parse_custom_delimiter_header"><code class="docutils literal notranslate"><span class="pre">parse_custom_delimiter_header()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.sequence_io.html#tidymut.utils.sequence_io.parse_fasta"><code class="docutils literal notranslate"><span class="pre">parse_fasta()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.sequence_io.html#tidymut.utils.sequence_io.parse_ncbi_header"><code class="docutils literal notranslate"><span class="pre">parse_ncbi_header()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.sequence_io.html#tidymut.utils.sequence_io.parse_simple_header"><code class="docutils literal notranslate"><span class="pre">parse_simple_header()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.sequence_io.html#tidymut.utils.sequence_io.parse_uniprot_header"><code class="docutils literal notranslate"><span class="pre">parse_uniprot_header()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.sequence_io.html#tidymut.utils.sequence_io.write_fasta"><code class="docutils literal notranslate"><span class="pre">write_fasta()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.utils.type_converter.html">tidymut.utils.type_converter module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.type_converter.html#tidymut.utils.type_converter.convert_data_types"><code class="docutils literal notranslate"><span class="pre">convert_data_types()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.type_converter.html#tidymut.utils.type_converter.convert_data_types_batch"><code class="docutils literal notranslate"><span class="pre">convert_data_types_batch()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.type_converter.html#tidymut.utils.type_converter.convert_to_boolean"><code class="docutils literal notranslate"><span class="pre">convert_to_boolean()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.type_converter.html#tidymut.utils.type_converter.get_conversion_function"><code class="docutils literal notranslate"><span class="pre">get_conversion_function()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="tidymut.utils.type_converter.html#tidymut.utils.type_converter.normalize_type_conversions"><code class="docutils literal notranslate"><span class="pre">normalize_type_conversions()</span></code></a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.utils.html#module-tidymut.utils">Module contents</a></li>
+</ul>
+</li>
+</ul>
+</div>
+</section>
+<section id="module-tidymut">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-tidymut" title="Link to this heading"></a></h2>
+<p>TidyMut: A Python package for cleaning protein mutation data</p>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Yuxiang Tang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

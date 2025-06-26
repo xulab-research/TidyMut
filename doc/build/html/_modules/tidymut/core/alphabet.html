@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>tidymut.core.alphabet &#8212; tidymut 0.1.0-dev documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <script src="../../../_static/documentation_options.js?v=ee2d09ae"></script>
+    <script src="../../../_static/doctools.js?v=9bcbadda"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for tidymut.core.alphabet</h1><div class="highlight"><pre>
+<span></span><span class="c1"># tidymut/core/alphabet.py</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ABC</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">.constants</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+    <span class="n">STANDARD_DNA_BASES</span><span class="p">,</span>
+    <span class="n">AMBIGUOUSE_DNA_BASES</span><span class="p">,</span>
+    <span class="n">STANDARD_RNA_BASES</span><span class="p">,</span>
+    <span class="n">AMBIGUOUSE_RNA_BASES</span><span class="p">,</span>
+    <span class="n">STANDARD_AMINO_ACIDS</span><span class="p">,</span>
+    <span class="n">AMBIGUOUSE_AMINO_ACIDS</span><span class="p">,</span>
+    <span class="n">AA1_TO_3</span><span class="p">,</span>
+    <span class="n">AA3_TO_1</span><span class="p">,</span>
+<span class="p">)</span>
+
+<span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Set</span>
+
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;BaseAlphabet&quot;</span><span class="p">,</span> <span class="s2">&quot;DNAAlphabet&quot;</span><span class="p">,</span> <span class="s2">&quot;RNAAlphabet&quot;</span><span class="p">,</span> <span class="s2">&quot;ProteinAlphabet&quot;</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="fm">__dir__</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+    <span class="k">return</span> <span class="n">__all__</span>
+
+
+<div class="viewcode-block" id="BaseAlphabet">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.alphabet.BaseAlphabet">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">BaseAlphabet</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Base class for biological alphabets&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">letters</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">letters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">letter</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">letter</span> <span class="ow">in</span> <span class="n">letters</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+
+<div class="viewcode-block" id="BaseAlphabet.is_valid_char">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.alphabet.BaseAlphabet.is_valid_char">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_valid_char</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">char</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if character is valid in this alphabet&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">char</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">letters</span></div>
+
+
+<div class="viewcode-block" id="BaseAlphabet.is_valid_sequence">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.alphabet.BaseAlphabet.is_valid_sequence">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">is_valid_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if entire sequence is valid&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">all</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">is_valid_char</span><span class="p">(</span><span class="n">char</span><span class="p">)</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="BaseAlphabet.get_invalid_chars">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.alphabet.BaseAlphabet.get_invalid_chars">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_invalid_chars</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get set of invalid characters in sequence&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">(</span><span class="n">char</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="k">for</span> <span class="n">char</span> <span class="ow">in</span> <span class="n">sequence</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">letters</span></div>
+
+
+<div class="viewcode-block" id="BaseAlphabet.validate_sequence">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.alphabet.BaseAlphabet.validate_sequence">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">validate_sequence</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sequence</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Validate sequence and raise error if invalid&quot;&quot;&quot;</span>
+        <span class="n">invalid</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_invalid_chars</span><span class="p">(</span><span class="n">sequence</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">invalid</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid characters in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> sequence: </span><span class="si">{</span><span class="n">invalid</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sequence</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">char</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_valid_char</span><span class="p">(</span><span class="n">char</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">Alphabet: </span><span class="si">{</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">letters</span><span class="p">))</span><span class="si">}</span><span class="s2">&quot;</span></div>
+
+
+
+<div class="viewcode-block" id="DNAAlphabet">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.alphabet.DNAAlphabet">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">DNAAlphabet</span><span class="p">(</span><span class="n">BaseAlphabet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;DNA alphabet (A, T, C, G)&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_ambiguous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">standard</span> <span class="o">=</span> <span class="n">STANDARD_DNA_BASES</span>
+        <span class="k">if</span> <span class="n">include_ambiguous</span><span class="p">:</span>
+            <span class="c1"># IUPAC ambiguous nucleotide codes</span>
+            <span class="n">ambiguous</span> <span class="o">=</span> <span class="n">AMBIGUOUSE_DNA_BASES</span>
+            <span class="n">letters</span> <span class="o">=</span> <span class="n">standard</span> <span class="o">|</span> <span class="n">ambiguous</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">letters</span> <span class="o">=</span> <span class="n">standard</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">letters</span><span class="p">,</span> <span class="s2">&quot;DNA&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include_ambiguous</span> <span class="o">=</span> <span class="n">include_ambiguous</span></div>
+
+
+
+<div class="viewcode-block" id="RNAAlphabet">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.alphabet.RNAAlphabet">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">RNAAlphabet</span><span class="p">(</span><span class="n">BaseAlphabet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;RNA alphabet (A, U, C, G)&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_ambiguous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="n">standard</span> <span class="o">=</span> <span class="n">STANDARD_RNA_BASES</span>
+        <span class="k">if</span> <span class="n">include_ambiguous</span><span class="p">:</span>
+            <span class="n">ambiguous</span> <span class="o">=</span> <span class="n">AMBIGUOUSE_RNA_BASES</span>
+            <span class="n">letters</span> <span class="o">=</span> <span class="n">standard</span> <span class="o">|</span> <span class="n">ambiguous</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">letters</span> <span class="o">=</span> <span class="n">standard</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">letters</span><span class="p">,</span> <span class="s2">&quot;RNA&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include_ambiguous</span> <span class="o">=</span> <span class="n">include_ambiguous</span></div>
+
+
+
+<div class="viewcode-block" id="ProteinAlphabet">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.alphabet.ProteinAlphabet">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">ProteinAlphabet</span><span class="p">(</span><span class="n">BaseAlphabet</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Protein alphabet (20 standard amino acids + stop codon)&quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">include_stop</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span> <span class="n">include_ambiguous</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+        <span class="c1"># 20 standard amino acids</span>
+        <span class="n">standard</span> <span class="o">=</span> <span class="n">STANDARD_AMINO_ACIDS</span>
+
+        <span class="n">letters</span> <span class="o">=</span> <span class="n">standard</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+        <span class="k">if</span> <span class="n">include_stop</span><span class="p">:</span>
+            <span class="n">letters</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;*&quot;</span><span class="p">)</span>  <span class="c1"># Stop codon</span>
+
+        <span class="k">if</span> <span class="n">include_ambiguous</span><span class="p">:</span>
+            <span class="c1"># Ambiguous amino acids</span>
+            <span class="n">letters</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">AMBIGUOUSE_AMINO_ACIDS</span><span class="p">)</span>
+
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">letters</span><span class="p">,</span> <span class="s2">&quot;Protein&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include_stop</span> <span class="o">=</span> <span class="n">include_stop</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">include_ambiguous</span> <span class="o">=</span> <span class="n">include_ambiguous</span>
+
+<div class="viewcode-block" id="ProteinAlphabet.get_three_letter_code">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.alphabet.ProteinAlphabet.get_three_letter_code">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_three_letter_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">one_letter</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert one-letter to three-letter amino acid code&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">one_letter</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">AA1_TO_3</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid character: </span><span class="si">{</span><span class="n">one_letter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">AA1_TO_3</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">one_letter</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="s2">&quot;Unk&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ProteinAlphabet.get_one_letter_code">
+<a class="viewcode-back" href="../../../tidymut.core.html#tidymut.core.alphabet.ProteinAlphabet.get_one_letter_code">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_one_letter_code</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">three_letter</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">strict</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert three-letter to one-letter amino acid code&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">strict</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">three_letter</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">AA3_TO_1</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid amino acid code: </span><span class="si">{</span><span class="n">three_letter</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">AA3_TO_1</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">three_letter</span><span class="o">.</span><span class="n">upper</span><span class="p">(),</span> <span class="s2">&quot;X&quot;</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">tidymut</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+<p class="caption" role="heading"><span class="caption-text">Contents:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../modules.html">tidymut</a></li>
+</ul>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="../../../index.html">Documentation overview</a><ul>
+  <li><a href="../../index.html">Module code</a><ul>
+  </ul></li>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Yuxiang Tang.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

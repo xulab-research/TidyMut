@@ -1,7 +1,9 @@
 # tidymut/core/codon_table.py
+from __future__ import annotations
+
 
 from collections.abc import Collection
-from typing import Dict, Literal, Optional
+from typing import TYPE_CHECKING
 
 from .constants import (
     STANDARD_GENETIC_CODE_DNA,
@@ -9,6 +11,15 @@ from .constants import (
     STANDARD_GENETIC_CODE_RNA,
     STANDARD_START_CODONS_RNA,
 )
+
+if TYPE_CHECKING:
+    from typing import Dict, List, Literal, Optional
+
+__all__ = ["CodonTable"]
+
+
+def __dir__() -> List[str]:
+    return __all__
 
 
 class CodonTable:

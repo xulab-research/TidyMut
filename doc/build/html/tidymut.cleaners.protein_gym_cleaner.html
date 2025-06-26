@@ -1,0 +1,361 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tidymut.cleaners.protein_gym_cleaner module &mdash; tidymut 0.1.0-dev documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=ee2d09ae"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="tidymut.cleaners.protein_gym_custom_cleaners module" href="tidymut.cleaners.protein_gym_custom_cleaners.html" />
+    <link rel="prev" title="tidymut.cleaners.k50_cleaner module" href="tidymut.cleaners.k50_cleaner.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            tidymut
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="tidymut.cleaners.html">tidymut.cleaners package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="tidymut.cleaners.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html">tidymut.cleaners.base_config module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html">tidymut.cleaners.basic_cleaners module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html">tidymut.cleaners.human_domainome_cleaner module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_custom_cleaners.html">tidymut.cleaners.human_domainome_custom_cleaners module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html">tidymut.cleaners.k50_cleaner module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">tidymut.cleaners.protein_gym_cleaner module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig"><code class="docutils literal notranslate"><span class="pre">ProteinGymCleanerConfig</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.protein_gym_cleaner.clean_protein_gym_dataset"><code class="docutils literal notranslate"><span class="pre">clean_protein_gym_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.protein_gym_cleaner.create_protein_gym_cleaner"><code class="docutils literal notranslate"><span class="pre">create_protein_gym_cleaner()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_custom_cleaners.html">tidymut.cleaners.protein_gym_custom_cleaners module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.html#module-tidymut.cleaners">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.core.html">tidymut.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.utils.html">tidymut.utils package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tidymut</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="tidymut.cleaners.html">tidymut.cleaners package</a></li>
+      <li class="breadcrumb-item active">tidymut.cleaners.protein_gym_cleaner module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tidymut.cleaners.protein_gym_cleaner.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-tidymut.cleaners.protein_gym_cleaner">
+<span id="tidymut-cleaners-protein-gym-cleaner-module"></span><h1>tidymut.cleaners.protein_gym_cleaner module<a class="headerlink" href="#module-tidymut.cleaners.protein_gym_cleaner" title="Link to this heading"></a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig">
+<em class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.protein_gym_cleaner.</span></span><span class="sig-name descname"><span class="pre">ProteinGymCleanerConfig</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline_name:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'protein_gym_cleaner'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_config:</span> <span class="pre">bool</span> <span class="pre">=</span> <span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">column_mapping:</span> <span class="pre">Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters:</span> <span class="pre">Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">Any]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">type_conversions:</span> <span class="pre">Dict[str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validation_workers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">infer_wt_workers:</span> <span class="pre">int</span> <span class="pre">=</span> <span class="pre">16</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">handle_multiple_wt:</span> <span class="pre">Literal['error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'first'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">'separate']</span> <span class="pre">=</span> <span class="pre">'error'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">label_columns:</span> <span class="pre">List[str]</span> <span class="pre">=</span> <span class="pre">&lt;factory&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">primary_label_column:</span> <span class="pre">str</span> <span class="pre">=</span> <span class="pre">'DMS_score'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="_modules/tidymut/cleaners/protein_gym_cleaner.html#ProteinGymCleanerConfig"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig" title="Link to this definition"></a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">BaseCleanerConfig</span></code></p>
+<p>Configuration class for ProteinGym dataset cleaner</p>
+<p>Inherits from BaseCleanerConfig and adds ProteinGym-specific configuration options.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.column_mapping">
+<span class="sig-name descname"><span class="pre">column_mapping</span></span><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.column_mapping" title="Link to this definition"></a></dt>
+<dd><p>Mapping from source to target column names</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.filters">
+<span class="sig-name descname"><span class="pre">filters</span></span><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.filters" title="Link to this definition"></a></dt>
+<dd><p>Filter conditions for data cleaning</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, Any]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.type_conversions">
+<span class="sig-name descname"><span class="pre">type_conversions</span></span><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.type_conversions" title="Link to this definition"></a></dt>
+<dd><p>Data type conversion specifications</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Dict[str, str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.is_zero_based">
+<span class="sig-name descname"><span class="pre">is_zero_based</span></span><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.is_zero_based" title="Link to this definition"></a></dt>
+<dd><p>Whether mutation positions are zero-based</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.validation_workers">
+<span class="sig-name descname"><span class="pre">validation_workers</span></span><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.validation_workers" title="Link to this definition"></a></dt>
+<dd><p>Number of workers for mutation validation</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.infer_wt_workers">
+<span class="sig-name descname"><span class="pre">infer_wt_workers</span></span><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.infer_wt_workers" title="Link to this definition"></a></dt>
+<dd><p>Number of workers for wildtype sequence inference</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>int</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.handle_multiple_wt">
+<span class="sig-name descname"><span class="pre">handle_multiple_wt</span></span><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.handle_multiple_wt" title="Link to this definition"></a></dt>
+<dd><p>Strategy for handling multiple wildtype sequences</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Literal[“error”, “first”, “separate”]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.label_columns">
+<span class="sig-name descname"><span class="pre">label_columns</span></span><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.label_columns" title="Link to this definition"></a></dt>
+<dd><p>List of score columns to process</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List[str]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.primary_label_column">
+<span class="sig-name descname"><span class="pre">primary_label_column</span></span><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.primary_label_column" title="Link to this definition"></a></dt>
+<dd><p>Primary score column for the dataset</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>str</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id0">
+<span class="sig-name descname"><span class="pre">column_mapping</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id0" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id1">
+<span class="sig-name descname"><span class="pre">filters</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id1" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id2">
+<span class="sig-name descname"><span class="pre">handle_multiple_wt</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Literal</span><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'error'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'first'</span></span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="s"><span class="pre">'separate'</span></span><span class="p"><span class="pre">]</span></span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'error'</span></em><a class="headerlink" href="#id2" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id3">
+<span class="sig-name descname"><span class="pre">infer_wt_workers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#id3" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id4">
+<span class="sig-name descname"><span class="pre">label_columns</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">List</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id4" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.pipeline_name">
+<span class="sig-name descname"><span class="pre">pipeline_name</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'protein_gym_cleaner'</span></em><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.pipeline_name" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id5">
+<span class="sig-name descname"><span class="pre">primary_label_column</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">str</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'DMS_score'</span></em><a class="headerlink" href="#id5" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id6">
+<span class="sig-name descname"><span class="pre">type_conversions</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></em><a class="headerlink" href="#id6" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.validate">
+<span class="sig-name descname"><span class="pre">validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">None</span></span></span><a class="reference internal" href="_modules/tidymut/cleaners/protein_gym_cleaner.html#ProteinGymCleanerConfig.validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig.validate" title="Link to this definition"></a></dt>
+<dd><p>Validate ProteinGym-specific configuration parameters</p>
+<dl class="field-list simple">
+<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ValueError</strong> – If configuration is invalid</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="id7">
+<span class="sig-name descname"><span class="pre">validation_workers</span></span><em class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="pre">int</span></em><em class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">16</span></em><a class="headerlink" href="#id7" title="Link to this definition"></a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.clean_protein_gym_dataset">
+<span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.protein_gym_cleaner.</span></span><span class="sig-name descname"><span class="pre">clean_protein_gym_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">pipeline</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline"><span class="pre">Pipeline</span></a></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline"><span class="pre">Pipeline</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset" title="tidymut.core.MutationDataset"><span class="pre">MutationDataset</span></a><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/tidymut/cleaners/protein_gym_cleaner.html#clean_protein_gym_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.clean_protein_gym_dataset" title="Link to this definition"></a></dt>
+<dd><p>Clean ProteinGym dataset using configurable pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>pipeline</strong> (<a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline"><em>Pipeline</em></a>) – ProteinGym dataset cleaning pipeline</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><ul class="simple">
+<li><p>Pipeline: The cleaned pipeline</p></li>
+<li><p>MutationDataset: The cleaned ProteinGym dataset</p></li>
+</ul>
+</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[<a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline">Pipeline</a>, <a class="reference internal" href="tidymut.core.html#tidymut.core.MutationDataset" title="tidymut.core.MutationDataset">MutationDataset</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.cleaners.protein_gym_cleaner.create_protein_gym_cleaner">
+<span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.protein_gym_cleaner.</span></span><span class="sig-name descname"><span class="pre">create_protein_gym_cleaner</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data_path</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig" title="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig"><span class="pre">ProteinGymCleanerConfig</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">Any</span><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">str</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">Path</span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><span class="pre">None</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline"><span class="pre">Pipeline</span></a></span></span><a class="reference internal" href="_modules/tidymut/cleaners/protein_gym_cleaner.html#create_protein_gym_cleaner"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.protein_gym_cleaner.create_protein_gym_cleaner" title="Link to this definition"></a></dt>
+<dd><p>Create ProteinGym dataset cleaning pipeline</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data_path</strong> (<em>Union</em><em>[</em><em>str</em><em>, </em><em>Path</em><em>]</em>) – Path to directory containing ProteinGym CSV files or path to zip file
+- Download from: <a class="reference external" href="https://proteingym.org/download">https://proteingym.org/download</a>
+- File: DMS_ProteinGym_substitutions.zip</p></li>
+<li><p><strong>config</strong> (<em>Optional</em><em>[</em><em>Union</em><em>[</em><a class="reference internal" href="#tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig" title="tidymut.cleaners.protein_gym_cleaner.ProteinGymCleanerConfig"><em>ProteinGymCleanerConfig</em></a><em>, </em><em>Dict</em><em>[</em><em>str</em><em>, </em><em>Any</em><em>]</em><em>, </em><em>str</em><em>, </em><em>Path</em><em>]</em><em>]</em>) – Configuration for the cleaning pipeline. Can be:
+- ProteinGymCleanerConfig object
+- Dictionary with configuration parameters (merged with defaults)
+- Path to JSON configuration file (str or Path)
+- None (uses default configuration)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>The cleaning pipeline</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="tidymut.core.html#tidymut.core.Pipeline" title="tidymut.core.Pipeline">Pipeline</a></p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><strong>TypeError</strong> – If config has invalid type</p></li>
+<li><p><strong>ValueError</strong> – If configuration validation fails</p></li>
+</ul>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<p>Process directory of ProteinGym CSV files:
+&gt;&gt;&gt; pipeline = create_protein_gym_cleaner(“DMS_ProteinGym_substitutions/”)
+&gt;&gt;&gt; pipeline, dataset = clean_protein_gym_dataset(pipeline)</p>
+<p>Process zip file:
+&gt;&gt;&gt; pipeline = create_protein_gym_cleaner(“DMS_ProteinGym_substitutions.zip”)
+&gt;&gt;&gt; pipeline, dataset = clean_protein_gym_dataset(pipeline)</p>
+<p>Custom configuration:
+&gt;&gt;&gt; config = {
+…     “validation_workers”: 8,
+…     “handle_multiple_wt”: “first”
+… }
+&gt;&gt;&gt; pipeline = create_protein_gym_cleaner(“data/”, config=config)</p>
+<p>Load configuration from file:
+&gt;&gt;&gt; pipeline = create_protein_gym_cleaner(“data/”, config=”config.json”)</p>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tidymut.cleaners.k50_cleaner.html" class="btn btn-neutral float-left" title="tidymut.cleaners.k50_cleaner module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tidymut.cleaners.protein_gym_custom_cleaners.html" class="btn btn-neutral float-right" title="tidymut.cleaners.protein_gym_custom_cleaners module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Yuxiang Tang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,241 @@
+
+
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tidymut.cleaners.human_domainome_custom_cleaners module &mdash; tidymut 0.1.0-dev documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=e59714d7" />
+
+  
+      <script src="_static/jquery.js?v=5d32c60e"></script>
+      <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+      <script src="_static/documentation_options.js?v=ee2d09ae"></script>
+      <script src="_static/doctools.js?v=9bcbadda"></script>
+      <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="tidymut.cleaners.k50_cleaner module" href="tidymut.cleaners.k50_cleaner.html" />
+    <link rel="prev" title="tidymut.cleaners.human_domainome_cleaner module" href="tidymut.cleaners.human_domainome_cleaner.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="index.html" class="icon icon-home">
+            tidymut
+          </a>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">API Reference</span></p>
+<ul class="current">
+<li class="toctree-l1 current"><a class="reference internal" href="tidymut.cleaners.html">tidymut.cleaners package</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="tidymut.cleaners.html#submodules">Submodules</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.base_config.html">tidymut.cleaners.base_config module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.basic_cleaners.html">tidymut.cleaners.basic_cleaners module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.human_domainome_cleaner.html">tidymut.cleaners.human_domainome_cleaner module</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">tidymut.cleaners.human_domainome_custom_cleaners module</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.human_domainome_custom_cleaners.add_sequences_to_dataset"><code class="docutils literal notranslate"><span class="pre">add_sequences_to_dataset()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.human_domainome_custom_cleaners.extract_domain_sequences"><code class="docutils literal notranslate"><span class="pre">extract_domain_sequences()</span></code></a></li>
+<li class="toctree-l4"><a class="reference internal" href="#tidymut.cleaners.human_domainome_custom_cleaners.process_domain_positions"><code class="docutils literal notranslate"><span class="pre">process_domain_positions()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.k50_cleaner.html">tidymut.cleaners.k50_cleaner module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_cleaner.html">tidymut.cleaners.protein_gym_cleaner module</a></li>
+<li class="toctree-l3"><a class="reference internal" href="tidymut.cleaners.protein_gym_custom_cleaners.html">tidymut.cleaners.protein_gym_custom_cleaners module</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="tidymut.cleaners.html#module-tidymut.cleaners">Module contents</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.core.html">tidymut.core package</a></li>
+<li class="toctree-l1"><a class="reference internal" href="tidymut.utils.html">tidymut.utils package</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="index.html">tidymut</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="tidymut.cleaners.html">tidymut.cleaners package</a></li>
+      <li class="breadcrumb-item active">tidymut.cleaners.human_domainome_custom_cleaners module</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/tidymut.cleaners.human_domainome_custom_cleaners.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="module-tidymut.cleaners.human_domainome_custom_cleaners">
+<span id="tidymut-cleaners-human-domainome-custom-cleaners-module"></span><h1>tidymut.cleaners.human_domainome_custom_cleaners module<a class="headerlink" href="#module-tidymut.cleaners.human_domainome_custom_cleaners" title="Link to this heading"></a></h1>
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.cleaners.human_domainome_custom_cleaners.add_sequences_to_dataset">
+<span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.human_domainome_custom_cleaners.</span></span><span class="sig-name descname"><span class="pre">add_sequences_to_dataset</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pd.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_dict</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">Dict</span><span class="p"><span class="pre">[</span></span><span class="pre">str</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">str</span><span class="p"><span class="pre">]</span></span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'name'</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">pd.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pd.DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/tidymut/cleaners/human_domainome_custom_cleaners.html#add_sequences_to_dataset"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.human_domainome_custom_cleaners.add_sequences_to_dataset" title="Link to this definition"></a></dt>
+<dd><p>Add full wild-type sequences to the dataset from sequence dictionary</p>
+<p>This function maps sequences from a dictionary to the dataset. Records without
+matching sequences are separated into the failed dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<em>pd.DataFrame</em>) – Dataset containing protein names</p></li>
+<li><p><strong>sequence_dict</strong> (<em>Dict</em><em>[</em><em>str</em><em>, </em><em>str</em><em>]</em>) – Mapping from protein name to full wild-type sequence</p></li>
+<li><p><strong>name_column</strong> (<em>str</em><em>, </em><em>default='name'</em>) – Column name containing protein identifiers</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(successful_dataset, failed_dataset) - datasets with and without sequences</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[pd.DataFrame, pd.DataFrame]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;prot1&#39;</span><span class="p">,</span> <span class="s1">&#39;prot2&#39;</span><span class="p">,</span> <span class="s1">&#39;prot3&#39;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;score&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mf">1.0</span><span class="p">,</span> <span class="mf">2.0</span><span class="p">,</span> <span class="mf">3.0</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">seq_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;prot1&#39;</span><span class="p">:</span> <span class="s1">&#39;AKCD&#39;</span><span class="p">,</span> <span class="s1">&#39;prot2&#39;</span><span class="p">:</span> <span class="s1">&#39;EFGH&#39;</span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">successful</span><span class="p">,</span> <span class="n">failed</span> <span class="o">=</span> <span class="n">add_sequences_to_dataset</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">seq_dict</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">successful</span><span class="p">))</span>  <span class="c1"># Should be 2</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">failed</span><span class="p">))</span>  <span class="c1"># Should be 1</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.cleaners.human_domainome_custom_cleaners.extract_domain_sequences">
+<span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.human_domainome_custom_cleaners.</span></span><span class="sig-name descname"><span class="pre">extract_domain_sequences</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pd.DataFrame</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sequence_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'sequence'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start_pos_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'start_pos'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">end_pos_column</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">str</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">'end_pos'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_workers</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">int</span></span><span class="w"> </span><span class="o"><span class="pre">=</span></span><span class="w"> </span><span class="default_value"><span class="pre">4</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">pd.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pd.DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/tidymut/cleaners/human_domainome_custom_cleaners.html#extract_domain_sequences"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.human_domainome_custom_cleaners.extract_domain_sequences" title="Link to this definition"></a></dt>
+<dd><p>Extract domain sequences from full sequences using position information</p>
+<p>This function extracts domain subsequences based on start and end positions.
+Records with invalid positions or missing sequences are separated into the failed dataset.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dataset</strong> (<em>pd.DataFrame</em>) – Dataset with full sequences and position information</p></li>
+<li><p><strong>sequence_column</strong> (<em>str</em><em>, </em><em>default='sequence'</em>) – Column containing full wild-type sequences</p></li>
+<li><p><strong>start_pos_column</strong> (<em>str</em><em>, </em><em>default='start_pos'</em>) – Column containing domain start positions (0-based)</p></li>
+<li><p><strong>end_pos_column</strong> (<em>str</em><em>, </em><em>default='end_pos'</em>) – Column containing domain end positions</p></li>
+<li><p><strong>num_workers</strong> (<em>int</em><em>, </em><em>default=4</em>) – Number of parallel workers for processing, set to -1 for all available CPUs</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(successful_dataset, failed_dataset) - datasets with and without extraction errors</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[pd.DataFrame, pd.DataFrame]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;prot1&#39;</span><span class="p">,</span> <span class="s1">&#39;prot2&#39;</span><span class="p">,</span> <span class="s1">&#39;prot3&#39;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;sequence&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;ABCDEFGHIJ&#39;</span><span class="p">,</span> <span class="s1">&#39;KLMNOPQRST&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;start_pos&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">5</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;end_pos&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">7</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">10</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">successful</span><span class="p">,</span> <span class="n">failed</span> <span class="o">=</span> <span class="n">extract_domain_sequences</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="n">successful</span><span class="p">[</span><span class="s1">&#39;sequence&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">tolist</span><span class="p">())</span>
+<span class="go">[&#39;CDEFG&#39;, &#39;KLMN&#39;]</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">failed</span><span class="p">))</span>  <span class="c1"># Should be 1 (the None sequence)</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="tidymut.cleaners.human_domainome_custom_cleaners.process_domain_positions">
+<span class="sig-prename descclassname"><span class="pre">tidymut.cleaners.human_domainome_custom_cleaners.</span></span><span class="sig-name descname"><span class="pre">process_domain_positions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dataset</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><span class="pre">pd.DataFrame</span></span></em><span class="sig-paren">)</span> <span class="sig-return"><span class="sig-return-icon">&#x2192;</span> <span class="sig-return-typehint"><span class="pre">Tuple</span><span class="p"><span class="pre">[</span></span><span class="pre">pd.DataFrame</span><span class="p"><span class="pre">,</span></span><span class="w"> </span><span class="pre">pd.DataFrame</span><span class="p"><span class="pre">]</span></span></span></span><a class="reference internal" href="_modules/tidymut/cleaners/human_domainome_custom_cleaners.html#process_domain_positions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#tidymut.cleaners.human_domainome_custom_cleaners.process_domain_positions" title="Link to this definition"></a></dt>
+<dd><p>Process domain position information from PFAM entries</p>
+<p>This function extracts position information from PFAM entries and calculates
+relative mutation positions. It handles parsing errors by separating failed records.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dataset</strong> (<em>pd.DataFrame</em>) – Dataset with PFAM_entry column containing position information</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>(successful_dataset, failed_dataset) - datasets with and without parsing errors</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Tuple[pd.DataFrame, pd.DataFrame]</p>
+</dd>
+</dl>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span>
+<span class="gp">... </span>    <span class="s1">&#39;PFAM_entry&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;PF00001/10-100&#39;</span><span class="p">,</span> <span class="s1">&#39;PF00002/20-200&#39;</span><span class="p">,</span> <span class="s1">&#39;invalid_entry&#39;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;pos&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">15</span><span class="p">,</span> <span class="mi">25</span><span class="p">,</span> <span class="mi">30</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;wt_aa&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;A&#39;</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="s1">&#39;mut_aa&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;K&#39;</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span><span class="p">]</span>
+<span class="gp">... </span><span class="p">})</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">successful</span><span class="p">,</span> <span class="n">failed</span> <span class="o">=</span> <span class="n">process_domain_positions</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">successful</span><span class="p">))</span>  <span class="c1"># Should be 2</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">failed</span><span class="p">))</span>  <span class="c1"># Should be 1</span>
+<span class="go">1</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="tidymut.cleaners.human_domainome_cleaner.html" class="btn btn-neutral float-left" title="tidymut.cleaners.human_domainome_cleaner module" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="tidymut.cleaners.k50_cleaner.html" class="btn btn-neutral float-right" title="tidymut.cleaners.k50_cleaner module" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Yuxiang Tang.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
