@@ -13,5 +13,8 @@ A total of 1 people contributed to this release. People with a "+" by their name
 
 - YukunR
 
-
 **Full Changelog**: [b0518b2c91432fa750babf87593b37d93ed07e0a..HEAD](https://github.com/xulab-research/TidyMut/compare/b0518b2c91432fa750babf87593b37d93ed07e0a..HEAD)
+
+### Version
+
+Note: version 0.0.0 was an internal development artifact.
