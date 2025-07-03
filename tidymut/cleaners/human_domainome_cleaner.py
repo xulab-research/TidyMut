@@ -296,7 +296,8 @@ def create_human_domainome_cleaner(
                 merge_columns,
                 columns_to_merge=[
                     final_config.column_mapping.get("uniprot_ID", "uniprot_ID"),
-                    "pos",
+                    "start_pos",
+                    "end_pos",
                 ],
                 new_column_name="protein_mut_id",
             )
