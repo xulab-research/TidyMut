@@ -99,7 +99,6 @@ print(f"Translation: {dna.translate()}")
 ### Custom Processing Pipeline
 ```python
 import pandas as pd
-from typing import Tuple
 
 from tidymut.cleaners.basic_cleaners import (
     extract_and_rename_columns,
