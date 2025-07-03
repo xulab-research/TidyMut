@@ -113,6 +113,10 @@ def process_domain_positions(
     successful_dataset = result_dataset[success_mask].drop(columns=["error_message"])
     failed_dataset = result_dataset[~success_mask]
 
+    successful_dataset[["start_pos", "end_pos"]] = successful_dataset[
+        ["start_pos", "end_pos"]
+    ].astype(int)
+
     tqdm.write(
         f"Position processing: {len(successful_dataset)} successful, {len(failed_dataset)} failed"
     )

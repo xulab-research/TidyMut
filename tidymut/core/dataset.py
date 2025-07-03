@@ -795,20 +795,32 @@ class MutationDataset:
 
         tqdm.write(f"Saving dataset by reference to: {base_path}")
 
-        # Group mutation sets by reference_id
-        ref_groups = {}
+        # Pre-group mutation sets by reference_id and calculate stats in one pass
+        ref_data = {}
+
         for i, mutation_set in tqdm(
-            enumerate(self.mutation_sets), desc="Grouping mutation sets by reference_id"
+            enumerate(self.mutation_sets), desc="Grouping mutation sets "
         ):
             ref_id = self.mutation_set_references[i]
-            if ref_id not in ref_groups:
-                ref_groups[ref_id] = []
-            ref_groups[ref_id].append((i, mutation_set))
+
+            if ref_id not in ref_data:
+                ref_data[ref_id] = {
+                    "mutation_sets": [],
+                    "total_mutations": 0,
+                    "covered_positions": set(),
+                    "unique_labels": set(),
+                }
+
+            ref_data[ref_id]["mutation_sets"].append((i, mutation_set))
+            ref_data[ref_id]["total_mutations"] += len(mutation_set)
+            ref_data[ref_id]["covered_positions"].update(mutation_set.get_positions())
+
+            # Track unique labels
+            label = self.mutation_set_labels.get(i, "unlabeled")
+            ref_data[ref_id]["unique_labels"].add(str(label))
 
         # Process each reference
-        for ref_id, mutation_set_list in tqdm(
-            ref_groups.items(), desc="Processing references"
-        ):
+        for ref_id, data in tqdm(ref_data.items(), desc="Saving data by reference "):
             # Create sanitized directory name
             sanitized_ref_id = self._sanitize_filename(ref_id)
             ref_dir = base_path / sanitized_ref_id
@@ -820,8 +832,7 @@ class MutationDataset:
             # Prepare data for CSV
             csv_data = []
 
-            for set_index, mutation_set in mutation_set_list:
-                # Get mutation name (string representation of mutation set)
+            for set_index, mutation_set in data["mutation_sets"]:
                 mutation_name = str(mutation_set)
 
                 # Apply mutations to get mutated sequence
@@ -829,12 +840,11 @@ class MutationDataset:
                     mutated_sequence = ref_sequence.apply_mutation(mutation_set)
                     mutated_seq_str = str(mutated_sequence)
                 except Exception as e:
-                    tqdm.write(
+                    print(
                         f"Warning: Could not apply mutations for {mutation_name}: {e}"
                     )
                     mutated_seq_str = "ERROR_APPLYING_MUTATION"
 
-                # Get label
                 label = self.mutation_set_labels.get(set_index, "")
 
                 csv_data.append(
@@ -846,42 +856,37 @@ class MutationDataset:
                 )
 
             # Save data.csv
-            csv_path = ref_dir / "data.csv"
             df_ref = pd.DataFrame(csv_data)
-            df_ref.to_csv(csv_path, index=False)
+            df_ref.to_csv(ref_dir / "data.csv", index=False)
 
             # Save wt.fasta
-            fasta_path = ref_dir / "wt.fasta"
-            with open(fasta_path, "w") as f:
-                # Use sequence name if available, otherwise use ref_id
+            with open(ref_dir / "wt.fasta", "w") as f:
                 seq_name = ref_sequence.name if ref_sequence.name else ref_id
-                f.write(f">{seq_name}\n")
-                f.write(f"{str(ref_sequence)}\n")
+                f.write(f">{seq_name}\n{str(ref_sequence)}\n")
 
-            # Prepare metadata
-            ref_stats = self._get_single_sequence_coverage(ref_id)
+            # Prepare simplified metadata
+            seq_length = len(ref_sequence)
+            covered_positions = len(data["covered_positions"])
+            coverage_percentage = (
+                (covered_positions / seq_length) * 100 if seq_length > 0 else 0
+            )
+
             metadata = {
                 "reference_id": ref_id,
                 "sequence_name": ref_sequence.name,
                 "sequence_type": type(ref_sequence).__name__,
-                "sequence_length": len(ref_sequence),
-                "num_mutation_sets": len(mutation_set_list),
-                "total_mutations": sum(len(ms) for _, ms in mutation_set_list),
-                "coverage_stats": ref_stats,
+                "sequence_length": seq_length,
+                "num_mutation_sets": len(data["mutation_sets"]),
+                "total_mutations": data["total_mutations"],
+                "covered_positions": covered_positions,
+                "coverage_percentage": coverage_percentage,
+                "num_unique_labels": len(data["unique_labels"]),
+                "has_unlabeled": "unlabeled" in data["unique_labels"],
                 "dataset_name": self.name,
-                "sanitized_directory_name": sanitized_ref_id,
             }
 
-            # Add label distribution
-            label_counts = {}
-            for set_index, _ in mutation_set_list:
-                label = self.mutation_set_labels.get(set_index, "unlabeled")
-                label_counts[str(label)] = label_counts.get(str(label), 0) + 1
-            metadata["label_distribution"] = label_counts
-
             # Save metadata.json
-            metadata_path = ref_dir / "metadata.json"
-            with open(metadata_path, "w") as f:
+            with open(ref_dir / "metadata.json", "w") as f:
                 json.dump(metadata, f, indent=2, default=str)
 
     def save(
@@ -1017,61 +1022,75 @@ class MutationDataset:
         # Create new dataset
         dataset = cls(name=dataset_name)
 
+        total_loaded = 0
+        skipped_dirs = []
+
         # Process each reference directory
-        for ref_dir in tqdm(ref_dirs, desc="Loading references"):
+        for ref_dir in tqdm(ref_dirs, desc="Loading dataset from tidymut format "):
             # Required files
             data_path = ref_dir / "data.csv"
             fasta_path = ref_dir / "wt.fasta"
             metadata_path = ref_dir / "metadata.json"
 
             # Check required files exist
-            if not data_path.exists():
-                tqdm.write(f"Warning: Skipping {ref_dir.name} - data.csv not found")
-                continue
-            if not fasta_path.exists():
-                tqdm.write(f"Warning: Skipping {ref_dir.name} - wt.fasta not found")
+            if not data_path.exists() or not fasta_path.exists():
+                missing_files = []
+                if not data_path.exists():
+                    missing_files.append("data.csv")
+                if not fasta_path.exists():
+                    missing_files.append("wt.fasta")
+                skipped_dirs.append(
+                    f"{ref_dir.name} (missing: {', '.join(missing_files)})"
+                )
                 continue
 
-            # Load metadata to get original reference_id
+            # Load metadata to get original reference_id and sequence_type
             original_ref_id = ref_dir.name  # Default to directory name
+            sequence_type = ProteinSequence  # Default sequence type
+
             if metadata_path.exists():
                 try:
                     with open(metadata_path, "r") as f:
                         metadata = json.load(f)
                     original_ref_id = metadata.get("reference_id", ref_dir.name)
-                except Exception as e:
-                    tqdm.write(
-                        f"Warning: Could not load metadata for {ref_dir.name}: {e}"
+                    sequence_type_name = metadata.get(
+                        "sequence_type", "ProteinSequence"
                     )
+                    sequence_type = SEQUENCE_TYPE_MAP.get(
+                        sequence_type_name, ProteinSequence
+                    )
+                except Exception as e:
+                    print(f"Warning: Could not load metadata for {ref_dir.name}: {e}")
 
-            # Load reference sequence from FASTA
-            sequence_type = SEQUENCE_TYPE_MAP.get(
-                metadata.get("sequence_type", "ProteinSequence"), ProteinSequence
-            )
-
-            ref_sequence = list(
-                load_sequences_from_fasta(
-                    fasta_path, sequence_type, header_func=lambda x: (x, "")
-                ).values()
-            )[
-                0
-            ]  # get first sequence when mutli sequences
-            dataset.add_reference_sequence(original_ref_id, ref_sequence)
-
-            # Load mutation data
             try:
+                # Load reference sequence from FASTA
+                sequences = load_sequences_from_fasta(
+                    fasta_path, sequence_type, header_func=lambda x: (x, "")
+                )
+                if not sequences:
+                    skipped_dirs.append(f"{ref_dir.name} (empty FASTA)")
+                    continue
+
+                ref_sequence = list(sequences.values())[0]  # Get first sequence
+                dataset.add_reference_sequence(original_ref_id, ref_sequence)
+
+                # Load mutation data
                 df_ref = pd.read_csv(data_path)
                 required_cols = ["mutation_name", "mutated_sequence", "label"]
                 missing_cols = [
                     col for col in required_cols if col not in df_ref.columns
                 ]
+
                 if missing_cols:
-                    tqdm.write(
-                        f"Warning: Skipping {ref_dir.name} - missing columns: {missing_cols}"
+                    skipped_dirs.append(
+                        f"{ref_dir.name} (missing columns: {', '.join(missing_cols)})"
                     )
                     continue
 
-                # Process each mutation set
+                # Batch process mutations for this reference
+                mutation_sets_added = 0
+                failed_mutations = 0
+
                 for _, row in df_ref.iterrows():
                     mutation_name = row["mutation_name"]
                     label = row["label"]
@@ -1082,22 +1101,38 @@ class MutationDataset:
                             mutation_name, sep=",", is_zero_based=is_zero_based
                         )
                         dataset.add_mutation_set(mutation_set, original_ref_id, label)
-                    except Exception as e:
-                        tqdm.write(
-                            f"Warning: Could not parse mutation '{mutation_name}': {e}"
-                        )
+                        mutation_sets_added += 1
+                    except Exception:
+                        failed_mutations += 1
                         continue
 
-                tqdm.write(f"  Loaded {original_ref_id}: {len(df_ref)} mutation sets")
+                tqdm.write(
+                    f"  Loaded {original_ref_id}: {mutation_sets_added} mutation sets",
+                    end="",
+                )
+                if failed_mutations > 0:
+                    tqdm.write(f" ({failed_mutations} failed)")
+                else:
+                    tqdm.write("")
+
+                total_loaded += mutation_sets_added
 
             except Exception as e:
-                tqdm.write(f"Warning: Could not load data for {ref_dir.name}: {e}")
+                skipped_dirs.append(f"{ref_dir.name} (error: {str(e)})")
                 continue
+
+        # Report results
+        if skipped_dirs:
+            tqdm.write(f"Skipped {len(skipped_dirs)} directories:")
+            for skip_info in skipped_dirs:
+                tqdm.write(f"  - {skip_info}")
 
         if len(dataset) == 0:
             raise ValueError("No valid mutation sets were loaded")
 
-        tqdm.write(f"Successfully loaded dataset with {len(dataset)} mutation sets")
+        tqdm.write(
+            f"Successfully loaded dataset with {len(dataset)} mutation sets from {len(dataset.reference_sequences)} references"
+        )
         return dataset
 
     @classmethod

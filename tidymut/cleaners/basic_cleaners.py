@@ -1,13 +1,17 @@
 # tidymut/cleaners/basic_cleaners.py
 from __future__ import annotations
 
+import hashlib
 import numpy as np
 import pandas as pd
+import requests
+import time
 from functools import partial
 from joblib import Parallel, delayed
 from pathlib import Path
 from tqdm import tqdm
 from typing import cast, TYPE_CHECKING
+from urllib.parse import urlparse
 
 from ..core.alphabet import ProteinAlphabet, DNAAlphabet, RNAAlphabet
 from ..core.pipeline import pipeline_step, multiout_step
@@ -38,6 +42,7 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
+    "download_origin_data",
     "read_dataset",
     "merge_columns",
     "extract_and_rename_columns",
@@ -52,6 +57,234 @@ __all__ = [
 
 def __dir__() -> List[str]:
     return __all__
+
+
+@pipeline_step
+def download_origin_data(
+    url: str,
+    local_path: Union[str, Path],
+    overwrite: bool = False,
+    chunk_size: int = 8192,
+    timeout: int = 30,
+    max_retries: int = 3,
+    retry_delay: float = 1.0,
+    headers: Optional[Dict[str, str]] = None,
+    verify_ssl: bool = True,
+    expected_checksum: Optional[str] = None,
+    checksum_algorithm: str = "md5",
+    show_progress: bool = True,
+    create_dirs: bool = True,
+) -> Path:
+    """
+    Download data from a URL and save to local path with progress tracking.
+
+    Parameters
+    ----------
+    url : str
+        URL to download data from
+    local_path : Union[str, Path]
+        Local path where the downloaded file will be saved
+    overwrite : bool, default=False
+        Whether to overwrite existing files
+    chunk_size : int, default=8192
+        Size of chunks to download at a time (in bytes)
+    timeout : int, default=30
+        Request timeout in seconds
+    max_retries : int, default=3
+        Maximum number of retry attempts if download fails
+    retry_delay : float, default=1.0
+        Delay between retry attempts in seconds
+    headers : Optional[Dict[str, str]], default=None
+        Additional HTTP headers to send with the request
+    verify_ssl : bool, default=True
+        Whether to verify SSL certificates
+    expected_checksum : Optional[str], default=None
+        Expected checksum of the downloaded file for verification
+    checksum_algorithm : str, default="md5"
+        Algorithm to use for checksum verification ("md5", "sha1", "sha256")
+    show_progress : bool, default=True
+        Whether to show download progress bar
+    create_dirs : bool, default=True
+        Whether to create parent directories if they don't exist
+
+    Returns
+    -------
+    Path
+        Path object pointing to the downloaded file
+
+    Raises
+    ------
+    ValueError
+        If URL is invalid or checksum verification fails
+    FileExistsError
+        If file exists and overwrite=False
+    requests.RequestException
+        If download fails after all retries
+
+    Examples
+    --------
+    Basic usage:
+    >>> file_path = download_origin_data(
+    ...     "https://example.com/data.csv",
+    ...     "data/raw_data.csv"
+    ... )
+    >>> print(f"Downloaded to: {file_path}")
+    Downloaded to: data/raw_data.csv
+
+    With checksum verification:
+    >>> file_path = download_origin_data(
+    ...     "https://example.com/important_data.xlsx",
+    ...     "data/important_data.xlsx",
+    ...     expected_checksum="5d41402abc4b2a76b9719d911017c592",
+    ...     checksum_algorithm="md5"
+    ... )
+
+    With custom headers and retry settings:
+    >>> headers = {"User-Agent": "MyApp/1.0"}
+    >>> file_path = download_origin_data(
+    ...     "https://api.example.com/dataset.json",
+    ...     "data/dataset.json",
+    ...     headers=headers,
+    ...     max_retries=5,
+    ...     retry_delay=2.0
+    ... )
+
+    Download without progress bar:
+    >>> file_path = download_origin_data(
+    ...     "https://example.com/data.tsv",
+    ...     "data/data.tsv",
+    ...     show_progress=False,
+    ...     overwrite=True
+    ... )
+    """
+    # Convert to Path object
+    local_path = Path(local_path)
+
+    # Validate URL
+    parsed_url = urlparse(url)
+    if not parsed_url.scheme or not parsed_url.netloc:
+        raise ValueError(f"Invalid URL: {url}")
+
+    tqdm.write(f"Downloading data from {url}...")
+    tqdm.write(f"Target location: {local_path}")
+
+    # Check if file exists
+    if local_path.exists() and not overwrite:
+        raise FileExistsError(
+            f"File already exists: {local_path}. Use overwrite=True to replace it."
+        )
+
+    # Create parent directories if needed
+    if create_dirs and local_path.parent != Path("."):
+        local_path.parent.mkdir(parents=True, exist_ok=True)
+        tqdm.write(f"Created directory: {local_path.parent}")
+
+    # Prepare headers
+    default_headers = {"User-Agent": "tidymut-data-downloader/1.0"}
+    if headers:
+        default_headers.update(headers)
+
+    # Download with retries
+    for attempt in range(max_retries):
+        try:
+            tqdm.write(f"Download attempt {attempt + 1}/{max_retries}...")
+
+            # Make initial request to get file size
+            response = requests.head(
+                url,
+                headers=default_headers,
+                timeout=timeout,
+                verify=verify_ssl,
+                allow_redirects=True,
+            )
+            response.raise_for_status()
+
+            # Get content length for progress bar
+            total_size = int(response.headers.get("content-length", 0))
+
+            # Start actual download
+            response = requests.get(
+                url,
+                headers=default_headers,
+                timeout=timeout,
+                verify=verify_ssl,
+                stream=True,
+                allow_redirects=True,
+            )
+            response.raise_for_status()
+
+            # Initialize progress bar
+            progress_bar = None
+            if show_progress and total_size > 0:
+                progress_bar = tqdm(
+                    total=total_size,
+                    unit="B",
+                    unit_scale=True,
+                    unit_divisor=1024,
+                    desc=f"Downloading {local_path.name}",
+                )
+
+            # Initialize checksum if needed
+            checksum_hash = None
+            if expected_checksum:
+                if checksum_algorithm.lower() == "md5":
+                    checksum_hash = hashlib.md5()
+                elif checksum_algorithm.lower() == "sha1":
+                    checksum_hash = hashlib.sha1()
+                elif checksum_algorithm.lower() == "sha256":
+                    checksum_hash = hashlib.sha256()
+                else:
+                    raise ValueError(
+                        f"Unsupported checksum algorithm: {checksum_algorithm}"
+                    )
+
+            # Download and save file
+            with open(local_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=chunk_size):
+                    if chunk:  # Filter out keep-alive chunks
+                        f.write(chunk)
+                        if checksum_hash:
+                            checksum_hash.update(chunk)
+                        if progress_bar:
+                            progress_bar.update(len(chunk))
+
+            if progress_bar:
+                progress_bar.close()
+
+            # Verify checksum if provided
+            if expected_checksum and checksum_hash:
+                calculated_checksum = checksum_hash.hexdigest()
+                if calculated_checksum.lower() != expected_checksum.lower():
+                    local_path.unlink()  # Remove corrupted file
+                    raise ValueError(
+                        f"Checksum verification failed. "
+                        f"Expected: {expected_checksum}, "
+                        f"Got: {calculated_checksum}"
+                    )
+                tqdm.write(
+                    f"Checksum verification passed ({checksum_algorithm.upper()})"
+                )
+
+            file_size = local_path.stat().st_size
+            tqdm.write(f"Successfully downloaded {file_size:,} bytes to {local_path}")
+            return local_path
+
+        except requests.RequestException as e:
+            tqdm.write(f"Download attempt {attempt + 1} failed: {str(e)}")
+            if attempt < max_retries - 1:
+                tqdm.write(f"Retrying in {retry_delay} seconds...")
+                time.sleep(retry_delay)
+            else:
+                tqdm.write("All download attempts failed.")
+                raise
+
+        except Exception as e:
+            # Clean up partial download on unexpected errors
+            if local_path.exists():
+                local_path.unlink()
+            raise
+    # should never reached because already deal with exception in loop
+    raise RuntimeError(f"Failed to download {url} after {max_retries} attempts.")
 
 
 @pipeline_step

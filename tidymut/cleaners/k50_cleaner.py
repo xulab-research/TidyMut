@@ -37,6 +37,10 @@ class K50CleanerConfig(BaseCleanerConfig):
 
     Inherits from BaseCleanerConfig and adds K50-specific configuration options.
 
+    Raw K50 dataset DataFrame or file path to K50 dataset
+    - Download from: https://zenodo.org/records/7992926
+    - File: `Tsuboyama2023_Dataset2_Dataset3_20230416.csv` in `Processed_K50_dG_datasets.zip`
+
     Attributes
     ----------
     column_mapping : Dict[str, str]
@@ -135,7 +139,7 @@ def create_k50_cleaner(
     ----------
     dataset_or_path : Union[pd.DataFrame, str, Path]
         Raw K50 dataset DataFrame or file path to K50 dataset
-        - Download from: https://zenodo.org/records/799292
+        - Download from: https://zenodo.org/records/7992926
         - File: `Tsuboyama2023_Dataset2_Dataset3_20230416.csv` in `Processed_K50_dG_datasets.zip`
     config : Optional[Union[K50CleanerConfig, Dict[str, Any], str, Path]]
         Configuration for the cleaning pipeline. Can be:

@@ -96,22 +96,9 @@ print(f"Translation: {dna.translate()}")
 
 ## Examples and Use Cases
 
-### Comparative Mutation Analysis
-```python
-from tidymut.analysis import MutationComparator
-
-comparator = MutationComparator()
-comparator.add_dataset("wildtype", wt_sequences)
-comparator.add_dataset("variant", variant_sequences)
-
-results = comparator.compare_mutation_profiles()
-comparator.plot_comparison(results)
-```
-
 ### Custom Processing Pipeline
 ```python
 import pandas as pd
-from typing import Tuple
 
 from tidymut.cleaners.basic_cleaners import (
     extract_and_rename_columns,

@@ -1,10 +1,11 @@
 # tidymut/cleaners/human_domainome_cleaner.py
 from __future__ import annotations
 
+import logging
+import pandas as pd
 from typing import TYPE_CHECKING
 from dataclasses import dataclass, field
 from pathlib import Path
-import logging
 
 from .base_config import BaseCleanerConfig
 from .basic_cleaners import (
@@ -48,6 +49,10 @@ class HumanDomainomeCleanerConfig(BaseCleanerConfig):
     """Configuration class for HumanDomainome dataset cleaner
 
     Inherits from BaseCleanerConfig and adds HumanDomainome-specific configuration options.
+
+    Raw HumanDomainome dataset DataFrame or file path to K50 HumanDomainome
+    - File: `SupplementaryTable4.txt` from the article
+        'Site-saturation mutagenesis of 500 human protein domains'
 
     Attributes
     ----------
@@ -158,7 +163,7 @@ class HumanDomainomeCleanerConfig(BaseCleanerConfig):
 
 
 def create_human_domainome_cleaner(
-    dataset_or_path: Union[str, Path],
+    dataset_or_path: Union[str, Path, pd.DataFrame],
     sequence_dict_path: Union[str, Path],
     config: Optional[
         Union[HumanDomainomeCleanerConfig, Dict[str, Any], str, Path]
@@ -292,7 +297,8 @@ def create_human_domainome_cleaner(
                 merge_columns,
                 columns_to_merge=[
                     final_config.column_mapping.get("uniprot_ID", "uniprot_ID"),
-                    "pos",
+                    "start_pos",
+                    "end_pos",
                 ],
                 new_column_name="protein_mut_id",
             )
