@@ -49,6 +49,10 @@ class HumanDomainomeCleanerConfig(BaseCleanerConfig):
 
     Inherits from BaseCleanerConfig and adds HumanDomainome-specific configuration options.
 
+    Raw HumanDomainome dataset DataFrame or file path to K50 HumanDomainome
+    - File: `SupplementaryTable4.txt` from the article
+        'Site-saturation mutagenesis of 500 human protein domains'
+
     Attributes
     ----------
     sequence_dict_path : Union[str, Path]

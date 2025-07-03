@@ -43,6 +43,10 @@ class ProteinGymCleanerConfig(BaseCleanerConfig):
 
     Inherits from BaseCleanerConfig and adds ProteinGym-specific configuration options.
 
+    Path to directory containing ProteinGym CSV files or path to zip file
+    - Download from: https://proteingym.org/download
+    - File: DMS_ProteinGym_substitutions.zip
+
     Attributes
     ----------
     column_mapping : Dict[str, str]
