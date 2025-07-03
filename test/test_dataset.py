@@ -1,7 +1,9 @@
 import pytest
 import pandas as pd
+import numpy as np
 from pathlib import Path
 import tempfile
+import json
 
 from tidymut.core.dataset import MutationDataset
 from tidymut.core.mutation import (
@@ -497,26 +499,156 @@ class TestSaveLoad:
         dataset.add_reference_sequence("ref1", protein_seq1)
         dataset.add_reference_sequence("ref2", protein_seq2)
 
-        # 为每个参考序列添加突变
+        # 为第一个参考序列添加多个突变集
         mutation1 = AminoAcidMutation("A", 0, "V")
         mutation_set1 = AminoAcidMutationSet([mutation1])
         dataset.add_mutation_set(mutation_set1, "ref1", label=1.0)
 
+        # 添加多突变集合
+        mutation1_multi = AminoAcidMutation("A", 0, "V")
+        mutation2_multi = AminoAcidMutation("C", 1, "G")
+        mutation_set1_multi = AminoAcidMutationSet([mutation1_multi, mutation2_multi])
+        dataset.add_mutation_set(mutation_set1_multi, "ref1", label=3.0)
+
+        # 为第二个参考序列添加突变
         mutation2 = AminoAcidMutation("G", 0, "A")
         mutation_set2 = AminoAcidMutationSet([mutation2])
         dataset.add_mutation_set(mutation_set2, "ref2", label=2.0)
 
+        # 添加无标签的突变集
+        mutation3 = AminoAcidMutation("H", 1, "R")
+        mutation_set3 = AminoAcidMutationSet([mutation3])
+        dataset.add_mutation_set(mutation_set3, "ref2")  # 无标签
+
         # 保存和加载
         with tempfile.TemporaryDirectory() as tmpdir:
             dataset.save_by_reference(tmpdir)
+
+            # 验证保存的文件结构
+            base_path = Path(tmpdir)
+            ref_dirs = [d for d in base_path.iterdir() if d.is_dir()]
+            assert (
+                len(ref_dirs) == 2
+            ), f"Expected 2 reference directories, got {len(ref_dirs)}"
+
+            # 验证每个目录包含必需文件
+            for ref_dir in ref_dirs:
+                assert (
+                    ref_dir / "data.csv"
+                ).exists(), f"Missing data.csv in {ref_dir.name}"
+                assert (
+                    ref_dir / "wt.fasta"
+                ).exists(), f"Missing wt.fasta in {ref_dir.name}"
+                assert (
+                    ref_dir / "metadata.json"
+                ).exists(), f"Missing metadata.json in {ref_dir.name}"
+
+                # 验证metadata.json格式
+                with open(ref_dir / "metadata.json") as f:
+                    metadata = json.load(f)
+                    required_fields = [
+                        "reference_id",
+                        "sequence_name",
+                        "sequence_type",
+                        "sequence_length",
+                        "num_mutation_sets",
+                        "total_mutations",
+                        "covered_positions",
+                        "coverage_percentage",
+                        "num_unique_labels",
+                        "has_unlabeled",
+                        "dataset_name",
+                    ]
+                    for field in required_fields:
+                        assert field in metadata, f"Missing field {field} in metadata"
+
+            # 加载数据集
             loaded_dataset = MutationDataset.load_by_reference(tmpdir, "loaded_dataset")
 
-        # 验证
+        # 验证基本属性
         assert loaded_dataset.name == "loaded_dataset"
-        assert len(loaded_dataset) == 2
+        assert (
+            len(loaded_dataset) == 4
+        ), f"Expected 4 mutation sets, got {len(loaded_dataset)}"
         assert len(loaded_dataset.reference_sequences) == 2
         assert "ref1" in loaded_dataset.reference_sequences
         assert "ref2" in loaded_dataset.reference_sequences
+
+        # 验证参考序列内容
+        loaded_seq1 = loaded_dataset.reference_sequences["ref1"]
+        loaded_seq2 = loaded_dataset.reference_sequences["ref2"]
+        assert str(loaded_seq1) == "ACDEFG"
+        assert str(loaded_seq2) == "GHIKLM"
+        assert loaded_seq1.name == "protein1"
+        assert loaded_seq2.name == "protein2"
+
+        # 验证突变集和标签
+        ref1_sets = []
+        ref2_sets = []
+
+        for i, (mutation_set, ref_id) in enumerate(loaded_dataset):
+            label = loaded_dataset.mutation_set_labels.get(i, "")
+
+            if ref_id == "ref1":
+                ref1_sets.append((mutation_set, label))
+            elif ref_id == "ref2":
+                ref2_sets.append((mutation_set, label))
+
+        # 验证ref1的突变集
+        assert (
+            len(ref1_sets) == 2
+        ), f"Expected 2 mutation sets for ref1, got {len(ref1_sets)}"
+
+        # 查找单突变和多突变
+        single_mut = None
+        multi_mut = None
+        for mut_set, label in ref1_sets:
+            if len(mut_set) == 1:
+                single_mut = (mut_set, label)
+            elif len(mut_set) == 2:
+                multi_mut = (mut_set, label)
+
+        assert single_mut is not None, "Single mutation not found for ref1"
+        assert multi_mut is not None, "Multi mutation not found for ref1"
+        assert single_mut[1] == 1.0, f"Expected label 1.0, got {single_mut[1]}"
+        assert multi_mut[1] == 3.0, f"Expected label '3.0', got {multi_mut[1]}"
+
+        # 验证ref2的突变集
+        assert (
+            len(ref2_sets) == 2
+        ), f"Expected 2 mutation sets for ref2, got {len(ref2_sets)}"
+
+        # 检查标签
+        labels = [label for _, label in ref2_sets]
+        assert 2.0 in labels, "Label 2.0 not found in ref2"
+        assert pd.isna(labels).any(), "Empty label (unlabeled) not found in ref2"
+
+        # 验证统计信息
+        stats = loaded_dataset.get_statistics()
+        assert stats["total_mutation_sets"] == 4
+        assert stats["total_mutations"] == 5  # 1 + 2 + 1 + 1
+        assert stats["num_reference_sequences"] == 2
+
+        print("All tests passed!")
+
+    def test_save_load_error_handling(self):
+        """测试错误处理"""
+        # 测试空目录
+        with tempfile.TemporaryDirectory() as tmpdir:
+            try:
+                MutationDataset.load_by_reference(tmpdir)
+                assert False, "Should raise ValueError for empty directory"
+            except ValueError as e:
+                assert "No reference directories found" in str(e)
+
+        # 测试不存在的目录
+        try:
+            MutationDataset.load_by_reference("/nonexistent/path")
+            assert False, "Should raise FileNotFoundError"
+        except FileNotFoundError:
+            pass
+
+        print("Error handling tests passed!")
 
     def test_sanitize_filename(self):
         """测试文件名清理功能"""

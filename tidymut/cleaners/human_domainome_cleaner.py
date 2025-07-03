@@ -1,10 +1,11 @@
 # tidymut/cleaners/human_domainome_cleaner.py
 from __future__ import annotations
 
+import logging
+import pandas as pd
 from typing import TYPE_CHECKING
 from dataclasses import dataclass, field
 from pathlib import Path
-import logging
 
 from .base_config import BaseCleanerConfig
 from .basic_cleaners import (
@@ -162,7 +163,7 @@ class HumanDomainomeCleanerConfig(BaseCleanerConfig):
 
 
 def create_human_domainome_cleaner(
-    dataset_or_path: Union[str, Path],
+    dataset_or_path: Union[str, Path, pd.DataFrame],
     sequence_dict_path: Union[str, Path],
     config: Optional[
         Union[HumanDomainomeCleanerConfig, Dict[str, Any], str, Path]
