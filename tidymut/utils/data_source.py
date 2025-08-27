@@ -1,7 +1,7 @@
 # tidymut/utils/data_source.py
 
 DATASETS = {
-    "K50": {
+    "cDNAProteolysis": {
         "name": "Mega-scale experimental analysis of protein folding stability in biology and design",
         "url": "https://zenodo.org/records/7992926",
         "file": "'Tsuboyama2023_Dataset2_Dataset3_20230416.csv' in 'Processed_K50_dG_datasets.zip'",
@@ -31,7 +31,7 @@ def list_datasets_with_built_in_cleaners() -> None:
     the same `@pipeline_step` framework.
 
     Predefined datasets:
-    - K50
+    - cDNAProteolysis
     - ProteinGym
     - HumanDomainome
     """

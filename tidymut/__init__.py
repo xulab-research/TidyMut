@@ -23,7 +23,11 @@ from .core import (
     create_pipeline,
 )
 
-from .cleaners import k50_cleaner, protein_gym_cleaner, human_domainome_cleaner
+from .cleaners import (
+    cdna_proteolysis_cleaner,
+    protein_gym_cleaner,
+    human_domainome_cleaner,
+)
 from .utils.data_source import (
     list_datasets_with_built_in_cleaners,
     show_download_instructions,

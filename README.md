@@ -35,30 +35,27 @@ pip install -e .
 
 ## Quick Start
 
-### Processing K50 Dataset
+### Processing cDNAProteolysis Dataset
 
-Here's a complete example demonstrating TidyMut's capabilities with the K50 mutation dataset:
+Here's a complete example demonstrating TidyMut's capabilities with the cDNAProteolysis mutation dataset:
 
 ```python
-from tidymut import k50_cleaner
+from tidymut import cdna_proteolysis_cleaner
 
 
-# Create K50 cleaning pipeline using TidyMut's default pipeline
+# Create cDNAProteolysis cleaning pipeline using TidyMut's default pipeline
 # Download from: https://zenodo.org/records/799292
 # File: `Tsuboyama2023_Dataset2_Dataset3_20230416.csv` in `Processed_K50_dG_datasets.zip`
-k50_cleaning_pipeline = k50_cleaner.create_k50_cleaner(
+# or https://huggingface.co/datasets/xulab-research/TidyMut/blob/main/cDNA_proteolysis/Tsuboyama2023_Dataset2_Dataset3_20230416.csv
+cdna_proteolysis_cleaning_pipeline = cdna_proteolysis_cleaner.create_cdna_proteolysis_cleaner(
     "path/to/Tsuboyama2023_Dataset2_Dataset3_20230416.csv"
 )
 
 # Clean and process the dataset 
-k50_dataset = clean_k50_dataset(k50_cleaning_pipeline)
+cdna_proteolysis_dataset = clean_cdna_proteolysis_dataset(cdna_proteolysis_cleaning_pipeline)
 
 # Save the processed dataset
-k50_dataset.save("output/cleaned_k50_data")
-
-# Access processed data
-print(f"Dataset contains {len(k50_dataset)} sequences")
-print(f"Mutation types identified: {k50_dataset.mutation_summary()}")
+cdna_proteolysis_dataset.save("output/cleaned_cdna_proteolysis_data")
 ```
 
 ### Basic Sequence Operations
@@ -113,7 +110,7 @@ from tidymut.core.pipeline import Pipeline, create_pipeline
 
 dataset = pd.read_csv("path/to/Tsuboyama2023_Dataset2_Dataset3_20230416.csv")
 
-pipeline = create_pipeline(dataset, "k50_cleaner")
+pipeline = create_pipeline(dataset, "cnda_proteolysis_cleaner")
 clean_result = (
     pipeline.then(
         extract_and_rename_columns,
@@ -149,8 +146,10 @@ clean_result = (
         is_zero_based=True,
     )
 )
-k50_dataset_df, k50_ref_seq = clean_result.data
-k50_dataset = MutationDataset.from_dataframe(k50_dataset_df, k50_ref_seq)
+cdna_proteolysis_dataset_df, cdna_proteolysis_ref_seq = clean_result.data
+cdna_proteolysis_dataset = MutationDataset.from_dataframe(
+    cdna_proteolysis_dataset_df, cdna_proteolysis_ref_seq
+)
 
 # Get execution summary
 execution_info = pipeline.get_execution_summary()
@@ -159,7 +158,7 @@ execution_info = pipeline.get_execution_summary()
 artifacts = pipeline.artifacts
 
 # Save pipeline state
-pipeline.save_structured_data("k50_cleaner_pipeline.pkl")
+pipeline.save_structured_data("cdna_proteolysis_cleaner_pipeline.pkl")
 ```
 
 ## Citation

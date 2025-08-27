@@ -1,6 +1,10 @@
 # tidymut/cleaners/__init__.py
 
-from .k50_cleaner import K50CleanerConfig, create_k50_cleaner, clean_k50_dataset
+from .cdna_proteolysis_cleaner import (
+    CDNAProteolysisCleanerConfig,
+    create_cdna_proteolysis_cleaner,
+    clean_cdna_proteolysis_dataset,
+)
 from .protein_gym_cleaner import (
     ProteinGymCleanerConfig,
     create_protein_gym_cleaner,
@@ -13,9 +17,9 @@ from .human_domainome_cleaner import (
 )
 
 __all__ = [
-    "create_k50_cleaner",
-    "clean_k50_dataset",
-    "K50CleanerConfig",
+    "create_cdna_proteolysis_cleaner",
+    "clean_cdna_proteolysis_dataset",
+    "CDNAProteolysisCleanerConfig",
     "create_protein_gym_cleaner",
     "clean_protein_gym_dataset",
     "ProteinGymCleanerConfig",
