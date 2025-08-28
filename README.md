@@ -40,19 +40,19 @@ pip install -e .
 Here's a complete example demonstrating TidyMut's capabilities with the cDNAProteolysis mutation dataset:
 
 ```python
+from tidymut import download_cdna_proteolysis_source_file
 from tidymut import cdna_proteolysis_cleaner
 
 
 # Create cDNAProteolysis cleaning pipeline using TidyMut's default pipeline
-# Download from: https://zenodo.org/records/799292
-# File: `Tsuboyama2023_Dataset2_Dataset3_20230416.csv` in `Processed_K50_dG_datasets.zip`
-# or https://huggingface.co/datasets/xulab-research/TidyMut/blob/main/cDNA_proteolysis/Tsuboyama2023_Dataset2_Dataset3_20230416.csv
+cdna_proteolysis_filepath = download_cdna_proteolysis_source_file("dir_path", "file_name")
+
 cdna_proteolysis_cleaning_pipeline = cdna_proteolysis_cleaner.create_cdna_proteolysis_cleaner(
-    "path/to/Tsuboyama2023_Dataset2_Dataset3_20230416.csv"
+    cdna_proteolysis_filepath
 )
 
 # Clean and process the dataset 
-cdna_proteolysis_dataset = clean_cdna_proteolysis_dataset(cdna_proteolysis_cleaning_pipeline)
+cdna_proteolysis_cleaning_pipeline, cdna_proteolysis_dataset = clean_cdna_proteolysis_dataset(cdna_proteolysis_cleaning_pipeline)
 
 # Save the processed dataset
 cdna_proteolysis_dataset.save("output/cleaned_cdna_proteolysis_data")

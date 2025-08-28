@@ -5,16 +5,22 @@ DATASETS = {
         "name": "Mega-scale experimental analysis of protein folding stability in biology and design",
         "url": "https://zenodo.org/records/7992926",
         "file": "'Tsuboyama2023_Dataset2_Dataset3_20230416.csv' in 'Processed_K50_dG_datasets.zip'",
+        "huggingface_repo": "datasets/xulab-research/TidyMut/resolve/main/cDNA_proteolysis/Tsuboyama2023_Dataset2_Dataset3_20230416.csv",
+        "file_name": "Tsuboyama2023_Dataset2_Dataset3_20230416.csv",
     },
     "ProteinGym": {
         "name": "ProteinGym",
         "url": "https://proteingym.org/download",
         "file": "DMS_ProteinGym_substitutions.zip",
+        "huggingface_repo": "datasets/xulab-research/TidyMut/resolve/main/ProteinGym_DMS_substitutions/DMS_ProteinGym_substitutions.zip",
+        "file_name": "ProteinGym_DMS_substitutions.zip",
     },
     "HumanDomainome": {
         "name": "Site-saturation mutagenesis of 500 human protein domains",
         "url": "https://www.nature.com/articles/s41586-024-08370-4",
         "file": "SupplementaryTable4.txt",
+        "huggingface_repo": "datasets/xulab-research/TidyMut/resolve/main/human_domainome/SupplementaryTable4.txt",
+        "file_name": "SupplementaryTable4.txt",
     },
 }
 
@@ -54,7 +60,7 @@ def show_download_instructions(dataset_key: str) -> None:
         f"""
 Dataset: {info['name']}
 File: {info['file']}
-Download URL: {info['url']}
+Download URL: https://huggingface.co/{info['huggingface_repo']}
 
 Please download the required file manually from the URL above
 """
