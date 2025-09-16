@@ -1,7 +1,16 @@
 # tidymut/core/pipeline.py
 from __future__ import annotations
 
-from typing import Callable, NamedTuple, cast, TYPE_CHECKING
+from typing import (
+    Any,
+    Callable,
+    NamedTuple,
+    ParamSpec,
+    Tuple,
+    TypeVar,
+    overload,
+    TYPE_CHECKING,
+)
 from copy import deepcopy
 import logging
 from functools import wraps
@@ -11,12 +20,10 @@ from dataclasses import dataclass
 
 if TYPE_CHECKING:
     from typing import (
-        Any,
         List,
         Dict,
         Optional,
         Union,
-        Tuple,
     )
 
 __all__ = ["Pipeline", "create_pipeline", "multiout_step", "pipeline_step"]
@@ -865,7 +872,21 @@ def create_pipeline(data: Any, name: Optional[str] = None, **kwargs) -> Pipeline
     return Pipeline(data, name, **kwargs)
 
 
-def pipeline_step(name: Union[str, Callable[..., Any], None] = None):
+P = ParamSpec("P")
+R = TypeVar("R")
+
+
+@overload
+def pipeline_step(_func: Callable[P, R]) -> Callable[P, R]: ...
+@overload
+def pipeline_step(
+    *, name: Optional[str] = ...
+) -> Callable[[Callable[P, R]], Callable[P, R]]: ...
+
+
+def pipeline_step(
+    _func: Optional[Callable[P, R]] = None, *, name: Optional[str] = None
+) -> Union[Callable[P, R], Callable[[Callable[P, R]], Callable[P, R]]]:
     """
     Decorator for single-output pipeline functions.
 
@@ -874,9 +895,8 @@ def pipeline_step(name: Union[str, Callable[..., Any], None] = None):
 
     Parameters
     ----------
-    name : Optional[str] or Callable
+    name : Optional[str]
         Custom name for the step. If None, uses function name.
-        When used as @pipeline_step (without parentheses), this will be the function.
 
     Examples
     --------
@@ -893,36 +913,38 @@ def pipeline_step(name: Union[str, Callable[..., Any], None] = None):
     ...     return (10, 20)  # Single tuple output
     """
 
-    def decorator(func):
+    def _decorate(func: Callable[P, R]) -> Callable[P, R]:
+        step_name = name or func.__name__
+
         @wraps(func)
-        def wrapper(*args, **kwargs):
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> R:
+            # place for logging/metrics using `step_name`
             return func(*args, **kwargs)
 
         # Add consistent metadata attributes
         setattr(wrapper, "_is_pipeline_step", True)
         setattr(wrapper, "_step_type", "single_output")
-        setattr(wrapper, "_step_name", name if isinstance(name, str) else func.__name__)
+        setattr(wrapper, "_step_name", step_name)
         setattr(wrapper, "_step_description", func.__doc__)
         setattr(wrapper, "_expected_output_count", 1)
         setattr(wrapper, "_output_names", ["main"])
-
         return wrapper
 
-    # Handle both @pipeline_step and @pipeline_step() usage
-    if callable(name):
-        func = name
-        name = None
-        return decorator(func)
-
-    return decorator
+    # bare usage: @pipeline_step
+    if _func is not None:
+        return _decorate(_func)
+    # factory usage: @pipeline_step(name="...")
+    return _decorate
 
 
-def multiout_step(**outputs: str):
+DecoratorMO = Callable[[Callable[P, Tuple[Any, ...] | Any]], Callable[P, MultiOutput]]
+
+
+def multiout_step(
+    **outputs: str,
+) -> Callable[[Callable[P, Tuple[Any, ...] | Any]], Callable[P, MultiOutput]]:
     """
-    Decorator for multi-output pipeline functions.
-
-    Use this for functions that return multiple values where you want
-    to name and access the outputs separately.
+    Decorator factory for multi-output pipeline functions.
 
     Parameters
     ----------
@@ -930,37 +952,38 @@ def multiout_step(**outputs: str):
         Named outputs. Use 'main' to specify which output is the main data flow.
         If 'main' is not specified, the first return value is treated as main.
 
-    Examples
-    --------
-    >>> # Returns 3 values: main, stats, plot
-    >>> @multiout_step(stats="statistics", plot="visualization")
-    ... def analyze_data(data):
-    ...     ...
-    ...     return processed_data, stats_dict, plot_object
-
-    >>> # Returns 3 values with explicit main designation
-    >>> @multiout_step(main="result", error="error_info", stats="statistics")
-    ... def process_with_metadata(data):
-    ...     ...
-    ...     return result, error_info, stats
-
     Note
     ----
-    With this decorator, side outputs are returned as a dictionary.
+    - Bare usage is NOT allowed: you must call it with parentheses, e.g.
+    @multiout_step(stats="statistics", plot="visualization")
+    - At least one output must be declared; otherwise use @pipeline_step.
+
+    Example
+    -------
+    >>> @multiout_step(stats="statistics", plot="visualization")
+    ... def analyze_data(data):
+    ...     # return (main, stats, plot)
+    ...     return processed, stats_dict, plot_obj
     """
+    if not outputs:
+        raise TypeError(
+            "@multiout_step requires at least one named output; "
+            "for single-output functions, use @pipeline_step."
+        )
+
     has_explicit_main = "main" in outputs
     side_output_items = [(k, v) for k, v in outputs.items() if k != "main"]
     side_output_names = [v for _, v in side_output_items]
-
-    # Calculate expected number of return values
+    # If 'main' is provided, expected_count == number of declared outputs.
+    # Otherwise, default: first item is main, rest are side outputs.
     expected_count = len(outputs) if has_explicit_main else len(side_output_items) + 1
 
-    def decorator(func: Callable[..., Tuple[Any, ...]]) -> Callable[..., MultiOutput]:
+    def _decorate(func: Callable[P, Tuple[Any, ...] | Any]) -> Callable[P, MultiOutput]:
         @wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> MultiOutput:
+        def wrapper(*args: P.args, **kwargs: P.kwargs) -> MultiOutput:
             results = func(*args, **kwargs)
 
-            # Validate return type and count
+            # When multiple outputs are declared, a tuple of that length is required.
             if not isinstance(results, tuple):
                 if expected_count > 1:
                     raise ValueError(
@@ -968,9 +991,10 @@ def multiout_step(**outputs: str):
                         f"expected {expected_count} return values but got 1 non-tuple value. "
                         f"For single outputs, use @pipeline_step instead."
                     )
+                # This branch should be rare because we require at least one side OR explicit main,
+                # but keep it for completeness when expected_count == 1.
                 return MultiOutput(main=results, side={})
 
-            # Check if tuple length matches expected outputs
             if len(results) != expected_count:
                 raise ValueError(
                     f"Function {func.__name__} decorated with @multiout_step "
@@ -978,25 +1002,25 @@ def multiout_step(**outputs: str):
                     f"Declared outputs: {list(outputs.keys())}"
                 )
 
-            # Process as multiple values
+            # Map tuple -> (main, side)
             if has_explicit_main:
                 main_index = list(outputs.keys()).index("main")
                 main = results[main_index]
-                side = {}
-                for i, (_, name) in enumerate(side_output_items):
+                side: Dict[str, Any] = {}
+                for i, (_, side_name) in enumerate(side_output_items):
+                    # shift index if the side comes after the main slot
                     actual_index = i if i < main_index else i + 1
-                    if actual_index < len(results):
-                        side[name] = results[actual_index]
+                    side[side_name] = results[actual_index]
             else:
                 main = results[0]
-                side = {}
-                for i, (_, name) in enumerate(side_output_items):
-                    if i + 1 < len(results):
-                        side[name] = results[i + 1]
+                side = {
+                    side_name: results[i + 1]
+                    for i, (_, side_name) in enumerate(side_output_items)
+                }
 
             return MultiOutput(main=main, side=side)
 
-        # Add consistent metadata attributes
+        # Attach metadata for consistency
         setattr(wrapper, "_is_pipeline_step", True)
         setattr(wrapper, "_step_type", "multi_output")
         setattr(wrapper, "_step_name", func.__name__)
@@ -1005,6 +1029,6 @@ def multiout_step(**outputs: str):
         setattr(wrapper, "_output_names", ["main"] + side_output_names)
         setattr(wrapper, "_declared_outputs", outputs)
 
-        return cast(Callable[..., MultiOutput], wrapper)
+        return wrapper
 
-    return decorator
+    return _decorate
