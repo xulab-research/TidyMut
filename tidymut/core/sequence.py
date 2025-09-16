@@ -19,7 +19,7 @@ from .mutation import (
 )
 
 if TYPE_CHECKING:
-    from typing import Callable, Dict, Optional, List, Literal, Union, Type
+    from typing import Callable, Dict, List, Literal, Optional, Type, Union
 
     from .alphabet import BaseAlphabet
     from .types import SequenceType
@@ -38,10 +38,20 @@ class BaseSequence(ABC):
     def __init__(
         self,
         sequence: str,
-        alphabet: BaseAlphabet,
+        alphabet: Optional[BaseAlphabet] = None,
         name: Optional[str] = None,
         metadata: Optional[Dict] = None,
     ):
+        if not sequence:
+            raise ValueError("Sequence cannot be empty")
+        if alphabet is None:
+            # If not provided, request the subclass's default
+            alphabet = type(self).default_alphabet()
+        if alphabet is None:
+            # No default provided by the subclass → raise in the base class
+            raise TypeError(
+                f"{type(self).__name__} requires 'alphabet' (no default provided)"
+            )
         self.alphabet = alphabet
         self.sequence = self.alphabet.validate_sequence(sequence)
         self.name = name
@@ -83,6 +93,14 @@ class BaseSequence(ABC):
         return self.sequence == other.sequence and type(self.alphabet) == type(
             other.alphabet
         )
+
+    @classmethod
+    def default_alphabet(cls) -> Optional[BaseAlphabet]:
+        """Subclasses may override this method to provide a default alphabet.
+
+        By default, it returns None, indicating no default is provided
+        and callers must pass `alphabet` explicitly."""
+        raise NotImplementedError("Subclasses must implement this method.")
 
     def get_subsequence(
         self: SequenceType, start: int, end: Optional[int] = None
@@ -257,9 +275,11 @@ class ProteinSequence(BaseSequence):
         name: Optional[str] = None,
         metadata: Optional[Dict] = None,
     ):
-        if alphabet is None:
-            alphabet = ProteinAlphabet(include_stop=True)
         super().__init__(sequence, alphabet, name, metadata)
+
+    @classmethod
+    def default_alphabet(cls) -> Optional[BaseAlphabet]:
+        return ProteinAlphabet(include_stop=True)
 
     def get_residue(self, position: int) -> str:
         """Get amino acid at specific position (0-indexed)"""
@@ -293,9 +313,11 @@ class RNASequence(BaseSequence):
         name: Optional[str] = None,
         metadata: Optional[Dict] = None,
     ):
-        if alphabet is None:
-            alphabet = RNAAlphabet()
         super().__init__(sequence, alphabet, name, metadata)
+
+    @classmethod
+    def default_alphabet(cls) -> Optional[BaseAlphabet]:
+        return RNAAlphabet()
 
     def reverse_complement(self) -> "RNASequence":
         """Get reverse complement of RNA sequence"""
@@ -379,9 +401,11 @@ class DNASequence(BaseSequence):
         name: Optional[str] = None,
         metadata: Optional[Dict] = None,
     ):
-        if alphabet is None:
-            alphabet = DNAAlphabet()
         super().__init__(sequence, alphabet, name, metadata)
+
+    @classmethod
+    def default_alphabet(cls) -> Optional[BaseAlphabet]:
+        return DNAAlphabet()
 
     def reverse_complement(self) -> "DNASequence":
         """Get reverse complement of DNA sequence"""
