@@ -168,7 +168,7 @@ class TestSimplifiedPipelineBasicOperations:
     def test_pipeline_step_decorator_integration(self):
         """测试@pipeline_step装饰器集成"""
 
-        @pipeline_step("process_data")
+        @pipeline_step(name="process_data")
         def process_list(data):
             """Process the input list"""
             return [x * 3 for x in data]
@@ -333,7 +333,7 @@ class TestSimplifiedPipelineUtilityMethods:
     def test_get_execution_summary(self):
         """测试获取执行摘要"""
 
-        @pipeline_step("step1")
+        @pipeline_step(name="step1")
         def successful_step(data):
             return [x + 1 for x in data]
 
@@ -362,7 +362,7 @@ class TestSimplifiedPipelineUtilityMethods:
     def test_visualize_pipeline(self):
         """测试pipeline可视化"""
 
-        @pipeline_step("process_data")
+        @pipeline_step(name="process_data")
         def process_data(data):
             """Process the input data"""
             return [x * 2 for x in data]
@@ -564,7 +564,7 @@ class TestSimplifiedPipelineAdvancedFeatures:
     def test_complex_pipeline_workflow(self):
         """测试复杂的pipeline工作流"""
 
-        @pipeline_step("normalize")
+        @pipeline_step(name="normalize")
         def normalize(data):
             """Normalize data to 0-1 range"""
             max_val = max(data)
@@ -1173,7 +1173,7 @@ class TestDelayedPipeline:
         def step1(data):
             return data
 
-        @pipeline_step("custom_name")
+        @pipeline_step(name="custom_name")
         def step2(data):
             return data
 

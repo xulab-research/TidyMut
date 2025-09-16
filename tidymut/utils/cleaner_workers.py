@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING
 
 from .mutation_converter import invert_mutation_set
 from ..core.mutation import MutationSet
+from ..core.types import SequenceType
 
 if TYPE_CHECKING:
     from pandas import Index
@@ -20,7 +21,7 @@ __all__ = [
     "valid_single_mutation",
     "apply_single_mutation",
     "infer_wt_sequence_grouped",
-    "merge_skip_na",
+    "infer_single_mutationset",
 ]
 
 
@@ -294,3 +295,56 @@ def infer_wt_sequence_grouped(
         )
         error_row["error_message"] = f"{type(e).__name__}: {str(e)}"
         return [error_row], "failed"
+
+
+def infer_single_mutationset(
+    row_data: Tuple,
+    dataset_columns: Index,
+    wt_sequence_column: str,
+    mut_sequence_column: str,
+    mutation_sep: str,
+    sequence_class: Type[SequenceType],
+) -> Tuple[Optional[str], Optional[str]]:
+    """
+    Process a single row to infer mutations between WT and mutated sequences.
+
+    This function is designed to be used with parallel processing.
+
+    Parameters
+    ----------
+    row_data : Tuple
+        Single row data containing sequence information
+    dataset_columns : Index
+        Column names of the dataset
+    wt_sequence_column : str
+        Column key for wild-type sequence
+    mut_sequence_column : str
+        Column key for mutated sequence
+    mutation_sep : str
+        Separator for joining multiple mutations
+    sequence_class : Type[SequenceType]
+        Sequence class to use for mutation inference
+
+    Returns
+    -------
+    tuple
+        (result, error_message) where error_message is None on success
+    """
+    try:
+        row_dict = dict(zip(dataset_columns, row_data))
+
+        # Extract sequences
+        wt_seq = sequence_class(row_dict.get(wt_sequence_column, ""))
+        mut_seq = sequence_class(row_dict.get(mut_sequence_column, ""))
+
+        # Check sequence lengths are equal
+        if len(wt_seq) != len(mut_seq):
+            raise ValueError(
+                f"Sequence length mismatch: WT={len(wt_seq)}, MUT={len(mut_seq)}"
+            )
+
+        mutations = wt_seq.infer_mutation(mut_seq)  # type: ignore[arg-type]
+        inferred_mutations = mutation_sep.join(tuple(map(str, mutations.mutations)))
+        return inferred_mutations, None
+    except Exception as e:
+        return None, str(e)

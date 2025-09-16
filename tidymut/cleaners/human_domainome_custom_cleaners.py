@@ -7,12 +7,14 @@ from joblib import Parallel, delayed
 from tqdm import tqdm
 from typing import TYPE_CHECKING
 
-from ..core.pipeline import pipeline_step, multiout_step
+from .basic_cleaners import split_columns, merge_columns
+from ..core.pipeline import multiout_step, pipeline_step
 
 if TYPE_CHECKING:
     from typing import Dict, List, Optional, Tuple
 
 __all__ = [
+    "generate_mutation_strings",
     "process_domain_positions",
     "add_sequences_to_dataset",
     "extract_domain_sequences",
@@ -23,6 +25,118 @@ def __dir__() -> List[str]:
     return __all__
 
 
+# ==================================================================
+# ======== Pipeline Functions Used in Supplementary Table 2 ========
+# ==================================================================
+@pipeline_step
+def generate_mutation_strings(
+    dataset: pd.DataFrame,
+    name_column: str = "domain_ID",
+    wt_aa_column: str = "wt_aa",
+    mut_aa_column: str = "mut_aa",
+    aa_pos_column: str = "pos",
+) -> pd.DataFrame:
+    """
+    Generate per-row mutation notations from wild-type amino acids, positions, and a
+    domain identifier that encodes a sequence offset.
+
+    This step expects the identifier column (``name_column``) to be formatted as
+    ``"<Uniprot_ID>_<Pfam_ID>_<sequence_offset>"``. It splits that column, computes a
+    relative residue position as ``pos - sequence_offset``, builds a simple mutation
+    string ``<wt_aa><relative_pos><mut_aa>`` (e.g., ``A15K``), stores it in
+    ``mut_info``. Helper columns introduced during the transformation are dropped
+    before returning.
+
+    Parameters
+    ----------
+    dataset : pandas.DataFrame
+        Input table containing at least the identifier, wild-type AA, mutant AA,
+        and absolute position columns.
+    name_column : str, default "domain_ID"
+        Column holding the domain identifier in the form
+        ``Uniprot_ID_Pfam_ID_sequence_offset``.
+    wt_aa_column : str, default "wt_aa"
+        Column with the wild-type amino acid (single-letter code).
+    mut_aa_column : str, default "mut_aa"
+        Column with the mutant amino acid (single-letter code).
+    aa_pos_column : str, default "pos"
+        Column with the absolute residue position (integer).
+
+    Returns
+    -------
+    pd.DataFrame
+        The input dataframe with:
+        * A new column ``mut_info`` containing strings like ``A15K``;
+        * All other columns are preserved.
+
+    Notes
+    -----
+    - The relative position is computed as ``pos - sequence_offset``; interpret it
+    as 0-based or 1-based according to how ``sequence_offset`` is defined in your
+    data.
+    - The function relies on utility helpers ``split_columns`` and ``merge_columns``.
+    It also treats ``sequence_offset`` and ``pos`` as integers.
+
+    Raises
+    ------
+    KeyError
+        If any of the required columns are missing.
+    ValueError
+        If position or offset values cannot be interpreted as integers.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> df = pd.DataFrame({
+    ...     "domain_ID": ["P12345_PF00001_10"],
+    ...     "wt_aa": ["A"],
+    ...     "mut_aa": ["K"],
+    ...     "pos": [25],
+    ... })
+    >>> generate_mutation_strings(df)[["domain_ID", "mut_info"]]
+    Splitting column 'domain_ID' into ['Uniprot_ID', 'Pfam_ID', 'sequence_offset']...
+    Splitting using separator: '_'
+    Successfully created split columns: ['Uniprot_ID', 'Pfam_ID', 'sequence_offset']
+    Merging columns ['wt_aa', 'aa_pos', 'mut_aa'] into 'mut_info'...
+    Successfully created merged column 'mut_info'
+    Merging columns ['Uniprot_ID', 'Pfam_ID', 'aa_pos'] into 'domain_ID'...
+    Successfully created merged column 'domain_ID'
+               domain_ID mut_info
+    0  P12345_PF00001_10     A15K
+    """
+    # Separate 'name' column to get sequence offset
+    dataset = split_columns(
+        dataset,
+        column_to_split=name_column,
+        new_column_names=["Uniprot_ID", "Pfam_ID", "sequence_offset"],
+        separator="_",
+    )
+    # Convert columns to appropriate data types
+    dataset.loc[:, ["sequence_offset", aa_pos_column]] = (
+        dataset.loc[:, ["sequence_offset", aa_pos_column]]
+        .apply(pd.to_numeric, errors="coerce")
+        .astype("Int64")
+    )
+    # Generate mutation strings
+    dataset["aa_pos"] = (dataset[aa_pos_column] - dataset["sequence_offset"]).astype(
+        str
+    )
+    dataset = merge_columns(
+        dataset,
+        columns_to_merge=[wt_aa_column, "aa_pos", mut_aa_column],
+        new_column_name="mut_info",
+        separator="",
+    )
+
+    dataset = dataset.drop(
+        columns=["Uniprot_ID", "Pfam_ID", "sequence_offset", "aa_pos"]
+    )
+    return dataset
+
+
+# ==================================================================
+# ======== Pipeline Functions Used in Supplementary Table 4 ========
+# ==================================================================
 @multiout_step(main="success", failed="failed")
 def process_domain_positions(
     dataset: pd.DataFrame,

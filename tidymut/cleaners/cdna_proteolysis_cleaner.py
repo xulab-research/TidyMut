@@ -1,4 +1,4 @@
-# tidymut/cleaners/k50_cleaner.py
+# tidymut/cleaners/cdna_proteolysis_cleaner.py
 from __future__ import annotations
 
 import pandas as pd
@@ -20,7 +20,11 @@ from .basic_cleaners import (
 from ..core.dataset import MutationDataset
 from ..core.pipeline import Pipeline, create_pipeline
 
-__all__ = ["K50CleanerConfig", "create_k50_cleaner", "clean_k50_dataset"]
+__all__ = [
+    "CDNAProteolysisCleanerConfig",
+    "create_cdna_proteolysis_cleaner",
+    "clean_cdna_proteolysis_dataset",
+]
 
 
 def __dir__() -> List[str]:
@@ -32,14 +36,16 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class K50CleanerConfig(BaseCleanerConfig):
-    """Configuration class for K50 dataset cleaner
+class CDNAProteolysisCleanerConfig(BaseCleanerConfig):
+    """Configuration class for cDNAProteolysis dataset cleaner
 
-    Inherits from BaseCleanerConfig and adds K50-specific configuration options.
+    Inherits from BaseCleanerConfig and adds cDNAProteolysis-specific configuration options.
 
-    Raw K50 dataset DataFrame or file path to K50 dataset
-    - Download from: https://zenodo.org/records/7992926
-    - File: `Tsuboyama2023_Dataset2_Dataset3_20230416.csv` in `Processed_K50_dG_datasets.zip`
+    Simply run `tidymut.download_cdna_proteolysis_source_file()` to download the dataset.
+
+    Alternatively, the raw cDNAProteolysis file can be obtained from:
+    - Zenodo: https://zenodo.org/records/7992926, File `Tsuboyama2023_Dataset2_Dataset3_20230416.csv` in `Processed_K50_dG_datasets.zip`
+    - Hugging Face: https://huggingface.co/datasets/xulab-research/TidyMut/blob/main/cDNA_proteolysis/Tsuboyama2023_Dataset2_Dataset3_20230416.csv
 
     Attributes
     ----------
@@ -91,10 +97,10 @@ class K50CleanerConfig(BaseCleanerConfig):
     primary_label_column: str = "ddG"
 
     # Override default pipeline name
-    pipeline_name: str = "k50_cleaner"
+    pipeline_name: str = "cdna_proteolysis_cleaner"
 
     def validate(self) -> None:
-        """Validate K50-specific configuration parameters
+        """Validate cDNAProteolysis-specific configuration parameters
 
         Raises
         ------
@@ -129,21 +135,22 @@ class K50CleanerConfig(BaseCleanerConfig):
             raise ValueError(f"Missing required column mappings: {missing}")
 
 
-def create_k50_cleaner(
-    dataset_or_path: Union[pd.DataFrame, str, Path],
-    config: Optional[Union[K50CleanerConfig, Dict[str, Any], str, Path]] = None,
+def create_cdna_proteolysis_cleaner(
+    dataset_or_path: Optional[Union[pd.DataFrame, str, Path]] = None,
+    config: Optional[
+        Union[CDNAProteolysisCleanerConfig, Dict[str, Any], str, Path]
+    ] = None,
 ) -> Pipeline:
-    """Create K50 dataset cleaning pipeline
+    """Create cDNAProteolysis dataset cleaning pipeline
 
     Parameters
     ----------
-    dataset_or_path : Union[pd.DataFrame, str, Path]
-        Raw K50 dataset DataFrame or file path to K50 dataset
-        - Download from: https://zenodo.org/records/7992926
-        - File: `Tsuboyama2023_Dataset2_Dataset3_20230416.csv` in `Processed_K50_dG_datasets.zip`
-    config : Optional[Union[K50CleanerConfig, Dict[str, Any], str, Path]]
+    dataset_or_path : Optional[Union[pd.DataFrame, str, Path]], default=None
+        Raw dataset DataFrame or file path to cDNAProteolysis dataset.
+        Must be provided if download is False
+    config : Optional[Union[CDNAProteolysisCleanerConfig, Dict[str, Any], str, Path]]
         Configuration for the cleaning pipeline. Can be:
-        - K50CleanerConfig object
+        - CDNAProteolysisCleanerConfig object
         - Dictionary with configuration parameters (merged with defaults)
         - Path to JSON configuration file (str or Path)
         - None (uses default configuration)
@@ -162,39 +169,29 @@ def create_k50_cleaner(
 
     Examples
     --------
-    Use default configuration:
-    >>> pipeline, dataset = clean_k50_dataset(df)
 
-    Use partial configuration:
-    >>> pipeline, dataset = clean_k50_dataset(df, config={
-    ...     "validation_workers": 8,
-    ...     "handle_multiple_wt": "first"
-    ... })
-
-    Load configuration from file:
-    >>> pipeline, dataset = clean_k50_dataset(df, config="config.json")
     """
     # Handle configuration parameter
     if config is None:
-        final_config = K50CleanerConfig()
-    elif isinstance(config, K50CleanerConfig):
+        final_config = CDNAProteolysisCleanerConfig()
+    elif isinstance(config, CDNAProteolysisCleanerConfig):
         final_config = config
     elif isinstance(config, dict):
         # Partial configuration - merge with defaults
-        default_config = K50CleanerConfig()
+        default_config = CDNAProteolysisCleanerConfig()
         final_config = default_config.merge(config)
     elif isinstance(config, (str, Path)):
         # Load from file
-        final_config = K50CleanerConfig.from_json(config)
+        final_config = CDNAProteolysisCleanerConfig.from_json(config)
     else:
         raise TypeError(
-            f"config must be K50CleanerConfig, dict, str, Path or None, "
+            f"config must be CDNAProteolysisCleanerConfig, dict, str, Path or None, "
             f"got {type(config)}"
         )
 
     # Log configuration summary
     logger.info(
-        f"K50 dataset will cleaning with pipeline: {final_config.pipeline_name}"
+        f"cDNAProteolysis dataset will cleaning with pipeline: {final_config.pipeline_name}"
     )
     logger.debug(f"Configuration:\n{final_config.get_summary()}")
 
@@ -250,38 +247,63 @@ def create_k50_cleaner(
         return pipeline
 
     except Exception as e:
-        logger.error(f"Error in creating K50 cleaning pipeline: {str(e)}")
-        raise RuntimeError(f"Error in creating K50 cleaning pipeline: {str(e)}")
+        logger.error(f"Error in creating cDNAProteolysis cleaning pipeline: {str(e)}")
+        raise RuntimeError(
+            f"Error in creating cDNAProteolysis cleaning pipeline: {str(e)}"
+        )
 
 
-def clean_k50_dataset(pipeline: Pipeline) -> Tuple[Pipeline, MutationDataset]:
-    """Clean K50 dataset using configurable pipeline
+def clean_cdna_proteolysis_dataset(
+    pipeline: Pipeline,
+) -> Tuple[Pipeline, MutationDataset]:
+    """Clean cDNAProteolysis dataset using configurable pipeline
 
     Parameters
     ----------
     pipeline : Pipeline
-        K50 dataset cleaning pipeline
+        cDNAProteolysis dataset cleaning pipeline
 
     Returns
     -------
     Tuple[Pipeline, MutationDataset]
         - Pipeline: The cleaned pipeline
-        - MutationDataset: The cleaned K50 dataset
+        - MutationDataset: The cleaned cDNAProteolysis dataset
+
+    Examples
+    >>> pipeline = create_cdna_proteolysis_cleaner(df)  # df is raw cDNAProteolysis dataset file
+
+    Use default configuration:
+    >>> pipeline, dataset = clean_cnda_proteolysis_dataset(pipeline)
+
+    Use partial configuration:
+    >>> pipeline, dataset = clean_cdna_proteolysis_dataset(df, config={
+    ...     "validation_workers": 8,
+    ...     "handle_multiple_wt": "first"
+    ... })
+
+    Load configuration from file:
+    >>> pipeline, dataset = clean_cdna_proteolysis_dataset(df, config="config.json")
     """
     try:
         # Run pipeline
         pipeline.execute()
 
         # Extract results
-        k50_dataset_df, k50_ref_seq = pipeline.data
-        k50_dataset = MutationDataset.from_dataframe(k50_dataset_df, k50_ref_seq)
-
-        logger.info(
-            f"Successfully cleaned K50 dataset: "
-            f"{len(k50_dataset_df)} mutations from {len(k50_ref_seq)} proteins"
+        cdna_proteolysis_dataset_df, cdna_proteolysis_ref_seq = pipeline.data
+        cdna_proteolysis_dataset = MutationDataset.from_dataframe(
+            cdna_proteolysis_dataset_df, cdna_proteolysis_ref_seq
         )
 
-        return pipeline, k50_dataset
+        logger.info(
+            f"Successfully cleaned cDNAProteolysis dataset: "
+            f"{len(cdna_proteolysis_dataset_df)} mutations from {len(cdna_proteolysis_ref_seq)} proteins"
+        )
+
+        return pipeline, cdna_proteolysis_dataset
     except Exception as e:
-        logger.error(f"Error in running K50 cleaning pipeline: {str(e)}")
-        raise RuntimeError(f"Error in running K50 cleaning pipeline: {str(e)}")
+        logger.error(
+            f"Error in running cDNAProteolysis dataset cleaning pipeline: {str(e)}"
+        )
+        raise RuntimeError(
+            f"Error in running cDNAProteolysis dataset cleaning pipeline: {str(e)}"
+        )

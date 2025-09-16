@@ -23,8 +23,20 @@ from .core import (
     create_pipeline,
 )
 
-from .cleaners import k50_cleaner, protein_gym_cleaner, human_domainome_cleaner
+from .cleaners import (
+    cdna_proteolysis_cleaner,
+    human_domainome_sup2_cleaner,
+    human_domainome_sup4_cleaner,
+    protein_gym_cleaner,
+)
 from .utils.data_source import (
     list_datasets_with_built_in_cleaners,
     show_download_instructions,
+)
+
+from .utils.raw_data_downloader import (
+    download,
+    download_cdna_proteolysis_source_file,
+    download_protein_gym_source_file,
+    download_human_domainome_source_file,
 )

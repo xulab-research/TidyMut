@@ -43,9 +43,11 @@ class ProteinGymCleanerConfig(BaseCleanerConfig):
 
     Inherits from BaseCleanerConfig and adds ProteinGym-specific configuration options.
 
-    Path to directory containing ProteinGym CSV files or path to zip file
-    - Download from: https://proteingym.org/download
-    - File: DMS_ProteinGym_substitutions.zip
+    Simply run `tidymut.download_protein_gym_source_file()` to download the dataset.
+
+    Alternatively, the raw ProteinGym file can be obtained from:
+    - ProteinGym: https://marks.hms.harvard.edu/proteingym/ProteinGym_v1.3/DMS_ProteinGym_substitutions.zip
+    - Hugging Face:
 
     Attributes
     ----------

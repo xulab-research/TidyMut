@@ -1,17 +1,13 @@
 # tidymut/cleaners/basic_cleaners.py
 from __future__ import annotations
 
-import hashlib
 import numpy as np
 import pandas as pd
-import requests
-import time
 from functools import partial
 from joblib import Parallel, delayed
 from pathlib import Path
 from tqdm import tqdm
 from typing import cast, TYPE_CHECKING
-from urllib.parse import urlparse
 
 from ..core.alphabet import ProteinAlphabet, DNAAlphabet, RNAAlphabet
 from ..core.pipeline import pipeline_step, multiout_step
@@ -20,6 +16,7 @@ from ..utils.cleaner_workers import (
     valid_single_mutation,
     apply_single_mutation,
     infer_wt_sequence_grouped,
+    infer_single_mutationset,
 )
 from ..utils.dataset_builders import convert_format_1, convert_format_2
 from ..utils.type_converter import (
@@ -42,14 +39,15 @@ if TYPE_CHECKING:
     )
 
 __all__ = [
-    "download_origin_data",
     "read_dataset",
     "merge_columns",
+    "split_columns",
     "extract_and_rename_columns",
     "filter_and_clean_data",
     "convert_data_types",
     "validate_mutations",
     "apply_mutations_to_sequences",
+    "infer_mutations_from_sequences",
     "infer_wildtype_sequences",
     "convert_to_mutation_dataset_format",
 ]
@@ -57,234 +55,6 @@ __all__ = [
 
 def __dir__() -> List[str]:
     return __all__
-
-
-@pipeline_step
-def download_origin_data(
-    url: str,
-    local_path: Union[str, Path],
-    overwrite: bool = False,
-    chunk_size: int = 8192,
-    timeout: int = 30,
-    max_retries: int = 3,
-    retry_delay: float = 1.0,
-    headers: Optional[Dict[str, str]] = None,
-    verify_ssl: bool = True,
-    expected_checksum: Optional[str] = None,
-    checksum_algorithm: str = "md5",
-    show_progress: bool = True,
-    create_dirs: bool = True,
-) -> Path:
-    """
-    Download data from a URL and save to local path with progress tracking.
-
-    Parameters
-    ----------
-    url : str
-        URL to download data from
-    local_path : Union[str, Path]
-        Local path where the downloaded file will be saved
-    overwrite : bool, default=False
-        Whether to overwrite existing files
-    chunk_size : int, default=8192
-        Size of chunks to download at a time (in bytes)
-    timeout : int, default=30
-        Request timeout in seconds
-    max_retries : int, default=3
-        Maximum number of retry attempts if download fails
-    retry_delay : float, default=1.0
-        Delay between retry attempts in seconds
-    headers : Optional[Dict[str, str]], default=None
-        Additional HTTP headers to send with the request
-    verify_ssl : bool, default=True
-        Whether to verify SSL certificates
-    expected_checksum : Optional[str], default=None
-        Expected checksum of the downloaded file for verification
-    checksum_algorithm : str, default="md5"
-        Algorithm to use for checksum verification ("md5", "sha1", "sha256")
-    show_progress : bool, default=True
-        Whether to show download progress bar
-    create_dirs : bool, default=True
-        Whether to create parent directories if they don't exist
-
-    Returns
-    -------
-    Path
-        Path object pointing to the downloaded file
-
-    Raises
-    ------
-    ValueError
-        If URL is invalid or checksum verification fails
-    FileExistsError
-        If file exists and overwrite=False
-    requests.RequestException
-        If download fails after all retries
-
-    Examples
-    --------
-    Basic usage:
-    >>> file_path = download_origin_data(
-    ...     "https://example.com/data.csv",
-    ...     "data/raw_data.csv"
-    ... )
-    >>> print(f"Downloaded to: {file_path}")
-    Downloaded to: data/raw_data.csv
-
-    With checksum verification:
-    >>> file_path = download_origin_data(
-    ...     "https://example.com/important_data.xlsx",
-    ...     "data/important_data.xlsx",
-    ...     expected_checksum="5d41402abc4b2a76b9719d911017c592",
-    ...     checksum_algorithm="md5"
-    ... )
-
-    With custom headers and retry settings:
-    >>> headers = {"User-Agent": "MyApp/1.0"}
-    >>> file_path = download_origin_data(
-    ...     "https://api.example.com/dataset.json",
-    ...     "data/dataset.json",
-    ...     headers=headers,
-    ...     max_retries=5,
-    ...     retry_delay=2.0
-    ... )
-
-    Download without progress bar:
-    >>> file_path = download_origin_data(
-    ...     "https://example.com/data.tsv",
-    ...     "data/data.tsv",
-    ...     show_progress=False,
-    ...     overwrite=True
-    ... )
-    """
-    # Convert to Path object
-    local_path = Path(local_path)
-
-    # Validate URL
-    parsed_url = urlparse(url)
-    if not parsed_url.scheme or not parsed_url.netloc:
-        raise ValueError(f"Invalid URL: {url}")
-
-    tqdm.write(f"Downloading data from {url}...")
-    tqdm.write(f"Target location: {local_path}")
-
-    # Check if file exists
-    if local_path.exists() and not overwrite:
-        raise FileExistsError(
-            f"File already exists: {local_path}. Use overwrite=True to replace it."
-        )
-
-    # Create parent directories if needed
-    if create_dirs and local_path.parent != Path("."):
-        local_path.parent.mkdir(parents=True, exist_ok=True)
-        tqdm.write(f"Created directory: {local_path.parent}")
-
-    # Prepare headers
-    default_headers = {"User-Agent": "tidymut-data-downloader/1.0"}
-    if headers:
-        default_headers.update(headers)
-
-    # Download with retries
-    for attempt in range(max_retries):
-        try:
-            tqdm.write(f"Download attempt {attempt + 1}/{max_retries}...")
-
-            # Make initial request to get file size
-            response = requests.head(
-                url,
-                headers=default_headers,
-                timeout=timeout,
-                verify=verify_ssl,
-                allow_redirects=True,
-            )
-            response.raise_for_status()
-
-            # Get content length for progress bar
-            total_size = int(response.headers.get("content-length", 0))
-
-            # Start actual download
-            response = requests.get(
-                url,
-                headers=default_headers,
-                timeout=timeout,
-                verify=verify_ssl,
-                stream=True,
-                allow_redirects=True,
-            )
-            response.raise_for_status()
-
-            # Initialize progress bar
-            progress_bar = None
-            if show_progress and total_size > 0:
-                progress_bar = tqdm(
-                    total=total_size,
-                    unit="B",
-                    unit_scale=True,
-                    unit_divisor=1024,
-                    desc=f"Downloading {local_path.name}",
-                )
-
-            # Initialize checksum if needed
-            checksum_hash = None
-            if expected_checksum:
-                if checksum_algorithm.lower() == "md5":
-                    checksum_hash = hashlib.md5()
-                elif checksum_algorithm.lower() == "sha1":
-                    checksum_hash = hashlib.sha1()
-                elif checksum_algorithm.lower() == "sha256":
-                    checksum_hash = hashlib.sha256()
-                else:
-                    raise ValueError(
-                        f"Unsupported checksum algorithm: {checksum_algorithm}"
-                    )
-
-            # Download and save file
-            with open(local_path, "wb") as f:
-                for chunk in response.iter_content(chunk_size=chunk_size):
-                    if chunk:  # Filter out keep-alive chunks
-                        f.write(chunk)
-                        if checksum_hash:
-                            checksum_hash.update(chunk)
-                        if progress_bar:
-                            progress_bar.update(len(chunk))
-
-            if progress_bar:
-                progress_bar.close()
-
-            # Verify checksum if provided
-            if expected_checksum and checksum_hash:
-                calculated_checksum = checksum_hash.hexdigest()
-                if calculated_checksum.lower() != expected_checksum.lower():
-                    local_path.unlink()  # Remove corrupted file
-                    raise ValueError(
-                        f"Checksum verification failed. "
-                        f"Expected: {expected_checksum}, "
-                        f"Got: {calculated_checksum}"
-                    )
-                tqdm.write(
-                    f"Checksum verification passed ({checksum_algorithm.upper()})"
-                )
-
-            file_size = local_path.stat().st_size
-            tqdm.write(f"Successfully downloaded {file_size:,} bytes to {local_path}")
-            return local_path
-
-        except requests.RequestException as e:
-            tqdm.write(f"Download attempt {attempt + 1} failed: {str(e)}")
-            if attempt < max_retries - 1:
-                tqdm.write(f"Retrying in {retry_delay} seconds...")
-                time.sleep(retry_delay)
-            else:
-                tqdm.write("All download attempts failed.")
-                raise
-
-        except Exception as e:
-            # Clean up partial download on unexpected errors
-            if local_path.exists():
-                local_path.unlink()
-            raise
-    # should never reached because already deal with exception in loop
-    raise RuntimeError(f"Failed to download {url} after {max_retries} attempts.")
 
 
 @pipeline_step
@@ -480,6 +250,268 @@ def merge_columns(
         tqdm.write(f"Dropped original columns: {columns_to_merge}")
 
     tqdm.write(f"Successfully created merged column '{new_column_name}'")
+    return result
+
+
+@pipeline_step
+def split_columns(
+    dataset: pd.DataFrame,
+    column_to_split: str,
+    new_column_names: List[str],
+    separator: str = "_",
+    max_splits: Optional[int] = None,
+    drop_original: bool = False,
+    fill_value: Optional[str] = "NaN",
+    strip_whitespace: bool = True,
+    regex: bool = False,
+    custom_splitter: Optional[Callable[[str], List[str]]] = None,
+) -> pd.DataFrame:
+    """Split a single column into multiple columns using a separator
+
+    This function splits values from one column into multiple new columns,
+    with flexible splitting options.
+
+    Parameters
+    ----------
+    dataset : pd.DataFrame
+        Input dataset
+    column_to_split : str
+        Name of the column to split
+    new_column_names : List[str]
+        List of names for the new columns
+    separator : str, default='_'
+        Separator to use for splitting. Can be regex pattern if regex=True.
+    max_splits : Optional[int], default=None
+        Maximum number of splits to perform. If None, splits on all occurrences.
+    drop_original : bool, default=False
+        Whether to drop the original column after splitting
+    fill_value : Optional[str], default=None
+        Value to use when split results have fewer parts than new_column_names.
+        If None, uses NaN for missing parts.
+    strip_whitespace : bool, default=True
+        Whether to strip whitespace from split results
+    regex : bool, default=False
+        Whether to treat separator as a regex pattern
+    custom_splitter : Optional[Callable], default=None
+        Custom function to split each value. Takes a string and returns a list of strings.
+        If provided, ignores separator, max_splits, regex parameters.
+
+    Returns
+    -------
+    pd.DataFrame
+        Dataset with the new split columns
+
+    Examples
+    --------
+    Basic usage:
+    >>> df = pd.DataFrame({
+    ...     'mutation_id': ['BRCA1_100_A', 'TP53_200_T', 'EGFR_300_G'],
+    ...     'score': [0.95, 0.87, 0.92]
+    ... })
+    >>> result = split_columns(
+    ...     df, 'mutation_id', ['gene', 'position', 'mutation'], separator='_'
+    ... )
+    Splitting column 'mutation_id' into ['gene', 'position', 'mutation']...
+    Splitting using separator: '_'
+    Successfully created split columns: ['gene', 'position', 'mutation']
+    >>> print(result[['gene', 'position', 'mutation']])
+        gene position mutation
+    0  BRCA1      100        A
+    1   TP53      200        T
+    2   EGFR      300        G
+
+    With max_splits:
+    >>> df = pd.DataFrame({
+    ...     'path': ['home/user/documents/file.txt', 'data/analysis/results.csv']
+    ... })
+    >>> result = split_columns(
+    ...     df, 'path', ['root', 'rest'], separator='/', max_splits=1
+    ... )
+    Splitting column 'path' into ['root', 'rest']...
+    Splitting using separator: '/'
+    Successfully created split columns: ['root', 'rest']
+    >>> print(result[['root', 'rest']])
+       root                     rest
+    0  home  user/documents/file.txt
+    1  data     analysis/results.csv
+
+    Handling insufficient splits with fill_value:
+    >>> df = pd.DataFrame({
+    ...     'incomplete': ['A_B', 'X_Y_Z', 'M']
+    ... })
+    >>> result = split_columns(
+    ...     df, 'incomplete', ['col1', 'col2', 'col3'],
+    ...     separator='_', fill_value='MISSING'
+    ... )
+    Splitting column 'incomplete' into ['col1', 'col2', 'col3']...
+    Splitting using separator: '_'
+    Successfully created split columns: ['col1', 'col2', 'col3']
+    >>> print(result[['col1', 'col2', 'col3']])
+      col1     col2     col3
+    0    A        B  MISSING
+    1    X        Y        Z
+    2    M  MISSING  MISSING
+
+    Using regex separator:
+    >>> df = pd.DataFrame({
+    ...     'text': ['word1-word2_word3', 'itemA|itemB-itemC']
+    ... })
+    >>> result = split_columns(
+    ...     df, 'text', ['part1', 'part2', 'part3'],
+    ...     separator=r'[-_|]', regex=True
+    ... )
+    Splitting column 'text' into ['part1', 'part2', 'part3']...
+    Splitting using separator: '[-_|]' (regex)
+    Successfully created split columns: ['part1', 'part2', 'part3']
+    >>> print(result[['part1', 'part2', 'part3']])
+       part1  part2  part3
+    0  word1  word2  word3
+    1  itemA  itemB  itemC
+
+    Custom splitter:
+    >>> def parse_coordinates(coord_str):
+    ...     # Parse "chr1:12345-67890" format
+    ...     parts = coord_str.replace(':', '_').replace('-', '_').split('_')
+    ...     return parts
+    >>> df = pd.DataFrame({
+    ...     'coordinates': ['chr1:12345-67890', 'chr2:98765-43210']
+    ... })
+    >>> result = split_columns(
+    ...     df, 'coordinates', ['chromosome', 'start', 'end'],
+    ...     custom_splitter=parse_coordinates
+    ... )
+    Splitting column 'coordinates' into ['chromosome', 'start', 'end']...
+    Using custom splitter...
+    100%|█████████████████████████████| 2/2 [00:00<00:00, xx it/s]
+    Successfully created split columns: ['chromosome', 'start', 'end']
+    >>> print(result[['chromosome', 'start', 'end']])
+      chromosome  start    end
+    0       chr1  12345  67890
+    1       chr2  98765  43210
+
+    Handling NaN values:
+    >>> df = pd.DataFrame({
+    ...     'data': ['A_B_C', None, 'X_Y']
+    ... })
+    >>> result = split_columns(
+    ...     df, 'data', ['col1', 'col2', 'col3'], separator='_'
+    ... )
+    Splitting column 'data' into ['col1', 'col2', 'col3']...
+    Splitting using separator: '_'
+    Successfully created split columns: ['col1', 'col2', 'col3']
+    >>> print(result[['col1', 'col2', 'col3']])
+       col1 col2 col3
+    0     A    B    C
+    1  None  NaN  NaN
+    2     X    Y  NaN
+    """
+    tqdm.write(f"Splitting column '{column_to_split}' into {new_column_names}...")
+
+    # Validate column exists
+    if column_to_split not in dataset.columns:
+        raise ValueError(f"Column '{column_to_split}' not found in dataset")
+
+    # Validate new column names don't already exist
+    existing_cols = [col for col in new_column_names if col in dataset.columns]
+    if existing_cols:
+        raise ValueError(f"New column names already exist in dataset: {existing_cols}")
+
+    # Unify fill_value to NaN if not provided
+    fill_value = fill_value if fill_value is not None else "NaN"
+    # Create a copy to avoid modifying original
+    result = dataset.copy()
+
+    # Get the column to split
+    col_series = result[column_to_split]
+
+    if custom_splitter is not None:
+        # Use custom splitter
+        tqdm.write("Using custom splitter...")
+
+        def apply_custom_splitter(value):
+            if pd.isna(value):
+                return [np.nan] * len(new_column_names)
+            try:
+                split_result = custom_splitter(str(value))
+                # Pad or truncate to match new_column_names length
+                padded_result = split_result[: len(new_column_names)]
+                while len(padded_result) < len(new_column_names):
+                    padded_result.append(fill_value)
+                return padded_result
+            except Exception as e:
+                tqdm.write(f"Warning: Custom splitter failed for value '{value}': {e}")
+                return ["NaN"] * len(new_column_names)
+
+        tqdm.pandas()
+        split_data = col_series.progress_apply(apply_custom_splitter)
+
+        # Convert to DataFrame
+        split_df = pd.DataFrame(
+            split_data.tolist(), columns=new_column_names, index=result.index
+        )
+
+    else:
+        # Standard splitting with separator
+        tqdm.write(
+            f"Splitting using separator: '{separator}'" + (" (regex)" if regex else "")
+        )
+
+        # Handle NaN values
+        non_na_mask = col_series.notna()
+
+        # Initialize result arrays
+        split_df = pd.DataFrame(
+            {
+                col: pd.Series("NaN", index=result.index, dtype=object)
+                for col in new_column_names
+            }
+        )
+
+        if non_na_mask.any():
+            # Convert to string and split
+            str_series = col_series[non_na_mask].astype(str)
+            temp_df = str_series.str.split(
+                separator, n=(max_splits or -1), expand=True, regex=bool(regex)
+            )
+            if strip_whitespace:
+                temp_df = temp_df.apply(lambda s: s.str.strip())
+
+            # Ensure the resulting DataFrame has exactly the required number of columns
+            # - If fewer, add extra columns filled with NaN
+            # - If more, drop extra columns
+            temp_df = temp_df.reindex(columns=range(len(new_column_names)))
+            temp_df = temp_df.fillna(fill_value)
+
+            # Assign each split column back into the result DataFrame
+            # Alignment is preserved because we use .loc with the original index
+            for i, col_name in enumerate(new_column_names):
+                split_df.loc[str_series.index, col_name] = temp_df.iloc[:, i].astype(
+                    object
+                )
+
+        # Post-process rows where the original value was missing:
+        #   - first split column -> None;
+        #   - remaining new columns -> fill_value
+        missing_mask = ~non_na_mask
+        if missing_mask.any():
+            if new_column_names:
+                # First column becomes None
+                split_df.loc[missing_mask, new_column_names[0]] = None
+                # Remaining columns become fill_value
+                if len(new_column_names) > 1:
+                    pad_value = fill_value
+                    split_df.loc[missing_mask, new_column_names[1:]] = pad_value
+
+    # Add new columns to result
+    for col_name in new_column_names:
+        result[col_name] = split_df[col_name]
+
+    # Drop original column if requested
+    if drop_original:
+        result = result.drop(columns=[column_to_split])
+        tqdm.write(f"Dropped original column: '{column_to_split}'")
+
+    tqdm.write(f"Successfully created split columns: {new_column_names}")
     return result
 
 
@@ -982,6 +1014,109 @@ def apply_mutations_to_sequences(
     success_mask = pd.notnull(result_dataset["mut_seq"])
     successful_dataset = result_dataset[success_mask].drop(columns=["error_message"])
     failed_dataset = result_dataset[~success_mask].drop(columns=["mut_seq"])
+
+    tqdm.write(
+        f"Mutation application: {len(successful_dataset)} successful, {len(failed_dataset)} failed"
+    )
+    return successful_dataset, failed_dataset
+
+
+def infer_mutations_from_sequences(
+    dataset: pd.DataFrame,
+    wt_sequence_column: str = "wt_seq",
+    mut_sequence_column: str = "mut_seq",
+    mutation_sep: str = ",",
+    sequence_type: str = "protein",
+    num_workers: int = 4,
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Infer mutations by comparing wild-type sequences with mutated sequences.
+
+    This function takes wild-type and mutated sequences and identifies the
+    mutations that occurred by comparing them position by position. It only
+    handles sequences of equal length. Uses parallel processing for large datasets.
+
+    Parameters
+    ----------
+    dataset : list of dict
+        Input dataset containing wild-type and mutated sequence data.
+        Each dict should contain the specified column keys.
+    wt_sequence_column : str, default='wt_seq'
+        Column key containing wild-type sequences
+    mut_sequence_column : str, default='mut_seq'
+        Column key containing mutated sequences
+    mutation_sep : str, default=','
+        Separator used to join multiple mutations in output string
+    sequence_type : str, default='protein'
+        Type of sequence ('protein', 'dna', 'rna')
+    num_workers : int, default=4
+        Number of parallel workers for processing, set to -1 for all available CPUs
+
+    Returns
+    -------
+    Tuple[pd.DataFrame, pd.DataFrame]
+        (successful_results, failed_results) - datasets with and without errors
+
+    Example
+    -------
+    >>> dataset = pd.DataFrame([
+    ...     {'name': 'prot1', 'wt_seq': 'AKCDEF', 'mut_seq': 'KKCDEF'},
+    ...     {'name': 'prot1', 'wt_seq': 'AKCDEF', 'mut_seq': 'AKDDEF'},
+    ...     {'name': 'prot2', 'wt_seq': 'FEGHIS', 'mut_seq': 'FFGHIS'},
+    ...     {'name': 'prot3', 'wt_seq': 'ABC', 'mut_seq': 'ASC'}
+    ... ])
+    >>> successful, failed = infer_mutations_from_sequences(dataset)
+    >>> successful
+        name  wt_seq mut_seq inferred_mutations
+    0  prot1  AKCDEF  KKCDEF                A0K
+    1  prot1  AKCDEF  AKDDEF                C2D
+    2  prot2  FEGHIS  FFGHIS                E1F
+    >>> failed
+        name wt_seq mut_seq                                  error_message
+    3  prot3    ABC    ABCD  Invalid characters in Protein sequence: {'B'}
+    """
+    tqdm.write("Inferring mutations from sequence pairs...")
+
+    # Select appropriate sequence class based on sequence_type
+    sequence_type = sequence_type.lower()
+    if sequence_type == "protein":
+        SequenceClass = ProteinSequence
+    elif sequence_type == "dna":
+        SequenceClass = DNASequence
+    elif sequence_type == "rna":
+        SequenceClass = RNASequence
+    else:
+        raise ValueError(
+            f"Unsupported sequence type: {sequence_type}. Must be 'protein', 'dna', or 'rna'"
+        )
+
+    # Create partial function for single row processing
+    _infer_single_mutationset = partial(
+        infer_single_mutationset,
+        wt_sequence_column=wt_sequence_column,
+        dataset_columns=dataset.columns,
+        mut_sequence_column=mut_sequence_column,
+        mutation_sep=mutation_sep,
+        sequence_class=SequenceClass,
+    )
+
+    # Parallel processing
+    rows = dataset.itertuples(index=False, name=None)
+    results = Parallel(n_jobs=num_workers, backend="loky")(
+        delayed(_infer_single_mutationset)(row)
+        for row in tqdm(rows, desc="Processing sequences")
+    )
+
+    # Separate successful and failed results
+    mutations, error_messages = map(list, zip(*results))
+
+    result_dataset = dataset.copy()
+    result_dataset["inferred_mutations"] = mutations
+    result_dataset["error_message"] = error_messages
+
+    success_mask = pd.notnull(result_dataset["inferred_mutations"])
+    successful_dataset = result_dataset[success_mask].drop(columns=["error_message"])
+    failed_dataset = result_dataset[~success_mask].drop(columns=["inferred_mutations"])
 
     tqdm.write(
         f"Mutation application: {len(successful_dataset)} successful, {len(failed_dataset)} failed"
