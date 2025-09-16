@@ -45,14 +45,15 @@ from tidymut import cdna_proteolysis_cleaner
 
 
 # Create cDNAProteolysis cleaning pipeline using TidyMut's default pipeline
-cdna_proteolysis_filepath = download_cdna_proteolysis_source_file("dir_path", "file_name")
+cdna_proteolysis_filepath = download_cdna_proteolysis_source_file("dir_path", "file_name")["filename"]
 
 cdna_proteolysis_cleaning_pipeline = cdna_proteolysis_cleaner.create_cdna_proteolysis_cleaner(
     cdna_proteolysis_filepath
 )
 
 # Clean and process the dataset 
-cdna_proteolysis_cleaning_pipeline, cdna_proteolysis_dataset = clean_cdna_proteolysis_dataset(cdna_proteolysis_cleaning_pipeline)
+cdna_proteolysis_cleaning_pipeline, cdna_proteolysis_dataset = \
+    cdna_proteiolysis_cleaner.clean_cdna_proteolysis_dataset(cdna_proteolysis_cleaning_pipeline)
 
 # Save the processed dataset
 cdna_proteolysis_dataset.save("output/cleaned_cdna_proteolysis_data")

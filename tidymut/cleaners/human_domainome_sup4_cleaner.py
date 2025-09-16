@@ -1,4 +1,4 @@
-# tidymut/cleaners/human_domainome_cleaner.py
+# tidymut/cleaners/human_domainome_sup4_cleaner.py
 from __future__ import annotations
 
 import logging
@@ -30,9 +30,9 @@ if TYPE_CHECKING:
     from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 __all__ = [
-    "HumanDomainomeCleanerConfig",
-    "create_human_domainome_cleaner",
-    "clean_human_domainome_dataset",
+    "HumanDomainomeSup4CleanerConfig",
+    "create_human_domainome_sup4_cleaner",
+    "clean_human_domainome_sup4_dataset",
 ]
 
 
@@ -45,8 +45,8 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass(kw_only=True)
-class HumanDomainomeCleanerConfig(BaseCleanerConfig):
-    """Configuration class for HumanDomainome dataset cleaner
+class HumanDomainomeSup4CleanerConfig(BaseCleanerConfig):
+    """Configuration class for HumanDomainome dataset cleaner - SupplementaryTable4
 
     Inherits from BaseCleanerConfig and adds HumanDomainome-specific configuration options.
 
@@ -151,32 +151,25 @@ class HumanDomainomeCleanerConfig(BaseCleanerConfig):
             )
 
         # Validate column mapping
-        required_mappings = {
-            "uniprot_ID",
-            "wt_aa",
-            "mut_aa",
-            "pos",
-            "PFAM_entry",
-            "mean_kcalmol_scaled",
-        }
+        required_mappings = set(self.column_mapping.keys())
         missing = required_mappings - set(self.column_mapping.keys())
         if missing:
             raise ValueError(f"Missing required column mappings: {missing}")
 
 
-def create_human_domainome_cleaner(
+def create_human_domainome_sup4_cleaner(
     dataset_or_path: Union[str, Path, pd.DataFrame],
     sequence_dict_path: Union[str, Path],
     config: Optional[
-        Union[HumanDomainomeCleanerConfig, Dict[str, Any], str, Path]
+        Union[HumanDomainomeSup4CleanerConfig, Dict[str, Any], str, Path]
     ] = None,
 ) -> Pipeline:
-    """Create HumanDomainome dataset cleaning pipeline
+    """Create HumanDomainome dataset cleaning pipeline - SupplementaryTable4
 
     Parameters
     ----------
     dataset_or_path : Union[pd.DataFrame, str, Path]
-        Raw HumanDomainome dataset DataFrame or file path to K50 HumanDomainome
+        Raw HumanDomainome dataset DataFrame or file path to HumanDomainome
         - File: `SupplementaryTable4.txt` from the article
           'Site-saturation mutagenesis of 500 human protein domains'
     sequence_dict_path : Union[str, Path]
@@ -237,35 +230,35 @@ def create_human_domainome_cleaner(
 
     # Handle configuration parameter
     if config is None:
-        final_config = HumanDomainomeCleanerConfig(
+        final_config = HumanDomainomeSup4CleanerConfig(
             sequence_dict_path=sequence_dict_path
         )
-    elif isinstance(config, HumanDomainomeCleanerConfig):
+    elif isinstance(config, HumanDomainomeSup4CleanerConfig):
         final_config = config
         # Override sequence_dict_path if not set
         if final_config.sequence_dict_path is None:
             final_config.sequence_dict_path = sequence_dict_path
     elif isinstance(config, dict):
         # Partial configuration - merge with defaults
-        default_config = HumanDomainomeCleanerConfig(
+        default_config = HumanDomainomeSup4CleanerConfig(
             sequence_dict_path=sequence_dict_path
         )
         final_config = default_config.merge(config)
     elif isinstance(config, (str, Path)):
         # Load from file
-        final_config = HumanDomainomeCleanerConfig.from_json(config)
+        final_config = HumanDomainomeSup4CleanerConfig.from_json(config)
         # Override sequence_dict_path if not set
         if final_config.sequence_dict_path is None:
             final_config.sequence_dict_path = sequence_dict_path
     else:
         raise TypeError(
-            f"config must be HumanDomainomeCleanerConfig, dict, str, Path or None, "
+            f"config must be HumanDomainomeSup4CleanerConfig, dict, str, Path or None, "
             f"got {type(config)}"
         )
 
     # Log configuration summary
     logger.info(
-        f"HumanDomainome dataset will be cleaned with pipeline: {final_config.pipeline_name}"
+        f"HumanDomainome dataset (SupplementaryTable4) will be cleaned with pipeline: {final_config.pipeline_name}"
     )
     logger.debug(f"Configuration:\n{final_config.get_summary()}")
 
@@ -354,7 +347,7 @@ def create_human_domainome_cleaner(
         )
 
 
-def clean_human_domainome_dataset(
+def clean_human_domainome_sup4_dataset(
     pipeline: Pipeline,
 ) -> Tuple[Pipeline, MutationDataset]:
     """Clean HumanDomainome dataset using configurable pipeline

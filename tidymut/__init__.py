@@ -25,8 +25,9 @@ from .core import (
 
 from .cleaners import (
     cdna_proteolysis_cleaner,
+    human_domainome_sup2_cleaner,
+    human_domainome_sup4_cleaner,
     protein_gym_cleaner,
-    human_domainome_cleaner,
 )
 from .utils.data_source import (
     list_datasets_with_built_in_cleaners,

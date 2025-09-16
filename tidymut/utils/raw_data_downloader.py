@@ -319,7 +319,7 @@ def download(
 
 def download_source_file_from_huggingface(
     dataset_name: str, dir: str, filename: Optional[str], *, overwrite: bool = False
-) -> str:
+) -> Dict[str, str]:
     """
     Download the source file for a given dataset.
 
@@ -343,8 +343,9 @@ def download_source_file_from_huggingface(
 
     Returns
     -------
-    str
-        The local filesystem path to the downloaded file.
+    Dict[str]
+        key: file name,
+        value: The local filesystem paths to the downloaded files.
 
     Raises
     ------
@@ -364,37 +365,43 @@ def download_source_file_from_huggingface(
     if target_dataset is None:
         raise ValueError(f"No dataset found with name: {dataset_name}")
 
-    hf_repo = target_dataset.get("huggingface_repo", None)
-    if hf_repo is None:
+    hf_repos = target_dataset.get("huggingface_repos", [])
+    if len(hf_repos) == 0:
         raise ValueError(
             f"No Hugging Face repository found for dataset: {dataset_name}"
         )
+    filenames = target_dataset.get("file_name", [])
 
-    if filename is None:
-        filename = target_dataset.get("file_name", None)
+    local_paths = {}
+    for repo, filename in zip(hf_repos, filenames):
         if filename is None:
             raise ValueError("No file name provided and no default found in dataset")
 
-    url = f"{resolve_hf_endpoint()}{hf_repo}"
-    local_path = Path(dir) / filename
-    if local_path.exists() and not overwrite:
-        raise FileExistsError(
-            f"File already exists: {local_path}. Use overwrite=True to replace it."
-        )
-    download(url, local_path)
-    return str(local_path)
+        url = f"{resolve_hf_endpoint()}{repo}"
+        local_path = Path(dir) / filename
+        if local_path.exists():
+            if not overwrite:
+                raise FileExistsError(
+                    f"File already exists: {local_path}. Use overwrite=True to replace it."
+                )
+            else:
+                local_path.unlink()
+        download(url, local_path)
+        local_paths[filename] = str(local_path)
+    return local_paths
 
 
 def download_cdna_proteolysis_source_file(
     dir: str, filename: Optional[str] = None, *, overwrite: bool = False
-) -> str:
+) -> Dict[str, str]:
     """
     Download the source file for cDNAProteolysis dataset from the original source.
 
     Returns
     -------
-    str
-        file path pointing to cDNAProteolysis dataset source file
+    Dict[str, str]
+        key: file name,
+        value: file path pointing to cDNAProteolysis dataset source file
     """
     return download_source_file_from_huggingface(
         "cDNAProteolysis", dir, filename, overwrite=overwrite
@@ -403,14 +410,15 @@ def download_cdna_proteolysis_source_file(
 
 def download_protein_gym_source_file(
     dir: str, filename: Optional[str] = None, *, overwrite: bool = False
-) -> str:
+) -> Dict[str, str]:
     """
     Download the source file for ProteinGym dataset from the original source.
 
     Returns
     -------
-    str
-        file path pointing to the ProteinGym dataset source file
+    Dict[str, str]
+        key: file name,
+        value: file path pointing to the ProteinGym dataset source file
     """
     return download_source_file_from_huggingface(
         "ProteinGym", dir, filename, overwrite=overwrite
@@ -419,14 +427,16 @@ def download_protein_gym_source_file(
 
 def download_human_domainome_source_file(
     dir: str, filename: Optional[str] = None, *, overwrite: bool = False
-) -> str:
+) -> Dict[str, str]:
     """
     Download the source file for HumanDomainome dataset from the original source.
 
     Returns
     -------
-    str
-        file path pointing to the HumanDomainome dataset source file
+    Dict[str, str]
+        key: file name,
+        value: file path pointing to the HumanDomainome dataset source file
+
     """
     return download_source_file_from_huggingface(
         "HumanDomainome", dir, filename, overwrite=overwrite
