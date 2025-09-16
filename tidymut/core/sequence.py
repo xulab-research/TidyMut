@@ -264,6 +264,23 @@ class BaseSequence(ABC):
         else:
             raise TypeError(f"Unsupported mutation type: {type(mutation).__name__}")
 
+    def infer_mutation(self: SequenceType, other: SequenceType) -> MutationSet:
+        """Infer a mutation that leads to a specific sequence"""
+        if type(self) != type(other):
+            raise TypeError("Sequences must be of the same type")
+        if len(self.sequence) != len(other.sequence):
+            raise ValueError("Sequences must have the same length")
+        mutations = []
+        for pos, (wt_char, mut_char) in enumerate(zip(self.sequence, other.sequence)):
+            if wt_char != mut_char:
+                # Adjust position based on zero_based parameter
+                mutation = f"{wt_char}{pos}{mut_char}"
+                mutations.append(mutation)
+        mutations = MutationSet.from_string(
+            ",".join(mutations), sep=",", is_zero_based=True
+        )
+        return mutations
+
 
 class ProteinSequence(BaseSequence):
     """Protein sequence with amino acid validation"""
