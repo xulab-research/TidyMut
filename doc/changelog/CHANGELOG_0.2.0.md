@@ -5,7 +5,7 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [HEAD] - 2025-09-16
+## [v0.2.0] - 2025-09-16
 
 ### Added
 
@@ -18,4 +18,4 @@ A total of 1 people contributed to this release. People with a "+" by their name
 - YukunR
 
 
-**Full Changelog**: [v0.1.1..HEAD](https://github.com/xulab-research/TidyMut/compare/v0.1.1..HEAD)
+**Full Changelog**: [v0.1.1..v0.2.0](https://github.com/xulab-research/TidyMut/compare/v0.1.1..v0.2.0)
