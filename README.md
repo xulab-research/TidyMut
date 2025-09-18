@@ -35,6 +35,13 @@ pip install -e .
 
 ## Quick Start
 
+### Supported Datasets
+| Dataset Name    | Reference                                                                           | File                                               | Link                                               |
+| --------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------- |
+| cDNAProteolysis | Mega-scale experimental analysis of protein folding stability in biology and design | Tsuboyama2023_Dataset2_Dataset3_20230416.csv       | https://zenodo.org/records/7992926                 |
+| ProteinGym      | ProteinGym: Large-Scale Benchmarks for Protein Design and Fitness Prediction        | DMS_ProteinGym_substitutions.zip                   | https://proteingym.org/download                    |
+| HumanDomainome  | Site-saturation mutagenesis of 500 human protein domains                            | SupplementaryTable2.txt or SupplementaryTable4.txt | https://www.nature.com/articles/s41586-024-08370-4 |
+
 ### Processing cDNAProteolysis Dataset
 
 Here's a complete example demonstrating TidyMut's capabilities with the cDNAProteolysis mutation dataset:
@@ -53,7 +60,7 @@ cdna_proteolysis_cleaning_pipeline = cdna_proteolysis_cleaner.create_cdna_proteo
 
 # Clean and process the dataset 
 cdna_proteolysis_cleaning_pipeline, cdna_proteolysis_dataset = \
-    cdna_proteiolysis_cleaner.clean_cdna_proteolysis_dataset(cdna_proteolysis_cleaning_pipeline)
+    cdna_proteolysis_cleaner.clean_cdna_proteolysis_dataset(cdna_proteolysis_cleaning_pipeline)
 
 # Save the processed dataset
 cdna_proteolysis_dataset.save("output/cleaned_cdna_proteolysis_data")
