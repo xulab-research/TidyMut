@@ -937,9 +937,6 @@ def pipeline_step(
     return _decorate
 
 
-DecoratorMO = Callable[[Callable[P, Tuple[Any, ...] | Any]], Callable[P, MultiOutput]]
-
-
 def multiout_step(
     **outputs: str,
 ) -> Callable[[Callable[P, Tuple[Any, ...] | Any]], Callable[P, MultiOutput]]:

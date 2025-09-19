@@ -176,7 +176,7 @@ If you use TidyMut in your research, please cite:
 ```bibtex
 @software{tidymut,
   title={TidyMut: A Python Package for Biological Sequence Data Processing},
-  author={Your Name and Contributors},
+  author={YukunR},
   year={2025},
   url={https://github.com/xulab-research/tidymut}
 }
