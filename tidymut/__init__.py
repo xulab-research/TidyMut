@@ -29,14 +29,12 @@ from .cleaners import (
     human_domainome_sup4_cleaner,
     protein_gym_cleaner,
 )
-from .utils.data_source import (
-    list_datasets_with_built_in_cleaners,
-    show_download_instructions,
-)
 
-from .utils.raw_data_downloader import (
+from .utils import (
     download,
     download_cdna_proteolysis_source_file,
     download_protein_gym_source_file,
     download_human_domainome_source_file,
+    list_datasets_with_built_in_cleaners,
+    show_download_instructions,
 )
