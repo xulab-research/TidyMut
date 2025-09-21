@@ -955,8 +955,8 @@ def multiout_step(
     @multiout_step(stats="statistics", plot="visualization")
     - At least one output must be declared; otherwise use @pipeline_step.
 
-    Example
-    -------
+    Examples
+    --------
     >>> @multiout_step(stats="statistics", plot="visualization")
     ... def analyze_data(data):
     ...     # return (main, stats, plot)

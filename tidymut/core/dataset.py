@@ -57,8 +57,10 @@ class MutationDataset:
         """
         Initialize a new MutationDataset.
 
-        Parameters:
-            name: Optional name for the dataset
+        Parameters
+        ----------
+        name : Optional[str], default=None
+            Optional name for the dataset
 
         Note:
             All mutation sets added to this dataset must be linked to a reference sequence.
@@ -83,14 +85,16 @@ class MutationDataset:
         """
         Iterate over mutation sets and their reference sequence IDs.
 
-        Yields:
-            Tuple[MutationSet, str]: (mutation_set, reference_id) pairs
+        Yields
+        ------
+        Tuple[MutationSet, str]: (mutation_set, reference_id) pairs
 
-        Example:
-            for mutation_set, ref_id in dataset:
-                print(f"Processing {len(mutation_set)} mutations for {ref_id}")
-                ref_seq = dataset.get_reference_sequence(ref_id)
-                # ... analysis code
+        Examples
+        --------
+        >>> for mutation_set, ref_id in dataset:
+        ...    print(f"Processing {len(mutation_set)} mutations for {ref_id}")
+        ...    ref_seq = dataset.get_reference_sequence(ref_id)
+        ...    # ... analysis code
         """
         for i, mutation_set in enumerate(self.mutation_sets):
             reference_id = self.mutation_set_references[i]
@@ -727,8 +731,10 @@ class MutationDataset:
         """
         Convert all codon mutation sets to amino acid mutation sets
 
-        Parameters:
-            convert_labels: Whether to save the labels with the mutation sets (default: False)
+        Parameters
+        ----------
+        convert_labels : bool, default: False
+            Whether to save the labels with the mutation sets (default: False)
         """
         converted_sets = []
         converted_references = []
@@ -782,13 +788,16 @@ class MutationDataset:
         """
         Save dataset by reference_id, creating separate folders for each reference.
 
-        Parameters:
-            base_dir: Base directory to create reference folders in
-
         For each reference_id, creates:
-            - {base_dir}/{reference_id}/data.csv: mutation data with columns [mutation_name, mutated_sequence, label]
-            - {base_dir}/{reference_id}/wt.fasta: wild-type reference sequence
-            - {base_dir}/{reference_id}/metadata.json: statistics and metadata for this reference
+
+        - {base_dir}/{reference_id}/data.csv: mutation data with columns [mutation_name, mutated_sequence, label]
+        - {base_dir}/{reference_id}/wt.fasta: wild-type reference sequence
+        - {base_dir}/{reference_id}/metadata.json: statistics and metadata for this reference
+
+        Parameters
+        ----------
+        base_dir : Union[str, Path]
+            Base directory to create reference folders in
         """
         base_path = Path(base_dir)
         base_path.mkdir(parents=True, exist_ok=True)
@@ -897,9 +906,12 @@ class MutationDataset:
         """
         Save the dataset to files.
 
-        Parameters:
-            filepath: Base filepath (without extension)
-            save_type: Type of save format ("tidymut", "dataframe" or "pickle")
+        Parameters
+        ----------
+        filepath : str
+            Base filepath (without extension)
+        save_type : Optional[Literal["tidymut", "pickle", "dataframe"]], default="tidymut"
+            Type of save format ("tidymut", "dataframe" or "pickle")
 
         For save_type="dataframe":
             - Saves mutations as {filepath}.csv
@@ -909,9 +921,10 @@ class MutationDataset:
         For save_type="pickle":
             - Saves entire dataset as {filepath}.pkl
 
-        Example:
-            dataset.save("my_study", "dataframe")
-            # Creates: my_study.csv, my_study_refs.pkl, my_study_meta.json
+        Examples
+        --------
+        >>> dataset.save("my_study", "dataframe")
+        >>> # Creates: my_study.csv, my_study_refs.pkl, my_study_meta.json
         """
 
         base_path = Path(filepath)
@@ -979,6 +992,19 @@ class MutationDataset:
         """
         Load a dataset from tidymut reference-based format.
 
+        Expected directory structure::
+
+            base_dir/
+            ├── reference_id_1/
+            │   ├── data.csv
+            │   ├── wt.fasta
+            │   └── metadata.json
+            ├── reference_id_2/
+            │   ├── data.csv
+            │   ├── wt.fasta
+            │   └── metadata.json
+            └── ...
+
         Parameters
         ----------
         base_dir : Union[str, Path]
@@ -991,18 +1017,6 @@ class MutationDataset:
         Returns
         -------
         MutationDataset instance
-
-        Expected directory structure:
-            base_dir/
-            ├── reference_id_1/
-            │   ├── data.csv
-            │   ├── wt.fasta
-            │   └── metadata.json
-            ├── reference_id_2/
-            │   ├── data.csv
-            │   ├── wt.fasta
-            │   └── metadata.json
-            └── ...
         """
         import json
 
@@ -1152,8 +1166,8 @@ class MutationDataset:
         -------
             MutationDataset instance
 
-        Example
-        -------
+        Examples
+        --------
         >>> # Auto-detect from extension
         >>> dataset = MutationDataset.load("my_study.csv")
         >>> dataset = MutationDataset.load("my_study.pkl")

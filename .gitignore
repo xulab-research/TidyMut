@@ -45,3 +45,10 @@ dist/
 # Database files #
 ##################
 tests/*.pkl
+
+# Doc files #
+#############
+doc/build/
+**/.doctrees/
+doc/source/api/generated/
+doc/source/generated/

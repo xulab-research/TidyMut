@@ -151,6 +151,7 @@ def download(
     Examples
     --------
     Basic usage:
+
     >>> file_path = download_origin_data(
     ...     "https://example.com/data.csv",
     ...     "data/raw_data.csv"
@@ -159,6 +160,7 @@ def download(
     Downloaded to: data/raw_data.csv
 
     With checksum verification:
+
     >>> file_path = download_origin_data(
     ...     "https://example.com/important_data.xlsx",
     ...     "data/important_data.xlsx",
@@ -167,6 +169,7 @@ def download(
     ... )
 
     With custom headers and retry settings:
+
     >>> headers = {"User-Agent": "MyApp/1.0"}
     >>> file_path = download_origin_data(
     ...     "https://api.example.com/dataset.json",
@@ -177,6 +180,7 @@ def download(
     ... )
 
     Download without progress bar:
+
     >>> file_path = download_origin_data(
     ...     "https://example.com/data.tsv",
     ...     "data/data.tsv",
@@ -354,8 +358,8 @@ def download_source_file_from_huggingface(
     FileExistsError
         If the file already exists and `overwrite` is False.
 
-    Example
-    -------
+    Examples
+    --------
     >>> download_source_file("cdna_proteolysis", "data", "cDNA_proteolysis.csv")
     'data/cDNA_proteolysis.csv'
     >>> download_source_file("cdna_proteolysis", "data")

@@ -2,15 +2,18 @@
 
 """
 Functions are used in tidymut.cleaners.basic_cleaners.convert_to_mutation_dataset_format()
->>> # format 1:
+
+format 1:
+
 >>> pd.DataFrame({
 ...     'name': ['prot1', 'prot1', 'prot1', 'prot2', 'prot2'],
 ...     'mut_info': ['A0S,Q1D', 'C2D', 'WT', 'E0F', 'WT'],
 ...     'mut_seq': ['SDCDEF', 'AQDDEF', 'AQCDEF', 'FGHIGHK', 'EGHIGHK'],
 ...     'score': [1.5, 2.0, 0.0, 3.0, 0.0]
 ... })
->>>
->>> # format 2:
+
+format 2:
+
 >>> df2 = pd.DataFrame({
 ...     'name': ['prot1', 'prot1', 'prot2'],
 ...     'sequence': ['AKCDEF', 'AKCDEF', 'FEGHIS'],

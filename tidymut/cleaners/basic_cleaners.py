@@ -78,8 +78,8 @@ def read_dataset(
     pd.DataFrame
         Dataset loaded from the specified file
 
-    Example
-    -------
+    Examples
+    --------
     >>> # Specify file_format parameter
     >>> df = read_dataset("data.csv", "csv")
     >>>
@@ -149,6 +149,7 @@ def merge_columns(
     Examples
     --------
     Basic usage:
+
     >>> df = pd.DataFrame({
     ...     'gene': ['BRCA1', 'TP53', 'EGFR'],
     ...     'position': [100, 200, 300],
@@ -161,6 +162,7 @@ def merge_columns(
     2     EGFR_300_G
 
     With prefix and suffix:
+
     >>> result = merge_columns(
     ...     df, ['gene', 'position'], 'gene_pos',
     ...     separator=':', prefix='[', suffix=']'
@@ -171,6 +173,7 @@ def merge_columns(
     2     [EGFR:300]
 
     Handling NaN values:
+
     >>> df_with_nan = pd.DataFrame({
     ...     'col1': ['A', 'B', None],
     ...     'col2': ['X', None, 'Z'],
@@ -186,6 +189,7 @@ def merge_columns(
     2    NA-Z-3
 
     Custom formatter:
+
     >>> def format_mutation(row):
     ...     return f"{row['gene']}:{row['position']}{row['mutation']}"
     >>> result = merge_columns(
@@ -304,6 +308,7 @@ def split_columns(
     Examples
     --------
     Basic usage:
+
     >>> df = pd.DataFrame({
     ...     'mutation_id': ['BRCA1_100_A', 'TP53_200_T', 'EGFR_300_G'],
     ...     'score': [0.95, 0.87, 0.92]
@@ -321,6 +326,7 @@ def split_columns(
     2   EGFR      300        G
 
     With max_splits:
+
     >>> df = pd.DataFrame({
     ...     'path': ['home/user/documents/file.txt', 'data/analysis/results.csv']
     ... })
@@ -336,6 +342,7 @@ def split_columns(
     1  data     analysis/results.csv
 
     Handling insufficient splits with fill_value:
+
     >>> df = pd.DataFrame({
     ...     'incomplete': ['A_B', 'X_Y_Z', 'M']
     ... })
@@ -353,6 +360,7 @@ def split_columns(
     2    M  MISSING  MISSING
 
     Using regex separator:
+
     >>> df = pd.DataFrame({
     ...     'text': ['word1-word2_word3', 'itemA|itemB-itemC']
     ... })
@@ -369,6 +377,7 @@ def split_columns(
     1  itemA  itemB  itemC
 
     Custom splitter:
+
     >>> def parse_coordinates(coord_str):
     ...     # Parse "chr1:12345-67890" format
     ...     parts = coord_str.replace(':', '_').replace('-', '_').split('_')
@@ -390,6 +399,7 @@ def split_columns(
     1       chr2  98765  43210
 
     Handling NaN values:
+
     >>> df = pd.DataFrame({
     ...     'data': ['A_B_C', None, 'X_Y']
     ... })
@@ -548,8 +558,8 @@ def extract_and_rename_columns(
     ValueError
         If required columns are missing from the input dataset
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> df = pd.DataFrame({
     ...     'uniprot_ID': ['P12345', 'Q67890'],
@@ -626,8 +636,8 @@ def filter_and_clean_data(
     pd.DataFrame
         Filtered and cleaned dataset
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> df = pd.DataFrame({
     ...     'mut_type': ['A123B', 'wt', 'C456D', 'insert', 'E789F'],
@@ -746,8 +756,8 @@ def convert_data_types(
     pd.DataFrame
         Dataset with converted data types
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> import numpy as np
     >>> df = pd.DataFrame({
@@ -823,8 +833,8 @@ def validate_mutations(
     Tuple[pd.DataFrame, pd.DataFrame]
         (successful_dataset, failed_dataset) - datasets with valid and invalid mutations
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> df = pd.DataFrame({
     ...     'name': ['protein1', 'protein1', 'protein2'],
@@ -1062,8 +1072,8 @@ def apply_mutations_to_sequences(
     Tuple[pd.DataFrame, pd.DataFrame]
         (successful_dataset, failed_dataset) - datasets with and without errors
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> df = pd.DataFrame({
     ...     'name': ['prot1', 'prot1', 'prot2'],
@@ -1170,8 +1180,8 @@ def infer_mutations_from_sequences(
     Tuple[pd.DataFrame, pd.DataFrame]
         (successful_results, failed_results) - datasets with and without errors
 
-    Example
-    -------
+    Examples
+    --------
     >>> dataset = pd.DataFrame([
     ...     {'name': 'prot1', 'wt_seq': 'AKCDEF', 'mut_seq': 'KKCDEF'},
     ...     {'name': 'prot1', 'wt_seq': 'AKCDEF', 'mut_seq': 'AKDDEF'},
@@ -1288,8 +1298,8 @@ def infer_wildtype_sequences(
     Tuple[pd.DataFrame, pd.DataFrame]
         (successful_dataset, problematic_dataset) - datasets with added WT rows
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> df = pd.DataFrame({
     ...     'name': ['prot1', 'prot1', 'prot2'],

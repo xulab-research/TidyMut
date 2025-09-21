@@ -1,4 +1,60 @@
 # tidymut/core/constants.py
+"""Alphabet and genetic-code constants used across tidymut.
+
+This module collects IUPAC alphabets for DNA/RNA/amino acids, base-complement
+mappings, 1↔3 letter amino-acid code conversions, and the standard genetic code
+(codon → amino acid) for DNA and RNA.
+
+Examples
+--------
+Validate a DNA sequence contains only standard bases::
+
+    all(b in STANDARD_DNA_BASES for b in "ATGCGT")
+
+Translate a DNA codon::
+
+    AA = STANDARD_GENETIC_CODE_DNA["ATG"]   # 'M'
+
+Get the 1-letter code from a PDB-style residue name::
+
+    AA1 = AA3_TO_1["ASP"]    # 'D'
+    AA3 = AA1_TO_3["D"]      # 'Asp'
+
+Attributes
+----------
+STANDARD_DNA_BASES : set of str
+    Canonical DNA bases (``{'A','T','C','G'}``).
+AMBIGUOUSE_DNA_BASES : set of str
+    IUPAC ambiguous DNA symbols (e.g. ``'R','Y','S','W','K','M','B','D','H','V','N'``).
+STANDARD_RNA_BASES : set of str
+    Canonical RNA bases (``{'A','U','C','G'}``).
+AMBIGUOUSE_RNA_BASES : set of str
+    IUPAC ambiguous RNA symbols.
+STANDARD_AMINO_ACIDS : set of str
+    20 standard amino-acid one-letter codes.
+AMBIGUOUSE_AMINO_ACIDS : set of str
+    Ambiguous/non-standard amino-acid symbols (e.g. ``'B','Z','X','J','U','O'``).
+
+DNA_BASE_COMPLEMENTS : dict[str, str]
+    DNA Watson–Crick complements.
+RNA_BASE_COMPLEMENTS : dict[str, str]
+    RNA Watson–Crick complements.
+
+AA3_TO_1 : dict[str, str]
+    Amino-acid 3-letter → 1-letter code map (case-tolerant; includes ``'*' → 'Ter'``).
+AA1_TO_3 : dict[str, str]
+    Amino-acid 1-letter → 3-letter code map (includes stop ``'*' → 'Ter'``).
+
+STANDARD_GENETIC_CODE_DNA : dict[str, str]
+    DNA codon table (triplet of ``ATCG`` → ``ACDEFGHIKLMNPQRSTVWY*``).
+STANDARD_START_CODONS_DNA : set[str]
+    DNA start codons (default ``{'ATG'}``).
+
+STANDARD_GENETIC_CODE_RNA : dict[str, str]
+    RNA codon table (triplet of ``AUCG`` → ``ACDEFGHIKLMNPQRSTVWY*``).
+STANDARD_START_CODONS_RNA : set[str]
+    RNA start codon set (default ``{'AUG'}``).
+"""
 
 # fmt: off
 # ==== Alphabet Constants ====
