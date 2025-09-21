@@ -47,7 +47,7 @@ class ProteinGymCleanerConfig(BaseCleanerConfig):
 
     Alternatively, the raw ProteinGym file can be obtained from:
     - ProteinGym: https://marks.hms.harvard.edu/proteingym/ProteinGym_v1.3/DMS_ProteinGym_substitutions.zip
-    - Hugging Face:
+    - Hugging Face: https://huggingface.co/datasets/xulab-research/TidyMut/resolve/main/ProteinGym_DMS_substitutions/DMS_ProteinGym_substitutions.zip?download=true
 
     Attributes
     ----------
