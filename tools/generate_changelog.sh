@@ -28,11 +28,11 @@ python tools/changelog.py \
     "xulab-research/TidyMut" \
     "$REVISION_RANGE" \
     --template keepachangelog \
-    --output ./doc/changelog/CHANGELOG_0.2.0.md
+    --output ./doc/changelog/CHANGELOG_0.3.0.md
 
-if [ -f "./doc/changelog/CHANGELOG_0.2.0.md" ]; then
+if [ -f "./doc/changelog/CHANGELOG_0.3.0.md" ]; then
     echo "Generate changelog successfully!"
-    echo "File: CHANGELOG_0.2.0.md"
+    echo "File: CHANGELOG_0.3.0.md"
 else
     echo "Failed to generate changelog."
 fi
