@@ -46,13 +46,14 @@ logger = logging.getLogger(__name__)
 
 @dataclass(kw_only=True)
 class HumanDomainomeSup4CleanerConfig(BaseCleanerConfig):
-    """Configuration class for HumanDomainome dataset cleaner - SupplementaryTable4
-
+    """
+    Configuration class for HumanDomainome dataset cleaner - SupplementaryTable4.
     Inherits from BaseCleanerConfig and adds HumanDomainome-specific configuration options.
 
     Simply run `tidymut.download_human_domainome_source_file()` to download the dataset.
 
     Alternatively, the raw HumanDomainome file can be obtained from:
+
     - Nature artical: 'Site-saturation mutagenesis of 500 human protein domains', File `SupplementaryTable4.txt`
     - Hugging Face: https://huggingface.co/datasets/xulab-research/TidyMut/blob/main/human_domainome/SupplementaryTable4.txt
 

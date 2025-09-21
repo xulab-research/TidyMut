@@ -14,8 +14,12 @@ from .basic_cleaners import (
     filter_and_clean_data,
     convert_data_types,
     validate_mutations,
-    infer_wildtype_sequences,
     convert_to_mutation_dataset_format,
+)
+from .cdna_proteolysis_custom_cleaners import (
+    validate_wt_sequence,
+    average_labels_by_name,
+    subtract_labels_by_wt,
 )
 from ..core.dataset import MutationDataset
 from ..core.pipeline import Pipeline, create_pipeline
@@ -37,13 +41,14 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class CDNAProteolysisCleanerConfig(BaseCleanerConfig):
-    """Configuration class for cDNAProteolysis dataset cleaner
-
+    """
+    Configuration class for cDNAProteolysis dataset cleaner.
     Inherits from BaseCleanerConfig and adds cDNAProteolysis-specific configuration options.
 
     Simply run `tidymut.download_cdna_proteolysis_source_file()` to download the dataset.
 
     Alternatively, the raw cDNAProteolysis file can be obtained from:
+
     - Zenodo: https://zenodo.org/records/7992926, File `Tsuboyama2023_Dataset2_Dataset3_20230416.csv` in `Processed_K50_dG_datasets.zip`
     - Hugging Face: https://huggingface.co/datasets/xulab-research/TidyMut/blob/main/cDNA_proteolysis/Tsuboyama2023_Dataset2_Dataset3_20230416.csv
 
@@ -55,12 +60,10 @@ class CDNAProteolysisCleanerConfig(BaseCleanerConfig):
         Filter conditions for data cleaning
     type_conversions : Dict[str, str]
         Data type conversion specifications
-    validation_workers : int
+    validate_mut_workers : int
         Number of workers for mutation validation, set to -1 to use all available CPUs
-    infer_wt_workers : int
-        Number of workers for wildtype sequence inference, set to -1 to use all available CPUs
-    handle_multiple_wt : Literal["error", "first", "separate"], default="error"
-        Strategy for handling multiple wildtype sequences ('error', 'first', 'separate')
+    validate_wt_workers : int
+        Number of workers for wildtype sequence validation, set to -1 to use all available CPUs
     label_columns : List[str]
         List of score columns to process
     primary_label_column : str
@@ -73,31 +76,36 @@ class CDNAProteolysisCleanerConfig(BaseCleanerConfig):
             "WT_name": "name",
             "aa_seq": "mut_seq",
             "mut_type": "mut_info",
-            "ddG_ML": "ddG",
+            "ddG_ML": "label_cDNAProteolysis",
         }
     )
 
     # Data filtering configuration
     filters: Dict[str, Callable] = field(
-        default_factory=lambda: {"ddG": lambda x: x != "-"}
+        default_factory=lambda: {
+            "label_cDNAProteolysis": lambda s: pd.to_numeric(
+                s.astype(str).str.strip(), errors="coerce"
+            ).notna()
+        }
     )
 
     # Type conversion configuration
-    type_conversions: Dict[str, str] = field(default_factory=lambda: {"ddG": "float"})
+    type_conversions: Dict[str, str] = field(
+        default_factory=lambda: {"label_cDNAProteolysis": "float"}
+    )
 
     # Mutation validation parameters
-    validation_workers: int = 16
+    validate_mut_workers: int = 16
 
-    # Wildtype inference parameters
-    infer_wt_workers: int = 16
-    handle_multiple_wt: Literal["error", "first", "separate"] = "error"
+    # Wildtype validation parameters
+    validate_wt_workers: int = 16
 
     # Score columns configuration
-    label_columns: List[str] = field(default_factory=lambda: ["ddG"])
-    primary_label_column: str = "ddG"
+    label_columns: List[str] = field(default_factory=lambda: ["label_cDNAProteolysis"])
+    primary_label_column: str = "label_cDNAProteolysis"
 
     # Override default pipeline name
-    pipeline_name: str = "cdna_proteolysis_cleaner"
+    pipeline_name: str = "label_cDNAProteolysis"
 
     def validate(self) -> None:
         """Validate cDNAProteolysis-specific configuration parameters
@@ -109,14 +117,6 @@ class CDNAProteolysisCleanerConfig(BaseCleanerConfig):
         """
         # Call parent validation
         super().validate()
-
-        # Validate handle_multiple_wt parameter
-        valid_strategies = ["error", "first", "separate"]
-        if self.handle_multiple_wt not in valid_strategies:
-            raise ValueError(
-                f"handle_multiple_wt must be one of {valid_strategies}, "
-                f"got {self.handle_multiple_wt}"
-            )
 
         # Validate score columns
         if not self.label_columns:
@@ -212,16 +212,33 @@ def create_cdna_proteolysis_cleaner(
             .delayed_then(
                 validate_mutations,
                 mutation_column=final_config.column_mapping.get("mut_type", "mut_type"),
-                mutation_sep="_",
+                mutation_sep=":",
                 is_zero_based=False,
-                num_workers=final_config.validation_workers,
+                exclude_patterns=["wt"],
+                num_workers=final_config.validate_mut_workers,
             )
             .delayed_then(
-                infer_wildtype_sequences,
+                average_labels_by_name,
+                name_columns=(
+                    final_config.column_mapping.get("WT_name", "WT_name"),
+                    final_config.column_mapping.get("mut_type", "mut_type"),
+                ),
                 label_columns=final_config.label_columns,
-                handle_multiple_wt=final_config.handle_multiple_wt,
-                is_zero_based=True,  # Always True after validate_mutations
-                num_workers=final_config.infer_wt_workers,
+            )
+            .delayed_then(
+                validate_wt_sequence,
+                name_column=final_config.column_mapping.get("WT_name", "WT_name"),
+                mutation_column=final_config.column_mapping.get("mut_type", "mut_type"),
+                sequence_column=final_config.column_mapping.get("aa_seq", "aa_seq"),
+                wt_identifier="wt",
+                num_workers=final_config.validate_wt_workers,
+            )
+            .delayed_then(
+                subtract_labels_by_wt,
+                name_column=final_config.column_mapping.get("WT_name", "WT_name"),
+                label_columns=final_config.label_columns,
+                mutation_column=final_config.column_mapping.get("mut_type", "mut_type"),
+                in_place=True,
             )
             .delayed_then(
                 convert_to_mutation_dataset_format,
@@ -277,8 +294,7 @@ def clean_cdna_proteolysis_dataset(
 
     Use partial configuration:
     >>> pipeline, dataset = clean_cdna_proteolysis_dataset(df, config={
-    ...     "validation_workers": 8,
-    ...     "handle_multiple_wt": "first"
+    ...     "validate_mut_workers": 8,
     ... })
 
     Load configuration from file:

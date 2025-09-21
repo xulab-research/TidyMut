@@ -39,15 +39,16 @@ logger = logging.getLogger(__name__)
 
 @dataclass
 class ProteinGymCleanerConfig(BaseCleanerConfig):
-    """Configuration class for ProteinGym dataset cleaner
-
+    """
+    Configuration class for ProteinGym dataset cleaner.
     Inherits from BaseCleanerConfig and adds ProteinGym-specific configuration options.
 
     Simply run `tidymut.download_protein_gym_source_file()` to download the dataset.
 
     Alternatively, the raw ProteinGym file can be obtained from:
+
     - ProteinGym: https://marks.hms.harvard.edu/proteingym/ProteinGym_v1.3/DMS_ProteinGym_substitutions.zip
-    - Hugging Face:
+    - Hugging Face: https://huggingface.co/datasets/xulab-research/TidyMut/resolve/main/ProteinGym_DMS_substitutions/DMS_ProteinGym_substitutions.zip?download=true
 
     Attributes
     ----------

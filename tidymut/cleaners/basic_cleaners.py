@@ -78,8 +78,8 @@ def read_dataset(
     pd.DataFrame
         Dataset loaded from the specified file
 
-    Example
-    -------
+    Examples
+    --------
     >>> # Specify file_format parameter
     >>> df = read_dataset("data.csv", "csv")
     >>>
@@ -149,6 +149,7 @@ def merge_columns(
     Examples
     --------
     Basic usage:
+
     >>> df = pd.DataFrame({
     ...     'gene': ['BRCA1', 'TP53', 'EGFR'],
     ...     'position': [100, 200, 300],
@@ -161,6 +162,7 @@ def merge_columns(
     2     EGFR_300_G
 
     With prefix and suffix:
+
     >>> result = merge_columns(
     ...     df, ['gene', 'position'], 'gene_pos',
     ...     separator=':', prefix='[', suffix=']'
@@ -171,6 +173,7 @@ def merge_columns(
     2     [EGFR:300]
 
     Handling NaN values:
+
     >>> df_with_nan = pd.DataFrame({
     ...     'col1': ['A', 'B', None],
     ...     'col2': ['X', None, 'Z'],
@@ -186,6 +189,7 @@ def merge_columns(
     2    NA-Z-3
 
     Custom formatter:
+
     >>> def format_mutation(row):
     ...     return f"{row['gene']}:{row['position']}{row['mutation']}"
     >>> result = merge_columns(
@@ -304,6 +308,7 @@ def split_columns(
     Examples
     --------
     Basic usage:
+
     >>> df = pd.DataFrame({
     ...     'mutation_id': ['BRCA1_100_A', 'TP53_200_T', 'EGFR_300_G'],
     ...     'score': [0.95, 0.87, 0.92]
@@ -321,6 +326,7 @@ def split_columns(
     2   EGFR      300        G
 
     With max_splits:
+
     >>> df = pd.DataFrame({
     ...     'path': ['home/user/documents/file.txt', 'data/analysis/results.csv']
     ... })
@@ -336,6 +342,7 @@ def split_columns(
     1  data     analysis/results.csv
 
     Handling insufficient splits with fill_value:
+
     >>> df = pd.DataFrame({
     ...     'incomplete': ['A_B', 'X_Y_Z', 'M']
     ... })
@@ -353,6 +360,7 @@ def split_columns(
     2    M  MISSING  MISSING
 
     Using regex separator:
+
     >>> df = pd.DataFrame({
     ...     'text': ['word1-word2_word3', 'itemA|itemB-itemC']
     ... })
@@ -369,6 +377,7 @@ def split_columns(
     1  itemA  itemB  itemC
 
     Custom splitter:
+
     >>> def parse_coordinates(coord_str):
     ...     # Parse "chr1:12345-67890" format
     ...     parts = coord_str.replace(':', '_').replace('-', '_').split('_')
@@ -390,6 +399,7 @@ def split_columns(
     1       chr2  98765  43210
 
     Handling NaN values:
+
     >>> df = pd.DataFrame({
     ...     'data': ['A_B_C', None, 'X_Y']
     ... })
@@ -548,8 +558,8 @@ def extract_and_rename_columns(
     ValueError
         If required columns are missing from the input dataset
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> df = pd.DataFrame({
     ...     'uniprot_ID': ['P12345', 'Q67890'],
@@ -626,8 +636,8 @@ def filter_and_clean_data(
     pd.DataFrame
         Filtered and cleaned dataset
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> df = pd.DataFrame({
     ...     'mut_type': ['A123B', 'wt', 'C456D', 'insert', 'E789F'],
@@ -746,8 +756,8 @@ def convert_data_types(
     pd.DataFrame
         Dataset with converted data types
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> import numpy as np
     >>> df = pd.DataFrame({
@@ -783,6 +793,7 @@ def validate_mutations(
     format_mutations: bool = True,
     mutation_sep: str = ",",
     is_zero_based: bool = False,
+    exclude_patterns: Union[str, Sequence[str], Callable, None] = None,
     cache_results: bool = True,
     num_workers: int = 4,
 ) -> Tuple[pd.DataFrame, pd.DataFrame]:
@@ -805,6 +816,13 @@ def validate_mutations(
         Separator used to split multiple mutations in a single string (e.g., 'A123B,C456D')
     is_zero_based : bool, default=False
         Whether origin mutation positions are zero-based
+    exclude : Union[str, List[str], callable, None], default=None
+        Patterns to exclude from validation. Can be:
+        - A regex pattern string (e.g., r'^WT$|^wildtype$')
+        - A list of exact strings to match (e.g., ['WT', 'wildtype', 'UNKNOWN'])
+        - A list containing both regex patterns (starting with 'regex:') and exact strings
+        - A callable that takes a string value and returns True if it should be excluded
+        - None to validate all values
     cache_results : bool, default=True
         Whether to cache formatting results for performance
     num_workers : int, default=4
@@ -815,8 +833,8 @@ def validate_mutations(
     Tuple[pd.DataFrame, pd.DataFrame]
         (successful_dataset, failed_dataset) - datasets with valid and invalid mutations
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> df = pd.DataFrame({
     ...     'name': ['protein1', 'protein1', 'protein2'],
@@ -824,15 +842,59 @@ def validate_mutations(
     ...     'score': [1.5, 2.3, 3.7]
     ... })
     >>> successful, failed = validate_mutations(df, mutation_column='mut_info', mutation_sep=',')
-    >>> print(len(successful))  # Should be 2 (valid mutations)
+    >>> print(len(successful))
     2
     >>> print(successful['mut_info'].tolist())  # Formatted mutations
     ['A123S', 'C456D,E789F']
-    >>> print(len(failed))  # Should be 1 (invalid mutation)
+    >>> print(len(failed))
     1
     >>> print(failed['failed']['error_message'].iloc[0])  # Error message for failed mutation
     'ValueError: No valid mutations could be parsed...'
+    >>> # Exclude patterns
+    >>> df = pd.DataFrame({
+    ...     'name': ['protein1', 'protein1', 'protein2', 'protein3', 'protein4'],
+    ...     'mut_info': ['A123S', 'C456D,E789F', 'WT', 'wildtype', 'UNKNOWN'],
+    ...     'score': [1.5, 2.3, 3.7, 4.1, 5.2]
+    ... })
+    >>>
+    >>> # Exclude exact string matches
+    >>> successful, failed = validate_mutations(
+    ...     df,
+    ...     mutation_column='mut_info',
+    ...     exclude_patterns=['WT', 'wildtype', 'UNKNOWN']
+    ... )
+    >>>
+    >>> # Exclude using regex pattern
+    >>> successful, failed = validate_mutations(
+    ...     df,
+    ...     mutation_column='mut_info',
+    ...     exclude_patterns=r'^(WT|wildtype|UNKNOWN)$'
+    ... )
+    >>>
+    >>> # Mixed approach: regex patterns (prefixed with 'regex:') and exact strings
+    >>> successful, failed = validate_mutations(
+    ...     df,
+    ...     mutation_column='mut_info',
+    ...     exclude_patterns=['regex:^WT$', 'regex:.*type.*', 'UNKNOWN']
+    ... )
+    >>>
+    >>> # Using a custom function
+    >>> exclude_func = lambda x: str(x).upper() in ['WT', 'WILDTYPE'] or 'UNKNOWN' in str(x)
+    >>> successful, failed = validate_mutations(
+    ...     df,
+    ...     mutation_column='mut_info',
+    ...     exclude_patterns=exclude_func
+    ... )
+    >>> successful
+           name     mut_info  score
+    0  protein2           WT    3.7
+    1  protein3     wildtype    4.1
+    2  protein4      UNKNOWN    5.2
+    3  protein1        A122S    1.5
+    4  protein1  C455D,E788F    2.3
     """
+    import re
+
     tqdm.write("Validating and formatting mutations...")
 
     if mutation_column not in dataset.columns:
@@ -840,6 +902,62 @@ def validate_mutations(
 
     result = dataset.copy()
     original_len = len(result)
+
+    # Prepare exclude function
+    def should_exclude(value):
+        if exclude_patterns is None:
+            return False
+
+        # Convert value to string for pattern matching
+        str_value = str(value) if value is not None else ""
+
+        if callable(exclude_patterns):
+            # If exclude is a function, use it directly
+            return exclude_patterns(value)
+        elif isinstance(exclude_patterns, str):
+            # If exclude is a single regex pattern
+            try:
+                return bool(re.search(exclude_patterns, str_value))
+            except re.error:
+                # If regex is invalid, treat as exact string match
+                return str_value == exclude_patterns
+        elif isinstance(exclude_patterns, (list, tuple)):
+            # If exclude is a list of patterns/strings
+            for pattern in exclude_patterns:
+                if isinstance(pattern, str):
+                    if pattern.startswith("regex:"):
+                        # Handle explicit regex patterns
+                        regex_pattern = pattern[6:]  # Remove 'regex:' prefix
+                        try:
+                            if re.search(regex_pattern, str_value):
+                                return True
+                        except re.error:
+                            # If regex is invalid, skip this pattern
+                            continue
+                    else:
+                        # Handle exact string match
+                        if str_value == pattern:
+                            return True
+            return False
+        else:
+            # If exclude is neither callable nor string/list, treat as exact match
+            return str_value == str(exclude_patterns)
+
+    # Separate excluded and non-excluded rows
+    mutation_values = result[mutation_column]
+    exclude_mask = mutation_values.apply(should_exclude)
+    # Rows that should be excluded from validation (treated as successful)
+    excluded_dataset = result[exclude_mask].copy()
+    # Rows that need validation
+    validation_dataset = result[~exclude_mask].copy()
+
+    if len(validation_dataset) == 0:
+        # All rows were excluded, return all as successful
+        tqdm.write(
+            f"Mutation validation: {len(excluded_dataset)} excluded (treated as successful), "
+            f"0 validated, 0 failed (out of {original_len} total)"
+        )
+        return excluded_dataset, pd.DataFrame(columns=result.columns)
 
     # Global cache for parallel processing (shared memory)
     if cache_results:
@@ -890,13 +1008,18 @@ def validate_mutations(
     successful_dataset = successful_dataset.drop(
         columns=["formatted_" + mutation_column, "error_message"]
     )
+    # Combine excluded rows with successful validated rows
+    successful_dataset = pd.concat(
+        [excluded_dataset, successful_dataset], ignore_index=True
+    )
 
     # Create failed dataset
     failed_dataset = result_dataset[~success_mask].copy()
     failed_dataset = failed_dataset.drop(columns=["formatted_" + mutation_column])
 
     tqdm.write(
-        f"Mutation validation: {len(successful_dataset)} successful, {len(failed_dataset)} failed "
+        f"Mutation validation: {len(excluded_dataset)} excluded (treated as successful), "
+        f"{len(successful_dataset)} successful, {len(failed_dataset)} failed "
         f"(out of {original_len} total, {len(successful_dataset)/original_len*100:.1f}% valid)"
     )
 
@@ -949,8 +1072,8 @@ def apply_mutations_to_sequences(
     Tuple[pd.DataFrame, pd.DataFrame]
         (successful_dataset, failed_dataset) - datasets with and without errors
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> df = pd.DataFrame({
     ...     'name': ['prot1', 'prot1', 'prot2'],
@@ -1057,8 +1180,8 @@ def infer_mutations_from_sequences(
     Tuple[pd.DataFrame, pd.DataFrame]
         (successful_results, failed_results) - datasets with and without errors
 
-    Example
-    -------
+    Examples
+    --------
     >>> dataset = pd.DataFrame([
     ...     {'name': 'prot1', 'wt_seq': 'AKCDEF', 'mut_seq': 'KKCDEF'},
     ...     {'name': 'prot1', 'wt_seq': 'AKCDEF', 'mut_seq': 'AKDDEF'},
@@ -1175,8 +1298,8 @@ def infer_wildtype_sequences(
     Tuple[pd.DataFrame, pd.DataFrame]
         (successful_dataset, problematic_dataset) - datasets with added WT rows
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> df = pd.DataFrame({
     ...     'name': ['prot1', 'prot1', 'prot2'],
@@ -1435,6 +1558,9 @@ def convert_to_mutation_dataset_format(
     if missing_basic:
         raise ValueError(f"Missing required columns: {missing_basic}")
 
+    # Convert `mutation_column`` to uppercase for consistency
+    df[mutation_column] = df[mutation_column].str.upper()
+
     # Select appropriate sequence class based on sequence_type
     if sequence_type.lower() == "protein":
         SequenceClass = ProteinSequence
@@ -1449,7 +1575,9 @@ def convert_to_mutation_dataset_format(
 
     # Intelligently determine input format based on actual data content
     has_sequence_column = sequence_column is not None and sequence_column in df.columns
-    has_wt_rows = mutation_column in df.columns and "WT" in df[mutation_column].values
+    has_wt_rows = (
+        mutation_column in df.columns and df[mutation_column].str.contains("WT").any()
+    )
 
     # Decision logic for format detection
     if has_sequence_column and not has_wt_rows:

@@ -106,12 +106,17 @@ print(f"Translation: {dna.translate()}")
 import pandas as pd
 
 from tidymut.cleaners.basic_cleaners import (
+    read_dataset,
     extract_and_rename_columns,
     filter_and_clean_data,
     convert_data_types,
     validate_mutations,
-    infer_wildtype_sequences,
     convert_to_mutation_dataset_format,
+)
+from tidymut.cleaners.cdna_proteolysis_custom_cleaners import (
+    validate_wt_sequence,
+    average_labels_by_name,
+    subtract_labels_by_wt,
 )
 from tidymut.core.dataset import MutationDataset
 from tidymut.core.pipeline import Pipeline, create_pipeline
@@ -139,11 +144,24 @@ clean_result = (
         num_workers=16,
     )
     .then(
-        infer_wildtype_sequences,
-        label_columns=["ddG"],
-        handle_multiple_wt="error",
-        is_zero_based=True,
-        num_workers=16,
+        average_labels_by_name,
+        name_columns=("name", "mut_info"),
+        label_columns="ddG",
+    )
+    .then(
+        validate_wt_sequence,
+        name_column="name",
+        mutation_column="mut_info",
+        sequence_column="mut_seq",
+        wt_identifier="wt",
+        num_workers=16
+    )
+    .then(
+        subtract_labels_by_wt,
+        name_column="name",
+        label_columns="ddG",
+        mutation_column="mut_info",
+        in_place=True,
     )
     .then(
         convert_to_mutation_dataset_format,
@@ -176,7 +194,7 @@ If you use TidyMut in your research, please cite:
 ```bibtex
 @software{tidymut,
   title={TidyMut: A Python Package for Biological Sequence Data Processing},
-  author={Your Name and Contributors},
+  author={YukunR},
   year={2025},
   url={https://github.com/xulab-research/tidymut}
 }

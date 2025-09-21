@@ -156,8 +156,8 @@ def process_domain_positions(
     Tuple[pd.DataFrame, pd.DataFrame]
         (successful_dataset, failed_dataset) - datasets with and without parsing errors
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> df = pd.DataFrame({
     ...     'PFAM_entry': ['PF00001/10-100', 'PF00002/20-200', 'invalid_entry'],
@@ -261,8 +261,8 @@ def add_sequences_to_dataset(
     Tuple[pd.DataFrame, pd.DataFrame]
         (successful_dataset, failed_dataset) - datasets with and without sequences
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> df = pd.DataFrame({
     ...     'name': ['prot1', 'prot2', 'prot3'],
@@ -357,8 +357,8 @@ def extract_domain_sequences(
     Tuple[pd.DataFrame, pd.DataFrame]
         (successful_dataset, failed_dataset) - datasets with and without extraction errors
 
-    Example
-    -------
+    Examples
+    --------
     >>> import pandas as pd
     >>> df = pd.DataFrame({
     ...     'name': ['prot1', 'prot2', 'prot3'],
