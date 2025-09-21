@@ -1548,6 +1548,9 @@ def convert_to_mutation_dataset_format(
     if missing_basic:
         raise ValueError(f"Missing required columns: {missing_basic}")
 
+    # Convert `mutation_column`` to uppercase for consistency
+    df[mutation_column] = df[mutation_column].str.upper()
+
     # Select appropriate sequence class based on sequence_type
     if sequence_type.lower() == "protein":
         SequenceClass = ProteinSequence
@@ -1562,7 +1565,9 @@ def convert_to_mutation_dataset_format(
 
     # Intelligently determine input format based on actual data content
     has_sequence_column = sequence_column is not None and sequence_column in df.columns
-    has_wt_rows = mutation_column in df.columns and "WT" in df[mutation_column].values
+    has_wt_rows = (
+        mutation_column in df.columns and df[mutation_column].str.contains("WT").any()
+    )
 
     # Decision logic for format detection
     if has_sequence_column and not has_wt_rows:
