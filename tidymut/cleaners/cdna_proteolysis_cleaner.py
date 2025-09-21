@@ -75,17 +75,23 @@ class CDNAProteolysisCleanerConfig(BaseCleanerConfig):
             "WT_name": "name",
             "aa_seq": "mut_seq",
             "mut_type": "mut_info",
-            "ddG_ML": "ddG",
+            "ddG_ML": "label_cDNAProteolysis",
         }
     )
 
     # Data filtering configuration
     filters: Dict[str, Callable] = field(
-        default_factory=lambda: {"ddG": lambda x: x != "-"}
+        default_factory=lambda: {
+            "label_cDNAProteolysis": lambda s: pd.to_numeric(
+                s.astype(str).str.strip(), errors="coerce"
+            ).notna()
+        }
     )
 
     # Type conversion configuration
-    type_conversions: Dict[str, str] = field(default_factory=lambda: {"ddG": "float"})
+    type_conversions: Dict[str, str] = field(
+        default_factory=lambda: {"label_cDNAProteolysis": "float"}
+    )
 
     # Mutation validation parameters
     validate_mut_workers: int = 16
@@ -94,11 +100,11 @@ class CDNAProteolysisCleanerConfig(BaseCleanerConfig):
     validate_wt_workers: int = 16
 
     # Score columns configuration
-    label_columns: List[str] = field(default_factory=lambda: ["ddG"])
-    primary_label_column: str = "ddG"
+    label_columns: List[str] = field(default_factory=lambda: ["label_cDNAProteolysis"])
+    primary_label_column: str = "label_cDNAProteolysis"
 
     # Override default pipeline name
-    pipeline_name: str = "cdna_proteolysis_cleaner"
+    pipeline_name: str = "label_cDNAProteolysis"
 
     def validate(self) -> None:
         """Validate cDNAProteolysis-specific configuration parameters
