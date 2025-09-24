@@ -1,6 +1,12 @@
 # TidyMut
+[![License badge](https://img.shields.io/badge/License-BSD_3--Clause-yellow?logo=opensourceinitiative&logoColor=white)](https://github.com/xulab-research/TidyMut/blob/main/LICENSE)
+[![PyPI version badge](https://img.shields.io/pypi/v/tidymut?logo=python&logoColor=white&color=orange)](https://pypi.org/project/tidymut/)
+[![Documentation badge](https://img.shields.io/readthedocs/tidymut/latest?logo=readthedocs&logoColor=white)](https://tidymut.readthedocs.io/en/)
 
 A comprehensive Python package for processing and analyzing biological sequence data with advanced mutation analysis capabilities.
+
+- **Documentation**: https://tidymut.readthedocs.io/en/stable
+- **Cleaning Examples**: https://tidymut.readthedocs.io/en/stable/user_guide/cleaners.html
 
 ## Overview
 
@@ -34,6 +40,7 @@ pip install -e .
 ```
 
 ## Quick Start
+See [ReadtheDocs](https://tidymut.readthedocs.io/en/stable/user_guide/cleaners.html) for more examples.
 
 ### Supported Datasets
 | Dataset Name    | Reference                                                                           | File                                               | Link                                               |
