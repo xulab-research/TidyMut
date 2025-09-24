@@ -5,8 +5,8 @@
 
 A comprehensive Python package for processing and analyzing biological sequence data with advanced mutation analysis capabilities.
 
-- **Documentation**: https://tidymut.readthedocs.io/en/stable
-- **Cleaning Examples**: https://tidymut.readthedocs.io/en/stable/user_guide/cleaners.html
+- **Documentation**: https://tidymut.readthedocs.io/en/latest
+- **Cleaning Examples**: https://tidymut.readthedocs.io/en/latest/user_guide/cleaners.html
 
 ## Overview
 
@@ -40,7 +40,7 @@ pip install -e .
 ```
 
 ## Quick Start
-See [ReadtheDocs](https://tidymut.readthedocs.io/en/stable/user_guide/cleaners.html) for more examples.
+See [ReadtheDocs](https://tidymut.readthedocs.io/en/latest/user_guide/cleaners.html) for more examples.
 
 ### Supported Datasets
 | Dataset Name    | Reference                                                                           | File                                               | Link                                               |
