@@ -200,7 +200,10 @@ If you use TidyMut in your research, please cite:
 
 ```bibtex
 @software{tidymut,
-  title={TidyMut: A Python Package for Biological Sequence Data Processing},
+  title={
+    TidyMut: A comprehensive Python package for processing and analyzing 
+    biological sequence data with advanced mutation analysis capabilities
+  },
   author={YukunR},
   year={2025},
   url={https://github.com/xulab-research/tidymut}
