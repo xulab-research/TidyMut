@@ -1144,6 +1144,7 @@ def apply_mutations_to_sequences(
     return successful_dataset, failed_dataset
 
 
+@multiout_step(main="success", failed="failed")
 def infer_mutations_from_sequences(
     dataset: pd.DataFrame,
     wt_sequence_column: str = "wt_seq",
@@ -1247,7 +1248,7 @@ def infer_mutations_from_sequences(
     return successful_dataset, failed_dataset
 
 
-@multiout_step(main="successful", failed="failed")
+@multiout_step(main="success", failed="failed")
 def infer_wildtype_sequences(
     dataset: pd.DataFrame,
     name_column: str = "name",
