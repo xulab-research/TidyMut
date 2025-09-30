@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import pandas as pd
-from typing import Tuple, Dict, Any, Optional, Union, Callable, List, Literal
+from typing import Tuple, Dict, Any, Optional, Union, Callable, List
 from dataclasses import dataclass, field
 from pathlib import Path
 import logging
