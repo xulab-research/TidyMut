@@ -147,7 +147,6 @@ def create_cdna_proteolysis_cleaner(
     ----------
     dataset_or_path : Optional[Union[pd.DataFrame, str, Path]], default=None
         Raw dataset DataFrame or file path to cDNAProteolysis dataset.
-        Must be provided if download is False
     config : Optional[Union[CDNAProteolysisCleanerConfig, Dict[str, Any], str, Path]]
         Configuration for the cleaning pipeline. Can be:
         - CDNAProteolysisCleanerConfig object
