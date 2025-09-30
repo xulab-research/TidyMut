@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import pandas as pd
-from typing import Tuple, Dict, Any, Optional, Union, Callable, List
+from typing import TYPE_CHECKING
 from dataclasses import dataclass, field
 from pathlib import Path
 import logging
@@ -23,6 +23,9 @@ from .cdna_proteolysis_custom_cleaners import (
 )
 from ..core.dataset import MutationDataset
 from ..core.pipeline import Pipeline, create_pipeline
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 __all__ = [
     "CDNAProteolysisCleanerConfig",

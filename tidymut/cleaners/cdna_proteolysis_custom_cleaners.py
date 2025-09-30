@@ -8,7 +8,7 @@ from tqdm import tqdm
 from typing import TYPE_CHECKING
 
 from ..core.mutation import MutationSet
-from ..core.pipeline import multiout_step, pipeline_step
+from ..core.pipeline import multiout_step
 from ..core.sequence import ProteinSequence
 from ..utils.mutation_converter import invert_mutation_set
 
