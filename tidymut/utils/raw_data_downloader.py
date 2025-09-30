@@ -14,7 +14,7 @@ from urllib.parse import urlparse
 from .data_source import DATASETS
 
 if TYPE_CHECKING:
-    from typing import Dict, List, Optional, Sequence, Union
+    from typing import Dict, List, Literal, Optional, Sequence, Union
 
 __all__ = [
     "download",
@@ -322,7 +322,11 @@ def download(
 
 
 def download_source_file_from_huggingface(
-    dataset_name: str, dir: str, filename: Optional[str], *, overwrite: bool = False
+    dataset_name: str,
+    dir: str,
+    *,
+    overwrite: bool = False,
+    sub_dataset: Optional[str] = None,
 ) -> Dict[str, str]:
     """
     Download the source file for a given dataset.
@@ -339,11 +343,10 @@ def download_source_file_from_huggingface(
         The key identifying the dataset in the `DATASETS` registry.
     dir : str
         The target directory where the file will be saved.
-    filename : str, optional
-        The name to use when saving the downloaded file. Defaults to the basename
-        of the file URL if not provided.
-    overwrite : bool, optional
+    overwrite : bool, default=False
         Whether to overwrite the file if it already exists. Default is False.
+    sub_dataset : Optional[str], default=None
+        If provided, retrieves the file from the specified sub-dataset within the Hugging Face repository.
 
     Returns
     -------
@@ -365,10 +368,12 @@ def download_source_file_from_huggingface(
     >>> download_source_file("cdna_proteolysis", "data")
     'data/Tsuboyama2023_Dataset2_Dataset3_20230416.csv'
     """
-    target_dataset = DATASETS.get(dataset_name, None)
-    if target_dataset is None:
+    target_dataset = DATASETS.get(dataset_name, {})
+    if sub_dataset is not None:
+        target_dataset = target_dataset.get("sub_datasets", {}).get(sub_dataset, {})
+    if not target_dataset:
         raise ValueError(f"No dataset found with name: {dataset_name}")
-
+    print(target_dataset)
     hf_repos = target_dataset.get("huggingface_repos", [])
     if len(hf_repos) == 0:
         raise ValueError(
@@ -390,13 +395,14 @@ def download_source_file_from_huggingface(
                 )
             else:
                 local_path.unlink()
+        print(url)
         download(url, local_path)
         local_paths[filename] = str(local_path)
     return local_paths
 
 
 def download_cdna_proteolysis_source_file(
-    dir: str, filename: Optional[str] = None, *, overwrite: bool = False
+    dir: str, *, overwrite: bool = False
 ) -> Dict[str, str]:
     """
     Download the source file for cDNAProteolysis dataset from the original source.
@@ -408,12 +414,12 @@ def download_cdna_proteolysis_source_file(
         value: file path pointing to cDNAProteolysis dataset source file
     """
     return download_source_file_from_huggingface(
-        "cDNAProteolysis", dir, filename, overwrite=overwrite
+        "cDNAProteolysis", dir, overwrite=overwrite
     )
 
 
 def download_protein_gym_source_file(
-    dir: str, filename: Optional[str] = None, *, overwrite: bool = False
+    dir: str, *, overwrite: bool = False
 ) -> Dict[str, str]:
     """
     Download the source file for ProteinGym dataset from the original source.
@@ -424,16 +430,26 @@ def download_protein_gym_source_file(
         key: file name,
         value: file path pointing to the ProteinGym dataset source file
     """
-    return download_source_file_from_huggingface(
-        "ProteinGym", dir, filename, overwrite=overwrite
-    )
+    return download_source_file_from_huggingface("ProteinGym", dir, overwrite=overwrite)
 
 
 def download_human_domainome_source_file(
-    dir: str, filename: Optional[str] = None, *, overwrite: bool = False
+    dir: str,
+    *,
+    overwrite: bool = False,
+    sub_dataset: Optional[Literal["Sup2", "Sup4"]] = None,
 ) -> Dict[str, str]:
     """
     Download the source file for HumanDomainome dataset from the original source.
+
+    Parameters
+    ----------
+    dir : str
+        The target directory where the file will be saved.
+    overwrite : bool, default=False
+        Whether to overwrite the file if it already exists. Default is False.
+    sub_dataset : Optional[Literal["Sup2", "Sup4"]], default=None
+        Sub-dataset to download. If None, download the entire dataset.
 
     Returns
     -------
@@ -442,6 +458,9 @@ def download_human_domainome_source_file(
         value: file path pointing to the HumanDomainome dataset source file
 
     """
+    if sub_dataset is not None and sub_dataset not in ["Sup2", "Sup4"]:
+        raise ValueError("Unsupported sub-dataset. Supported options: Sup2, Sup4")
+
     return download_source_file_from_huggingface(
-        "HumanDomainome", dir, filename, overwrite=overwrite
+        "HumanDomainome", dir, overwrite=overwrite, sub_dataset=sub_dataset
     )

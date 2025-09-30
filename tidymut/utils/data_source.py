@@ -39,6 +39,23 @@ DATASETS = {
             "SupplementaryTable4.txt",
             "wild_type.fasta",
         ],
+        "sub_datasets": {
+            "Sup2": {
+                "files": ["SupplementaryTable2.txt"],
+                "huggingface_repos": [
+                    "datasets/xulab-research/TidyMut/resolve/main/human_domainome/SupplementaryTable2.txt?download=true"
+                ],
+                "file_name": ["SupplementaryTable2.txt"],
+            },
+            "Sup4": {
+                "files": ["SupplementaryTable4.txt", "wild_type.fasta"],
+                "huggingface_repos": [
+                    "datasets/xulab-research/TidyMut/resolve/main/human_domainome/SupplementaryTable4.txt?download=true",
+                    "datasets/xulab-research/TidyMut/resolve/main/human_domainome/wild_type.fasta?download=true",
+                ],
+                "file_name": ["SupplementaryTable4.txt", "wild_type.fasta"],
+            },
+        },
     },
 }
 
@@ -78,3 +95,9 @@ def show_download_instructions(dataset_key: str) -> None:
     for i, file in enumerate(info["files"]):
         print(f"  - File: {file}")
         print(f"    - Download link: {info['huggingface_repos'][i]}")
+    print(f"\nSub-datasets:")
+    for sub_dataset, sub_info in info.get("sub_datasets", {}).items():
+        print(f"- Sub-dataset: {sub_dataset}")
+        for i, file in enumerate(sub_info["files"]):
+            print(f"  - File: {file}")
+            print(f"    - Download link: {sub_info['huggingface_repos'][i]}")
