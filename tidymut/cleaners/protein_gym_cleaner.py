@@ -176,14 +176,17 @@ def create_protein_gym_cleaner(
     Examples
     --------
     Process directory of ProteinGym CSV files:
+
     >>> pipeline = create_protein_gym_cleaner("DMS_ProteinGym_substitutions/")
     >>> pipeline, dataset = clean_protein_gym_dataset(pipeline)
 
     Process zip file:
+
     >>> pipeline = create_protein_gym_cleaner("DMS_ProteinGym_substitutions.zip")
     >>> pipeline, dataset = clean_protein_gym_dataset(pipeline)
 
     Custom configuration:
+
     >>> config = {
     ...     "validation_workers": 8,
     ...     "handle_multiple_wt": "first"
@@ -191,6 +194,7 @@ def create_protein_gym_cleaner(
     >>> pipeline = create_protein_gym_cleaner("data/", config=config)
 
     Load configuration from file:
+
     >>> pipeline = create_protein_gym_cleaner("data/", config="config.json")
     """
     # Validate input path

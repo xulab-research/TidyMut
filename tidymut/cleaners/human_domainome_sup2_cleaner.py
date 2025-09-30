@@ -190,12 +190,14 @@ def create_human_domainome_sup2_cleaner(
     Examples
     --------
     Basic usage:
+
     >>> pipeline = create_human_domainome_sup2_cleaner(
     ...     "human_domainome.csv"
     ... )
     >>> pipeline, dataset = clean_human_domainome_dataset(pipeline)
 
     Custom configuration:
+
     >>> config = {
     ...     "process_workers": 8,
     ...     "type_conversions": {"label_humanDomainome": "float32"}
@@ -206,6 +208,7 @@ def create_human_domainome_sup2_cleaner(
     ... )
 
     Load configuration from file:
+
     >>> pipeline = create_human_domainome_sup2_cleaner(
     ...     "data.csv",
     ...     config="config.json"

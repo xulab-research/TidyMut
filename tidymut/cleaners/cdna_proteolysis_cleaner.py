@@ -168,10 +168,6 @@ def create_cdna_proteolysis_cleaner(
         If config has invalid type
     ValueError
         If configuration validation fails
-
-    Examples
-    --------
-
     """
     # Handle configuration parameter
     if config is None:
@@ -289,17 +285,21 @@ def clean_cdna_proteolysis_dataset(
         - MutationDataset: The cleaned cDNAProteolysis dataset
 
     Examples
+    --------
     >>> pipeline = create_cdna_proteolysis_cleaner(df)  # df is raw cDNAProteolysis dataset file
 
     Use default configuration:
+
     >>> pipeline, dataset = clean_cnda_proteolysis_dataset(pipeline)
 
     Use partial configuration:
+
     >>> pipeline, dataset = clean_cdna_proteolysis_dataset(df, config={
     ...     "validate_mut_workers": 8,
     ... })
 
     Load configuration from file:
+
     >>> pipeline, dataset = clean_cdna_proteolysis_dataset(df, config="config.json")
     """
     try:
