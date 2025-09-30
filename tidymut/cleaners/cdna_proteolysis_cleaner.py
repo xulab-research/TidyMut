@@ -105,7 +105,7 @@ class CDNAProteolysisCleanerConfig(BaseCleanerConfig):
     primary_label_column: str = "label_cDNAProteolysis"
 
     # Override default pipeline name
-    pipeline_name: str = "label_cDNAProteolysis"
+    pipeline_name: str = "cDNAProteolysis"
 
     def validate(self) -> None:
         """Validate cDNAProteolysis-specific configuration parameters
