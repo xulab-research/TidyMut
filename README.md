@@ -43,11 +43,13 @@ pip install -e .
 See [ReadtheDocs](https://tidymut.readthedocs.io/en/latest/user_guide/cleaners.html) for more examples.
 
 ### Supported Datasets
-| Dataset Name    | Reference                                                                           | File                                               | Link                                               |
-| --------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------- |
-| cDNAProteolysis | Mega-scale experimental analysis of protein folding stability in biology and design | Tsuboyama2023_Dataset2_Dataset3_20230416.csv       | https://zenodo.org/records/7992926                 |
-| ProteinGym      | ProteinGym: Large-Scale Benchmarks for Protein Design and Fitness Prediction        | DMS_ProteinGym_substitutions.zip                   | https://proteingym.org/download                    |
-| HumanDomainome  | Site-saturation mutagenesis of 500 human protein domains                            | SupplementaryTable2.txt or SupplementaryTable4.txt | https://www.nature.com/articles/s41586-024-08370-4 |
+| Dataset Name    | Reference                                                                           | File                                               | Link                                                                          |
+| --------------- | ----------------------------------------------------------------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------- |
+| cDNAProteolysis | Mega-scale experimental analysis of protein folding stability in biology and design | Tsuboyama2023_Dataset2_Dataset3_20230416.csv       | https://zenodo.org/records/7992926                                            |
+| ProteinGym      | ProteinGym: Large-Scale Benchmarks for Protein Design and Fitness Prediction        | DMS_ProteinGym_substitutions.zip                   | https://proteingym.org/download                                               |
+| HumanDomainome  | Site-saturation mutagenesis of 500 human protein domains                            | SupplementaryTable2.txt or SupplementaryTable4.txt | https://www.nature.com/articles/s41586-024-08370-4                            |
+| ddG             | None                                                                                | M1261.csv, S461.csv, S669.csv, S783.csv, S8754.csv | https://huggingface.co/datasets/xulab-research/TidyMut/tree/main/ddG_datasets |
+| dTm             | None                                                                                | S4346.csv, S557.csv, S571.csv                      | https://huggingface.co/datasets/xulab-research/TidyMut/tree/main/dTm_datasets |
 
 ### Processing cDNAProteolysis Dataset
 
@@ -200,7 +202,10 @@ If you use TidyMut in your research, please cite:
 
 ```bibtex
 @software{tidymut,
-  title={TidyMut: A Python Package for Biological Sequence Data Processing},
+  title={
+    TidyMut: A comprehensive Python package for processing and analyzing 
+    biological sequence data with advanced mutation analysis capabilities
+  },
   author={YukunR},
   year={2025},
   url={https://github.com/xulab-research/tidymut}

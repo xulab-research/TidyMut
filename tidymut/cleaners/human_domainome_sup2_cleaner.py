@@ -54,21 +54,18 @@ class HumanDomainomeSup2CleanerConfig(BaseCleanerConfig):
 
     Attributes
     ----------
-    # TODO: modify attributes
-    sequence_dict_path : Union[str, Path]
-        Path to the file containing UniProt ID to sequence mapping
-    header_parser : Callable[[str], Tuple[str, Dict[str, str]]]
-        Parse Header in fasta files and extract relevant information
     column_mapping : Dict[str, str]
         Mapping from source to target column names
+    filters : Dict[str, Callable]
+        Filter conditions for data cleaning
     type_conversions : Dict[str, str]
         Data type conversion specifications
     drop_na_columns: List[str]
         List of column names where null values should be dropped
-    is_zero_based : bool
-        Whether mutation positions are zero-based
-    process_workers : int
-        Number of workers for parallel processing
+    validation_workers : int
+        Number of workers for mutations validation, set to -1 to use all available CPUs
+    infer_wt_workers : int
+        Number of workers for wildtype sequences inference, set to -1 to use all available CPUs
     label_columns : List[str]
         List of score columns to process
     primary_label_column : str
@@ -193,12 +190,14 @@ def create_human_domainome_sup2_cleaner(
     Examples
     --------
     Basic usage:
+
     >>> pipeline = create_human_domainome_sup2_cleaner(
     ...     "human_domainome.csv"
     ... )
     >>> pipeline, dataset = clean_human_domainome_dataset(pipeline)
 
     Custom configuration:
+
     >>> config = {
     ...     "process_workers": 8,
     ...     "type_conversions": {"label_humanDomainome": "float32"}
@@ -209,6 +208,7 @@ def create_human_domainome_sup2_cleaner(
     ... )
 
     Load configuration from file:
+
     >>> pipeline = create_human_domainome_sup2_cleaner(
     ...     "data.csv",
     ...     config="config.json"

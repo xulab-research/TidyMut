@@ -19,6 +19,7 @@ from ..utils.cleaner_workers import (
     infer_single_mutationset,
 )
 from ..utils.dataset_builders import convert_format_1, convert_format_2
+from ..utils.label_resolvers import make_resolver
 from ..utils.type_converter import (
     convert_data_types as _convert_data_types,
     convert_data_types_batch as _convert_data_types_batch,
@@ -49,6 +50,8 @@ __all__ = [
     "apply_mutations_to_sequences",
     "infer_mutations_from_sequences",
     "infer_wildtype_sequences",
+    "aggregate_labels_by_name",
+    "average_labels_by_name",
     "convert_to_mutation_dataset_format",
 ]
 
@@ -1144,6 +1147,7 @@ def apply_mutations_to_sequences(
     return successful_dataset, failed_dataset
 
 
+@multiout_step(main="success", failed="failed")
 def infer_mutations_from_sequences(
     dataset: pd.DataFrame,
     wt_sequence_column: str = "wt_seq",
@@ -1247,7 +1251,7 @@ def infer_mutations_from_sequences(
     return successful_dataset, failed_dataset
 
 
-@multiout_step(main="successful", failed="failed")
+@multiout_step(main="success", failed="failed")
 def infer_wildtype_sequences(
     dataset: pd.DataFrame,
     name_column: str = "name",
@@ -1428,6 +1432,326 @@ def infer_wildtype_sequences(
     )
 
     return successful_df, failed_df
+
+
+@pipeline_step
+def aggregate_labels_by_name(
+    dataset: pd.DataFrame,
+    name_columns: Union[str, Sequence[str]],
+    label_columns: Union[str, Sequence[str]],
+    remove_origin_columns: bool = True,
+    strategy: Union[str, Callable[[pd.DataFrame, List[str]], pd.Series]] = "mean",
+    *,
+    nearest_by: Optional[Union[Sequence[Tuple[str, float]], Dict[str, float]]] = None,
+    nearest_weights: Optional[
+        Union[Sequence[Tuple[str, float]], Dict[str, float]]
+    ] = None,
+    output_suffix: Optional[str] = None,
+) -> pd.DataFrame:
+    """
+    Resolve/aggregate label columns for rows sharing the same (composite) name.
+    Supports built-in strategies ('mean', 'first', 'nearest') or a custom callable.
+
+    Parameters
+    ----------
+    dataset : pd.DataFrame
+        Input dataframe.
+    name_columns : Union[str, Sequence[str]]
+        Column name(s) used for grouping. Supports one or multiple columns.
+    label_columns : Union[str, Sequence[str]]
+        Label column(s) to resolve/aggregate.
+    remove_origin_columns : bool, default True
+        If True, return one row per name with resolved labels using the original
+        label column names. If False, keep original rows and merge resolved values
+        back as extra columns (see `output_suffix`).
+    strategy : {"mean", "first", "nearest"} or Callable, default "mean"
+        - "mean": per-group numeric mean for each label (NaNs ignored).
+        - "first": take the first row in each group for the labels.
+        - "nearest": pick the row minimizing a multi-criteria distance; requires `nearest_by`.
+        - Callable(group_df, label_cols) -> pd.Series: custom resolver that returns a
+          single-row Series whose index includes the label columns.
+    nearest_by : Optional[Union[Sequence[Tuple[str, float]], Mapping[str, float]]]
+        Criteria for "nearest" strategy. Provide either:
+          * a list of (column, target) pairs in priority order, or
+          * a dict {column: target}. When dict is used, priority order is the
+            insertion order (Python 3.7+ preserves dict insertion order).
+        The distance is computed per criterion as abs(col - target), and rows are
+        compared lexicographically by the (possibly weighted) distance tuple.
+    nearest_weights : Optional[Union[Sequence[Tuple[str, float]], Mapping[str, float]]]
+        Optional weights for "nearest" strategy (same columns as in `nearest_by`).
+        If provided, each distance is multiplied by its weight before comparison.
+        Defaults to all weights = 1.0.
+    output_suffix : Optional[str]
+        Suffix used when `remove_origin_columns=False` to name merged columns.
+        Default depends on `strategy`:
+          - "_mean_by_name", "_first_by_name", "_nearest_by_name", or "_custom_by_name".
+
+    Returns
+    -------
+    pd.DataFrame
+        If `remove_origin_columns` is True: one row per group with resolved labels.
+        Otherwise: original rows + resolved label columns (with suffix).
+
+    Raises
+    ------
+    KeyError
+        If required columns are missing.
+    ValueError
+        If label columns are non-numeric for "mean",
+        or if "nearest" is selected without `nearest_by`,
+        or if custom strategy returns invalid shape/index.
+
+    Examples
+    --------
+    Mean aggregation, one row per name:
+
+    >>> import pandas as pd
+    >>> df = pd.DataFrame({
+    ...     "gene": ["A","A","B"],
+    ...     "specie": ["hs","hs","hs"],
+    ...     "ddG": [1.0, 3.0, 2.0],
+    ...     "dTm": [10.0, 30.0, 20.0]
+    ... })
+    >>> aggregate_labels_by_name(
+    ...     df,
+    ...     name_columns=["gene","specie"],
+    ...     label_columns=["ddG","dTm"],
+    ...     strategy="mean",
+    ...     remove_origin_columns=True
+    ... )
+      gene specie  ddG   dTm
+    0    A     hs  2.0  20.0
+    1    B     hs  2.0  20.0
+
+    Nearest row by multiple criteria (temperature, then pH) with weights,
+    keeping original rows and adding resolved columns:
+
+    >>> df2 = pd.DataFrame({
+    ...     "gene": ["A","A","A","B"],
+    ...     "temperature": [20.0, 24.5, 26.0, 25.0],
+    ...     "pH": [7.2, 7.4, 7.3, 7.5],
+    ...     "ddG": [1.1, 1.9, 2.2, 2.0],
+    ...     "dTm": [9.0, 20.0, 21.0, 20.0],
+    ... })
+    >>> aggregate_labels_by_name(
+    ...     df2,
+    ...     name_columns="gene",
+    ...     label_columns=["ddG","dTm"],
+    ...     strategy="nearest",
+    ...     nearest_by=[("temperature", 25.0), ("pH", 7.4)],
+    ...     nearest_weights={"temperature": 2.0, "pH": 1.0},
+    ...     remove_origin_columns=False
+    ... ).filter(regex="^gene$|_nearest_by_name$|^ddG$|^dTm$")
+      gene  ddG   dTm  ddG_nearest_by_name  dTm_nearest_by_name
+    0    A  1.1   9.0                  1.9                 20.0
+    1    A  1.9  20.0                  1.9                 20.0
+    2    A  2.2  21.0                  1.9                 20.0
+    3    B  2.0  20.0                  2.0                 20.0
+    """
+
+    # Normalize inputs
+    name_cols = [name_columns] if isinstance(name_columns, str) else list(name_columns)
+    if not name_cols:
+        raise KeyError("name_columns must be a non-empty string or sequence of strings")
+
+    label_cols = (
+        [label_columns] if isinstance(label_columns, str) else list(label_columns)
+    )
+    if not label_cols:
+        raise KeyError(
+            "label_columns must be a non-empty string or sequence of strings"
+        )
+
+    # Existence checks
+    missing_names = [c for c in name_cols if c not in dataset.columns]
+    if missing_names:
+        raise KeyError(f"name_columns not found: {missing_names}")
+
+    missing_labels = [c for c in label_cols if c not in dataset.columns]
+    if missing_labels:
+        raise KeyError(f"label_columns not found: {missing_labels}")
+
+    # Default suffix (only used if keeping original rows)
+    if output_suffix is None and not remove_origin_columns:
+        suffix_map = {
+            "mean": "_mean_by_name",
+            "first": "_first_by_name",
+            "nearest": "_nearest_by_name",
+        }
+        suffix = (
+            suffix_map.get(str(strategy).lower(), "_custom_by_name")
+            if isinstance(strategy, str)
+            else "_custom_by_name"
+        )
+    else:
+        suffix = output_suffix
+
+    # Make resolver (string -> callable; pass nearest params through)
+    resolver = make_resolver(
+        strategy, nearest_by=nearest_by, nearest_weights=nearest_weights
+    )
+
+    # Compute per-group resolved labels
+    g = dataset.groupby(name_cols, dropna=False)
+    agg = g.apply(lambda grp: resolver(grp, label_cols), include_groups=False)  # type: ignore
+    if isinstance(agg, pd.Series):
+        # single-label case or resolver returns Series -> ensure DataFrame
+        agg = agg.to_frame().T if agg.name is None else agg.to_frame()
+    agg = agg.reset_index()  # bring name_cols back as columns
+
+    # Merge to desired shape
+    if remove_origin_columns:
+        reps = dataset.drop_duplicates(subset=name_cols, keep="first")
+        # Keep name cols + any non-label columns (to preserve metadata) from reps
+        keep_cols = list(
+            dict.fromkeys(
+                name_cols + [c for c in dataset.columns if c not in set(label_cols)]
+            )
+        )
+        reps = reps[keep_cols]
+        out = pd.merge(
+            reps,
+            agg[name_cols + label_cols],
+            on=name_cols,
+            how="left",
+            sort=False,
+            validate="one_to_one",
+        )
+        return out
+    else:
+        suffix_final = suffix or (
+            "_custom_by_name"
+            if not isinstance(strategy, str)
+            else f"_{strategy}_by_name"
+        )
+        rename_map = {c: f"{c}{suffix_final}" for c in label_cols}
+        to_merge = agg[name_cols + label_cols].rename(columns=rename_map)
+        out = pd.merge(
+            dataset,
+            to_merge,
+            on=name_cols,
+            how="left",
+            sort=False,
+            validate="many_to_one",
+        )
+        return out
+
+
+@pipeline_step
+def average_labels_by_name(
+    dataset: pd.DataFrame,
+    name_columns: Union[str, Sequence[str]],
+    label_columns: Union[str, Sequence[str]],
+    remove_origin_columns: bool = True,
+) -> pd.DataFrame:
+    """
+    Average label columns for rows sharing the same name.
+
+    Parameters
+    ----------
+    df : pd.DataFrame
+        Input dataframe.
+    name_columns : Union[str, Sequence[str]]
+        Column name(s) used for grouping (the "name" keys). Supports
+        a single column or multiple columns for composite keys.
+    label_cols : Union[str, Sequence[str]]
+        Label column(s) to average.
+    remove_origin_columns : bool, default True
+        If True, return one row per name with averaged labels using the
+        ORIGINAL label column names (deduplicated by design).
+        If False, keep original rows and add per-name mean columns named
+        ``<label>_mean_by_name``.
+
+    Returns
+    -------
+    pd.DataFrame
+        - If ``remove_origin_columns`` is True:
+            columns = [name_column] + label_columns (averaged),
+            one row per unique name.
+        - If False:
+            same rows as input plus ``<label>_mean_by_name`` columns.
+
+    Raises
+    ------
+    KeyError
+        If ``name_column`` or any of ``label_columns`` is missing.
+    ValueError
+        If any label column is non-numeric.v
+
+    Examples
+    --------
+    >>> df = pd.DataFrame({
+    ...     "gene": ["A","A","B"],
+    ...     "specie": ["hs","hs","hs"],
+    ...     "y1": [1.0, 3.0, 2.0],
+    ...     "y2": [10.0, 30.0, 20.0]
+    ... })
+    >>> # multiple name keys
+    >>> average_labels_by_name(df, ["gene","specie"], ["y1","y2"], remove_origin_columns=True)
+      gene specie   y1    y2
+    0    A     hs  2.0  20.0
+    1    B     hs  2.0  20.0
+
+    >>> # keep original rows and add means
+    >>> average_labels_by_name(df, "gene", ["y1","y2"], remove_origin_columns=False)
+      gene specie   y1    y2  y1_mean_by_name  y2_mean_by_name
+    0    A     hs  1.0  10.0              2.0             20.0
+    1    A     hs  3.0  30.0              2.0             20.0
+    2    B     hs  2.0  20.0              2.0             20.0
+    """
+    # Normalize inputs
+    name_cols = [name_columns] if isinstance(name_columns, str) else list(name_columns)
+    if not name_cols:
+        raise KeyError("name_columns must be a non-empty string or sequence of strings")
+    label_cols = (
+        [label_columns] if isinstance(label_columns, str) else list(label_columns)
+    )
+    if not label_cols:
+        raise KeyError(
+            "label_columns must be a non-empty string or sequence of strings"
+        )
+
+    # Existence checks
+    missing_names = [c for c in name_cols if c not in dataset.columns]
+    if missing_names:
+        raise KeyError(f"name_columns not found: {missing_names}")
+    missing_labels = [c for c in label_cols if c not in dataset.columns]
+    if missing_labels:
+        raise KeyError(f"label_columns not found: {missing_labels}")
+
+    # Numeric check for labels
+    for c in label_cols:
+        if not pd.api.types.is_numeric_dtype(dataset[c]):
+            raise ValueError(f"label column '{c}' must be numeric")
+
+    # groupby on one or multiple name columns; keep NaN groups as their own group
+    g = dataset.groupby(name_cols, dropna=False)
+    # Compute per-name means (NaNs are ignored by default)
+    if remove_origin_columns:
+        # Return one row per unique name key combination, columns = names + averaged labels
+        means = g[label_cols].mean().reset_index()
+        non_label_cols = [c for c in dataset.columns if c not in set(label_cols)]
+        # Keep original rows and add per-name mean columns named <label>_mean_by_name
+        reps = dataset.drop_duplicates(subset=name_cols, keep="first")[
+            list(dict.fromkeys(name_cols + non_label_cols))
+        ]
+        out = pd.merge(
+            reps,
+            means,
+            on=name_cols,
+            how="left",
+            sort=False,
+            validate="one_to_one",
+        )
+    else:
+        # Add <label>_mean_by_name columns to original rows (row count unchanged)
+        means = (
+            g[label_cols]
+            .transform("mean")
+            .rename(columns={c: f"{c}_mean_by_name" for c in label_cols})
+        )
+        out = pd.concat([dataset, means], axis=1)
+    return out
 
 
 @pipeline_step

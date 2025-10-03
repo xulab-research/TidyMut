@@ -22,6 +22,12 @@ from .human_domainome_sup4_cleaner import (
     clean_human_domainome_sup4_dataset,
 )
 
+from .ddg_dtm_cleaners import (
+    DdgDtmCleanerConfig,
+    create_ddg_dtm_cleaner,
+    clean_ddg_dtm_dataset,
+)
+
 __all__ = [
     "create_cdna_proteolysis_cleaner",
     "clean_cdna_proteolysis_dataset",
@@ -35,4 +41,7 @@ __all__ = [
     "create_human_domainome_sup4_cleaner",
     "clean_human_domainome_sup4_dataset",
     "HumanDomainomeSup4CleanerConfig",
+    "create_ddg_dtm_cleaner",
+    "clean_ddg_dtm_dataset",
+    "DdgDtmCleanerConfig",
 ]

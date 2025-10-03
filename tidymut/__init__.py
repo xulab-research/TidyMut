@@ -24,10 +24,12 @@ from .core import (
 )
 
 from .cleaners import (
+    basic_cleaners,
     cdna_proteolysis_cleaner,
     human_domainome_sup2_cleaner,
     human_domainome_sup4_cleaner,
     protein_gym_cleaner,
+    ddg_dtm_cleaners,
 )
 
 from .utils import (
@@ -35,6 +37,7 @@ from .utils import (
     download_cdna_proteolysis_source_file,
     download_protein_gym_source_file,
     download_human_domainome_source_file,
+    download_ddg_dtm_source_file,
     list_datasets_with_built_in_cleaners,
     show_download_instructions,
 )

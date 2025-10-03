@@ -2,7 +2,7 @@
 from __future__ import annotations
 
 import pandas as pd
-from typing import Tuple, Dict, Any, Optional, Union, Callable, List, Literal
+from typing import TYPE_CHECKING
 from dataclasses import dataclass, field
 from pathlib import Path
 import logging
@@ -14,15 +14,18 @@ from .basic_cleaners import (
     filter_and_clean_data,
     convert_data_types,
     validate_mutations,
+    average_labels_by_name,
     convert_to_mutation_dataset_format,
 )
 from .cdna_proteolysis_custom_cleaners import (
     validate_wt_sequence,
-    average_labels_by_name,
     subtract_labels_by_wt,
 )
 from ..core.dataset import MutationDataset
 from ..core.pipeline import Pipeline, create_pipeline
+
+if TYPE_CHECKING:
+    from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 __all__ = [
     "CDNAProteolysisCleanerConfig",
@@ -105,7 +108,7 @@ class CDNAProteolysisCleanerConfig(BaseCleanerConfig):
     primary_label_column: str = "label_cDNAProteolysis"
 
     # Override default pipeline name
-    pipeline_name: str = "label_cDNAProteolysis"
+    pipeline_name: str = "cDNAProteolysis"
 
     def validate(self) -> None:
         """Validate cDNAProteolysis-specific configuration parameters
@@ -147,7 +150,6 @@ def create_cdna_proteolysis_cleaner(
     ----------
     dataset_or_path : Optional[Union[pd.DataFrame, str, Path]], default=None
         Raw dataset DataFrame or file path to cDNAProteolysis dataset.
-        Must be provided if download is False
     config : Optional[Union[CDNAProteolysisCleanerConfig, Dict[str, Any], str, Path]]
         Configuration for the cleaning pipeline. Can be:
         - CDNAProteolysisCleanerConfig object
@@ -166,10 +168,6 @@ def create_cdna_proteolysis_cleaner(
         If config has invalid type
     ValueError
         If configuration validation fails
-
-    Examples
-    --------
-
     """
     # Handle configuration parameter
     if config is None:
@@ -287,17 +285,21 @@ def clean_cdna_proteolysis_dataset(
         - MutationDataset: The cleaned cDNAProteolysis dataset
 
     Examples
+    --------
     >>> pipeline = create_cdna_proteolysis_cleaner(df)  # df is raw cDNAProteolysis dataset file
 
     Use default configuration:
+
     >>> pipeline, dataset = clean_cnda_proteolysis_dataset(pipeline)
 
     Use partial configuration:
+
     >>> pipeline, dataset = clean_cdna_proteolysis_dataset(df, config={
     ...     "validate_mut_workers": 8,
     ... })
 
     Load configuration from file:
+
     >>> pipeline, dataset = clean_cdna_proteolysis_dataset(df, config="config.json")
     """
     try:
