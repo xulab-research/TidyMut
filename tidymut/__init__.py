@@ -24,6 +24,7 @@ from .core import (
 )
 
 from .cleaners import (
+    basic_cleaners,
     cdna_proteolysis_cleaner,
     human_domainome_sup2_cleaner,
     human_domainome_sup4_cleaner,
