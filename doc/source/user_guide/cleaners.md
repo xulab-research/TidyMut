@@ -9,6 +9,7 @@ This guide provides usage examples for data cleaning modules organized by databa
     - [**Supplementary Table 4**](#supplementarytable4-cleaner): Homolog-averaged ∆∆G predictions across families mapped to homologous domains proteome-wide.
 - [**ProteinGym**](#protein-gym-database): ProteinGym: Large-Scale Benchmarks for Protein Design and Fitness Prediction
 - [**cDNAProteolysis**](#cdna-proteolysis-database): Mega-scale experimental analysis of protein folding stability in biology and design
+- [**ddG-dTm Datasets**](#ddg-dtm-datasets): A collection of datasets providing single- and multiple-mutant measurements, labeled by thermodynamic parameters (ΔΔG, ΔTm)
 
 ## Prerequisites
 
@@ -162,3 +163,40 @@ cdnap_cleaning_config.column_mapping = {
 cdnap_cleaning_pipeline = create_cdna_proteolysis_cleaner(dataset_filepath, cdnap_cleaning_config)
 cdnap_cleaning_pipeline, cdnap_dataset = clean_cdna_proteolysis_dataset(cdnap_cleaning_pipeline)
 ```
+
+## ddG-dTm Datasets
+
+### File Preparation
+
+You can download the source file directy by running (see {py:func}`tidymut.utils.download_ddg_dtm_source_file` for details):
+```python
+from tidymut import download_ddg_dtm_source_file
+
+# Download all datasets
+filepaths = download_ddg_dtm_source_file("path/to/target/folder")
+
+# Or specify a particular dataset, e.g.
+filepath = download_ddg_dtm_source_file("path/to/target/folder", sub_dataset = "S571")
+```
+
+### Basic Usage
+
+{py:func}`tidymut.cleaners.ddg_dtm_cleaners.create_ddg_dtm_cleaner` can automatically recognize the label column (ddG or dTm). For example:
+
+```python
+from tidymut.cleaners import (
+    create_ddg_dtm_cleaner,
+    clean_ddg_dtm_dataset
+)
+
+# File settings
+dataset_filepath = "path/to/dataset/file"
+
+# Clean data
+ddgdtm_cleaning_pipeline = create_ddg_dtm_cleaner(dataset_filepath)
+ddgdtm_cleaning_pipeline, ddgdtm_dataset = clean_ddg_dtm_dataset(ddgdtm_cleaning_pipeline)
+```
+
+**Advanced Settings**
+
+See {py:func}`tidymut.cleaners.DdgDtmCleanerConfig` for details.
