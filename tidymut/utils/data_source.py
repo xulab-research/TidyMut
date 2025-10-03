@@ -57,6 +57,100 @@ DATASETS = {
             },
         },
     },
+    "ddG_datasets": {
+        "name": "ddG_datasets",
+        "official_url": None,
+        "files": ["M1261.csv", "S461.csv", "S669.csv", "S783.csv", "S8754.csv"],
+        "huggingface_repos": [
+            "datasets/xulab-research/TidyMut/resolve/main/ddG_datasets/M1261.csv?download=true",
+            "datasets/xulab-research/TidyMut/resolve/main/ddG_datasets/S461.csv?download=true",
+            "datasets/xulab-research/TidyMut/resolve/main/ddG_datasets/S669.csv?download=true",
+            "datasets/xulab-research/TidyMut/resolve/main/ddG_datasets/S783.csv?download=true",
+            "datasets/xulab-research/TidyMut/resolve/main/ddG_datasets/S8754.csv?download=true",
+        ],
+        "file_name": [
+            "M1261.csv",
+            "S461.csv",
+            "S669.csv",
+            "S783.csv",
+            "S8754.csv",
+        ],
+        "sub_datasets": {
+            "M1261": {
+                "files": ["M1261.csv"],
+                "huggingface_repos": [
+                    "datasets/xulab-research/TidyMut/resolve/main/ddG_datasets/M1261.csv?download=true"
+                ],
+                "file_name": ["M1261.csv"],
+            },
+            "S461": {
+                "files": ["S461.csv"],
+                "huggingface_repos": [
+                    "datasets/xulab-research/TidyMut/resolve/main/ddG_datasets/S461.csv?download=true"
+                ],
+                "file_name": ["S461.csv"],
+            },
+            "S669": {
+                "files": ["S669.csv"],
+                "huggingface_repos": [
+                    "datasets/xulab-research/TidyMut/resolve/main/ddG_datasets/S669.csv?download=true"
+                ],
+                "file_name": ["S669.csv"],
+            },
+            "S783": {
+                "files": ["S783.csv"],
+                "huggingface_repos": [
+                    "datasets/xulab-research/TidyMut/resolve/main/ddG_datasets/S783.csv?download=true"
+                ],
+                "file_name": ["S783.csv"],
+            },
+            "S8754": {
+                "files": ["S8754.csv"],
+                "huggingface_repos": [
+                    "datasets/xulab-research/TidyMut/resolve/main/ddG_datasets/S8754.csv?download=true"
+                ],
+                "file_name": ["S8754.csv"],
+            },
+        },
+    },
+    "dTm_datasets": {
+        "name": "dTm_datasets",
+        "official_url": None,
+        "files": ["S4346.csv", "S571.csv", "S557.csv"],
+        "huggingface_repos": [
+            "datasets/xulab-research/TidyMut/resolve/main/dTm_datasets/S4346.csv?download=true",
+            "datasets/xulab-research/TidyMut/resolve/main/dTm_datasets/S571.csv?download=true",
+            "datasets/xulab-research/TidyMut/resolve/main/dTm_datasets/S557.csv?download=true",
+        ],
+        "file_name": [
+            "S4346.csv",
+            "S571.csv",
+            "S557.csv",
+        ],
+        "sub_datasets": {
+            "S4346": {
+                "files": ["S4346.csv"],
+                "huggingface_repos": [
+                    "datasets/xulab-research/TidyMut/resolve/main/dTm_datasets/S4346.csv?download=true"
+                ],
+                "file_name": ["S4346.csv"],
+            },
+            "S571": {
+                "files": ["S571.csv"],
+                "huggingface_repos": [
+                    "datasets/xulab-research/TidyMut/resolve/main/dTm_datasets/S571.csv?download=true"
+                ],
+                "file_name": ["S571.csv"],
+            },
+            "S557": {
+                "files": ["S557.csv"],
+                "huggingface_repos": [
+                    "datasets/xulab-research/TidyMut/resolve/main/dTm_datasets/S557.csv?download=true"
+                ],
+                "file_name": ["S557.csv"],
+            },
+        },
+    },
 }
 
 
@@ -81,6 +175,9 @@ def list_datasets_with_built_in_cleaners() -> None:
     for key, info in DATASETS.items():
         print(f"- {key}: {info['name']}")
         print(f"  - Official URL: {info['official_url']}")
+    print(
+        "\nUse the `show_download_instructions` function to see detailed download instructions."
+    )
 
 
 def show_download_instructions(dataset_key: str) -> None:

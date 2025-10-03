@@ -373,7 +373,6 @@ def download_source_file_from_huggingface(
         target_dataset = target_dataset.get("sub_datasets", {}).get(sub_dataset, {})
     if not target_dataset:
         raise ValueError(f"No dataset found with name: {dataset_name}")
-    print(target_dataset)
     hf_repos = target_dataset.get("huggingface_repos", [])
     if len(hf_repos) == 0:
         raise ValueError(
@@ -464,3 +463,53 @@ def download_human_domainome_source_file(
     return download_source_file_from_huggingface(
         "HumanDomainome", dir, overwrite=overwrite, sub_dataset=sub_dataset
     )
+
+
+def download_ddg_dtm_source_file(
+    dir: str, *, overwrite: bool = False, sub_dataset: Optional[str] = None
+) -> Dict[str, str]:
+    """
+    Download the source file for ddG-dTm datasets from the original source.
+
+    Parameters
+    ----------
+    dir : str
+        The target directory where the file will be saved.
+    overwrite : bool, default=False
+        Whether to overwrite the file if it already exists. Default is False.
+    sub_dataset : Optional[str], default=None
+        Sub-dataset to download. If None, download the entire dataset.
+        Supported options:
+        - ddG datasets: "M1261", "S461", "S669", "S783", "S8754"
+        - dTm datasets: "S4346", "S571", "S557"
+
+    Returns
+    -------
+    Dict[str, str]
+        key: file name,
+        value: file path pointing to the ddG-dTm dataset source file
+    """
+    ddg_datasets = list(DATASETS["ddG_datasets"]["sub_datasets"].keys())
+    dtm_datasets = list(DATASETS["dTm_datasets"]["sub_datasets"].keys())
+    supported_sub_datasets = ddg_datasets + dtm_datasets
+    if sub_dataset is not None and sub_dataset not in supported_sub_datasets:
+        raise ValueError(
+            f"Unsupported sub-dataset. Supported options: "
+            f"{', '.join(supported_sub_datasets)}"
+        )
+
+    if sub_dataset is None:
+        file_paths = download_source_file_from_huggingface(
+            "ddG_datasets", dir, overwrite=overwrite
+        )
+        file_paths.update(
+            download_source_file_from_huggingface(
+                "dTm_datasets", dir, overwrite=overwrite
+            )
+        )
+    else:
+        dataset_name = "ddG_datasets" if sub_dataset in ddg_datasets else "dTm_datasets"
+        file_paths = download_source_file_from_huggingface(
+            dataset_name, dir, overwrite=overwrite, sub_dataset=sub_dataset
+        )
+    return file_paths
