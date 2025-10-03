@@ -197,6 +197,6 @@ ddgdtm_cleaning_pipeline = create_ddg_dtm_cleaner(dataset_filepath)
 ddgdtm_cleaning_pipeline, ddgdtm_dataset = clean_ddg_dtm_dataset(ddgdtm_cleaning_pipeline)
 ```
 
-**Advanced Settings**
+### Advanced Settings
 
 See {py:func}`tidymut.cleaners.DdgDtmCleanerConfig` for details.
