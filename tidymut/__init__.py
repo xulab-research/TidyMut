@@ -29,6 +29,7 @@ from .cleaners import (
     human_domainome_sup2_cleaner,
     human_domainome_sup4_cleaner,
     protein_gym_cleaner,
+    ddg_dtm_cleaners,
 )
 
 from .utils import (
