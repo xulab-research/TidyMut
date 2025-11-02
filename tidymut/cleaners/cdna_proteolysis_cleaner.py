@@ -16,6 +16,7 @@ from .basic_cleaners import (
     validate_mutations,
     average_labels_by_name,
     convert_to_mutation_dataset_format,
+    replace_in_protein_name,
 )
 from .cdna_proteolysis_custom_cleaners import (
     validate_wt_sequence,
@@ -237,6 +238,11 @@ def create_cdna_proteolysis_cleaner(
                 label_columns=final_config.label_columns,
                 mutation_column=final_config.column_mapping.get("mut_type", "mut_type"),
                 in_place=True,
+            )
+            .delayed_then(
+                replace_in_protein_name,
+                old = ".pdb",
+                name_column=final_config.column_mapping.get("WT_name", "WT_name"),
             )
             .delayed_then(
                 convert_to_mutation_dataset_format,
