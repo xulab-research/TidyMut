@@ -53,6 +53,7 @@ __all__ = [
     "aggregate_labels_by_name",
     "average_labels_by_name",
     "convert_to_mutation_dataset_format",
+    "replace_in_column"
 ]
 
 
@@ -1983,119 +1984,93 @@ def convert_to_mutation_dataset_format(
         error_msg += "  Format 1: Include 'WT' rows with wild-type sequences\n"
         error_msg += "  Format 2: Include a sequence column with wild-type sequences"
         raise ValueError(error_msg)
-@pipeline_step
-def replace_in_protein_name(
-    data: Any,
-    old: str,
-    new: str = None,
-    *,
-    name_column: str = "name",
-    inplace: bool = False,
-) -> Any:  
-    """
-    Perform string replacement on the protein-name column (default 'name').
 
-    Behavior
-    --------
-    - If only `old` is provided: remove all occurrences of `old`.
-    - If both `old` and `new` are provided: replace all occurrences of `old` with `new`
-      (with `new` defaulting to an empty string).
+
+@pipeline_step
+def replace_in_column(
+    df: pd.DataFrame,
+    name_column: str,
+    old: str,
+    new: str = "",
+) -> pd.DataFrame:  
+    """
+    Replace or remove a literal substring in a specified DataFrame column.
+
+    This function performs a literal (non-regex) string replacement on the specified column. 
+    It replaces occurrences of a target substring ('old') with a new substring ('new'). 
+    If 'new' is not provided, the target substring is removed.
 
     Parameters
-    --------
-    data : pandas.DataFrame or tuple
-        The input table. You may pass a DataFrame directly, or a tuple like
-        `(DataFrame, meta1, meta2, ...)`. When a tuple is given, only the first
-        element (the DataFrame) is modified; the remaining elements are returned
-        unchanged.
+    ----------
+    df : pd.DataFrame
+        Input DataFrame containing at least one column with string identifiers.
+    name_column : str
+        Name of the column on which to perform replacements. 
     old : str
-        The non-empty substring to remove/replace.
+        Non-empty substring to be replaced or removed.
     new : str, optional
-        The replacement substring. Defaults to `""` (i.e., deletion).
-    name_column : str, optional (keyword-only)
-        Name of the column holding protein identifiers. Defaults to `"name"`.
-    inplace : bool, optional (keyword-only)
-        If `True`, modify the input DataFrame in place. If `False` (default),
-        operate on a copy and return the new DataFrame.
+        Replacement substring. If omitted or None, occurrences of 'old' will be removed.
+        Defaults to "" (deletion).
 
     Returns
     -------
-    pandas.DataFrame or tuple
-        If `data` is a DataFrame, returns the modified DataFrame.
-        If `data` is a tuple `(df, *rest)`, returns `(modified_df, *rest)`.
-
+    pd.DataFrame
+        The DataFrame with the specified replacements applied.
+    
     Raises
     ------
     ValueError
-        If `old` is `None` or an empty string.
+        If 'old' is an empty string.
     TypeError
-        If `data` is neither a DataFrame nor a tuple whose first element is a DataFrame.
+        If 'df' is not a pd.DataFrame or 'old' is not a str
     KeyError
-        If `name_column` does not exist in the DataFrame.
+        If 'name_column' does not exist in the DataFrame.
 
 
     Examples
     --------
-    # remove ".pdb"
-    >>> df1 = pd.DataFrame({
+    Remove the substring ".pdb":
+
+    >>> import pandas as pd
+    >>> df = pd.DataFrame({
     ...     'name': ['prot1.pdb', 'prot1.pdb', 'prot1.pdb', 'prot2.pdb', 'prot2.pdb'], 
     ...     'mut_info': ['A0S,Q1D', 'C2D', 'WT', 'E0F', 'WT'],
     ...     'mut_seq': ['SDCDEF', 'AQDDEF', 'AQCDEF', 'FGHIGHK', 'EGHIGHK'],
     ...     'score': [1.5, 2.0, 0.0, 3.0, 0.0]
     ... )
-    >>> df1_replaced = replace_in_protein_name(df1, ".pdb")
-    >>> df1_replaced
+    >>> replace_in_column(df, "name", ".pdb")
         name mut_info  mut_seq  score
     0  prot1  A0S,Q1D   SDCDEF    1.5
     1  prot1      C2D   AQDDEF    2.0
     2  prot1       WT   AQCDEF    0.0
     3  prot2      E0F  FGHIGHK    3.0
     4  prot2       WT  EGHIGHK    0.0
-    # replace ".pdb" with ".pross"
-    >>> df1_replaced = replace_in_protein_name(df1, ".pdb", ".pross")
-    >>> df1_replaced
+
+    Replace ".pdb" with ".pross":
+
+    >>> replace_in_column(df, "name", ".pdb", ".pross")
             name mut_info  mut_seq  score
     0  prot1.pross  A0S,Q1D   SDCDEF    1.5
     1  prot1.pross      C2D   AQDDEF    2.0
     2  prot1.pross       WT   AQCDEF    0.0
     3  prot2.pross      E0F  FGHIGHK    3.0
     4  prot2.pross       WT  EGHIGHK    0.0
-    # works with (df, meta...) tuples as well
-    df_out, meta = replace_in_protein_name((df, meta), ".pdb")
     """
-    
-    if old is None or (isinstance(old, str) and old == ""):
-        raise ValueError("`old` must be a non-empty string.")
-    if new is None:
-        new = ""
-
-    if isinstance(data, pd.DataFrame):
-        df = data
-        rest = None
-    elif isinstance(data, tuple):
-        if len(data) == 0:
-            raise TypeError("Empty tuple input; expected (DataFrame, ...).")
-        first = data[0]
-        if not isinstance(first, pd.DataFrame):
-            raise TypeError("The first element of the tuple must be a pandas.DataFrame.")
-        df = first
-        rest = data[1:]
-    else:
-        raise TypeError(f"Unsupported input type: {type(data)}; expected DataFrame or tuple.")
+    if not isinstance(df, pd.DataFrame):
+        raise TypeError(f"'df' must be a pandas.DataFrame, got {type(df)}.")
 
     if name_column not in df.columns:
         cols_preview = ", ".join(map(str, df.columns[:20]))
-        raise KeyError(f"Column {name_column!r} not found. Available columns (first 20): {cols_preview}")
+        raise KeyError(
+            f"Column {name_column!r} not found."
+            f"Available columns (first 20): {cols_preview}"
+        )
+    
+    if not isinstance(old, str):
+        raise TypeError(f"'old' must be a str, got {type(old)}.")
+    if old == "":
+        raise ValueError("'old' must be a non-empty string.")
 
-    df_out = df if inplace else df.copy()
- 
-    def _safe_replace(v):
-        if pd.isna(v):
-            return v
-        return str(v).replace(old, new)
-
-    df_out[name_column] = df_out[name_column].map(_safe_replace)
-
-    if rest is None:
-        return df_out
-    return (df_out, *rest)
+    out = df.copy()
+    out[name_column] = out[name_column].astype("string").str.replace(old, new, regex=False)
+    return out
