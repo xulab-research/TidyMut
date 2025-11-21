@@ -287,12 +287,12 @@ def create_human_domainome_sup4_cleaner(
             )
             .delayed_then(
                 process_domain_positions,
-            )
+            )            
             .delayed_then(
                 convert_data_types,
                 type_conversions=final_config.type_conversions,
             )
-            .degit add tidymut/cleaners/human_domainome_sup4_cleaner.pylayed_then(
+            .delayed_then(
                 merge_columns,
                 columns_to_merge=[
                     final_config.column_mapping.get("uniprot_ID", "uniprot_ID"),
