@@ -514,11 +514,19 @@ def download_ddg_dtm_source_file(
         )
     return file_paths
 
+
 def download_archstabms1e10_source_file(
-        dir: str, *, overwrite: bool = False
-)-> Dict[str, str]:
+    dir: str, *, overwrite: bool = False
+) -> Dict[str, str]:
     """
     Download the source file for ArchStabMS1E10 dataset from the original source.
+
+    Parameters
+    ----------
+    dir : str
+        The target directory where the file will be saved
+    overwite bool, default=False
+        Whether to overwrite the file if it already exists. Default is False.
 
     Returns
     -------

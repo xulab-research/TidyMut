@@ -513,6 +513,7 @@ class MutationSet(Generic[MutationType]):
         alphabet: Optional[BaseAlphabet] = None,
         name: Optional[str] = None,
         metadata: Optional[Dict[str, Any]] = None,
+        reject_redundant: bool = True,
     ) -> "MutationSet":
         """
         Create a mutation set from a string
@@ -607,8 +608,20 @@ class MutationSet(Generic[MutationType]):
 
         if errors:
             # Raise an exception if we have some valid mutations but also errors
-            raise ValueError(f"Some mutations could not be parsed: {'; '.join(errors)}")
+            raise ValueError(f"Some mutations could not be parsed: {';'.join(errors)}")
 
+        if reject_redundant:
+            redundant = [
+                str(m)
+                for m in mutations
+                if hasattr(m, "is_synonymous")
+                and callable(getattr(m, "is_synonymous"))
+                and m.is_synonymous()
+            ]
+            if redundant:
+                raise ValueError(
+                    f"Redundant/no-op mutations detected : {', '.join(redundant)}"
+                )
         # Return appropriate mutation set type based on detected mutation type
         if mutation_type == AminoAcidMutation:
             return AminoAcidMutationSet(

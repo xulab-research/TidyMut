@@ -153,14 +153,12 @@ DATASETS = {
     },
     "ArchStabMS1E10_datasets": {
         "name": "ArchStabMS1E10_datasets",
-        "official_url":None,
+        "official_url": None,
         "files": ["archstabms_1e10.csv"],
         "huggingface_repos": [
             "datasets/xulab-research/TidyMut/resolve/main/archstabms_1e10/archstabms_1e10.csv?download=true"
         ],
-        "file_name": [
-            "archstabms_1e10.csv"
-        ],
+        "file_name": ["archstabms_1e10.csv"],
     },
 }
 
