@@ -53,7 +53,7 @@ __all__ = [
     "aggregate_labels_by_name",
     "average_labels_by_name",
     "convert_to_mutation_dataset_format",
-    "replace_in_column"
+    "replace_in_column",
 ]
 
 
@@ -1992,12 +1992,12 @@ def replace_in_column(
     name_column: str,
     old: str,
     new: str = "",
-) -> pd.DataFrame:  
+) -> pd.DataFrame:
     """
     Replace or remove a literal substring in a specified DataFrame column.
 
-    This function performs a literal (non-regex) string replacement on the specified column. 
-    It replaces occurrences of a target substring ('old') with a new substring ('new'). 
+    This function performs a literal (non-regex) string replacement on the specified column.
+    It replaces occurrences of a target substring ('old') with a new substring ('new').
     If 'new' is not provided, the target substring is removed.
 
     Parameters
@@ -2005,7 +2005,7 @@ def replace_in_column(
     df : pd.DataFrame
         Input DataFrame containing at least one column with string identifiers.
     name_column : str
-        Name of the column on which to perform replacements. 
+        Name of the column on which to perform replacements.
     old : str
         Non-empty substring to be replaced or removed.
     new : str, optional
@@ -2016,7 +2016,7 @@ def replace_in_column(
     -------
     pd.DataFrame
         The DataFrame with the specified replacements applied.
-    
+
     Raises
     ------
     ValueError
@@ -2033,7 +2033,7 @@ def replace_in_column(
 
     >>> import pandas as pd
     >>> df = pd.DataFrame({
-    ...     'name': ['prot1.pdb', 'prot1.pdb', 'prot1.pdb', 'prot2.pdb', 'prot2.pdb'], 
+    ...     'name': ['prot1.pdb', 'prot1.pdb', 'prot1.pdb', 'prot2.pdb', 'prot2.pdb'],
     ...     'mut_info': ['A0S,Q1D', 'C2D', 'WT', 'E0F', 'WT'],
     ...     'mut_seq': ['SDCDEF', 'AQDDEF', 'AQCDEF', 'FGHIGHK', 'EGHIGHK'],
     ...     'score': [1.5, 2.0, 0.0, 3.0, 0.0]
@@ -2065,12 +2065,14 @@ def replace_in_column(
             f"Column {name_column!r} not found."
             f"Available columns (first 20): {cols_preview}"
         )
-    
+
     if not isinstance(old, str):
         raise TypeError(f"'old' must be a str, got {type(old)}.")
     if old == "":
         raise ValueError("'old' must be a non-empty string.")
 
     out = df.copy()
-    out[name_column] = out[name_column].astype("string").str.replace(old, new, regex=False)
+    out[name_column] = (
+        out[name_column].astype("string").str.replace(old, new, regex=False)
+    )
     return out

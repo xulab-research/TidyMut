@@ -50,7 +50,7 @@ __all__ = [
     "create_ddg_dtm_cleaner",
     "clean_ddg_dtm_dataset",
     "DdgDtmCleanerConfig",
-    "ArchStabMS1E10CleanerConfig"
-    "create_archstabms_1e10_cleaner"
-    "clean_archstabms_1e10_dataset"
+    "ArchStabMS1E10CleanerConfig",
+    "create_archstabms_1e10_cleaner",
+    "clean_archstabms_1e10_dataset",
 ]

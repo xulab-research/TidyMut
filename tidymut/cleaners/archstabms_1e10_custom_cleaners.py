@@ -7,12 +7,13 @@ from ..core.pipeline import pipeline_step
 
 __all__ = ["compute_mutations"]
 
+
 @pipeline_step
 def compute_mutations(
     dataset: pd.DataFrame,
     name_column: str = "name",
     WT_column: str = "WT",
-    mut_seq: str = "mut_seq"
+    mut_seq: str = "mut_seq",
 ) -> pd.DataFrame:
     """compute the mutations by the wt_seq and mut_seq and generate mutation column
 
@@ -27,12 +28,13 @@ def compute_mutations(
         Column containing the amino-acid sequence for that row (treated as the
         mutated sequence for mutants and the WT sequence for the WT row).
     """
+
     def get_mut_info(group):
         # get wt sequence
         wt_rows = group[group[WT_column] == True]
         if len(wt_rows) == 0:
             return pd.Series([""] * len(group), index=group.index)
-        wt_seq = wt_rows[mut_seq].values[0] # means wt_seq
+        wt_seq = wt_rows[mut_seq].values[0]  # means wt_seq
         wt_array = np.array(list(wt_seq))
 
         # convert sequence to character matrix
@@ -51,14 +53,15 @@ def compute_mutations(
             muts = [f"{wt_array[pos]}{pos}{row[pos]}" for pos in positions]
             mut_str = ",".join(muts)
             mut_info_list.append(
-                str(MutationSet.from_string(mut_str, is_zero_based=True)) if mut_str else ""
+                str(MutationSet.from_string(mut_str, is_zero_based=True))
+                if mut_str
+                else ""
             )
         return pd.Series(mut_info_list, index=group.index)
 
-    dataset["mut_info"] = dataset.groupby(
-        [name_column], group_keys=False
-    ).apply(get_mut_info)
+    dataset["mut_info"] = dataset.groupby([name_column], group_keys=False).apply(
+        get_mut_info
+    )
 
     dataset = dataset.drop(columns=WT_column)
     return dataset
-
