@@ -287,7 +287,7 @@ def create_human_domainome_sup4_cleaner(
             )
             .delayed_then(
                 process_domain_positions,
-            )            
+            )
             .delayed_then(
                 convert_data_types,
                 type_conversions=final_config.type_conversions,

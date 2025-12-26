@@ -10,6 +10,7 @@ This guide provides usage examples for data cleaning modules organized by databa
 - [**ProteinGym**](#protein-gym-database): ProteinGym: Large-Scale Benchmarks for Protein Design and Fitness Prediction
 - [**cDNAProteolysis**](#cdna-proteolysis-database): Mega-scale experimental analysis of protein folding stability in biology and design
 - [**ddG-dTm Datasets**](#ddg-dtm-datasets): A collection of datasets providing single- and multiple-mutant measurements, labeled by thermodynamic parameters (ΔΔG, ΔTm)
+- [**archstabms1e10 Datasets**](#archstabms1e10-datasets): High-order multi-mutant libraries (“1e10”) measuring protein stability for GRB2-SH3 and SRC.
 
 ## Prerequisites
 
@@ -200,3 +201,33 @@ ddgdtm_cleaning_pipeline, ddgdtm_dataset = clean_ddg_dtm_dataset(ddgdtm_cleaning
 ### Advanced Settings
 
 See {py:func}`tidymut.cleaners.DdgDtmCleanerConfig` for details.
+
+## archstabms1e10 Datasets
+
+### File Preparation
+
+You can download the source file directy by running (see {py:func}`tidymut.utils.download_archstabms1e10_source_file` for details):
+```python
+from tidymut import download_archstabms1e10_source_file
+filepaths = download_archstabms1e10_source_file("path/to/target/folder")
+```
+
+### Basic Usage
+
+```python
+from tidymut.cleaners import (
+    create_archstabms_1e10_cleaner,
+    clean_archstabms_1e10_dataset
+)
+
+# File settings
+dataset_filepath = "path/to/dataset/file"
+
+# Clean data
+archstabms_cleaning_pipeline = create_archstabms_1e10_cleaner(dataset_filepath)
+archstabms_cleaning_pipeline, archstabms_dataset = clean_archstabms_1e10_dataset(ddgdtm_cleaning_pipeline)
+```
+
+### Advanced Settings
+
+See {py:func}`tidymut.cleaners.ArchStabMS1E10CleanerConfig` for details.

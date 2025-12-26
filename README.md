@@ -50,6 +50,7 @@ See [ReadtheDocs](https://tidymut.readthedocs.io/en/latest/user_guide/cleaners.h
 | HumanDomainome  | Site-saturation mutagenesis of 500 human protein domains                            | SupplementaryTable2.txt or SupplementaryTable4.txt | https://www.nature.com/articles/s41586-024-08370-4                            |
 | ddG             | None                                                                                | M1261.csv, S461.csv, S669.csv, S783.csv, S8754.csv | https://huggingface.co/datasets/xulab-research/TidyMut/tree/main/ddG_datasets |
 | dTm             | None                                                                                | S4346.csv, S557.csv, S571.csv                      | https://huggingface.co/datasets/xulab-research/TidyMut/tree/main/dTm_datasets |
+| ArchStabMS1E10  | The genetic architecture of protein stability                                       | archstabms_1e10.csv                                | https://huggingface.co/datasets/xulab-research/TidyMut/blob/main/archstabms1e_10/archstabms_1e10.csv |
 
 ### Processing cDNAProteolysis Dataset
 

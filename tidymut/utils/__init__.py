@@ -11,6 +11,7 @@ from .raw_data_downloader import (
     download_protein_gym_source_file,
     download_human_domainome_source_file,
     download_ddg_dtm_source_file,
+    download_archstabms1e10_source_file,
 )
 
 # fmt: off
@@ -22,4 +23,5 @@ __all__ = [
     "download_protein_gym_source_file", 
     "download_human_domainome_source_file",
     "download_ddg_dtm_source_file",
+    "download_archstabms1e10_source_file",
 ]

@@ -513,3 +513,27 @@ def download_ddg_dtm_source_file(
             dataset_name, dir, overwrite=overwrite, sub_dataset=sub_dataset
         )
     return file_paths
+
+
+def download_archstabms1e10_source_file(
+    dir: str, *, overwrite: bool = False
+) -> Dict[str, str]:
+    """
+    Download the source file for ArchStabMS1E10 dataset from the original source.
+
+    Parameters
+    ----------
+    dir : str
+        The target directory where the file will be saved
+    overwite bool, default=False
+        Whether to overwrite the file if it already exists. Default is False.
+
+    Returns
+    -------
+    Dict[str, str]
+        key: file name,
+        value: file path pointing to cDNAProteolysis dataset source file
+    """
+    return download_source_file_from_huggingface(
+        "ArchStabMS1E10_datasets", dir, overwrite=overwrite
+    )

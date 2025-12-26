@@ -30,6 +30,7 @@ from .cleaners import (
     human_domainome_sup4_cleaner,
     protein_gym_cleaner,
     ddg_dtm_cleaners,
+    archstabms_1e10_cleaner,
 )
 
 from .utils import (
@@ -40,4 +41,5 @@ from .utils import (
     download_ddg_dtm_source_file,
     list_datasets_with_built_in_cleaners,
     show_download_instructions,
+    download_archstabms1e10_source_file,
 )
