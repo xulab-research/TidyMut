@@ -1,4 +1,4 @@
-# cleaners/human_domainome_custom_cleaners.py
+# cleaners/cdna_proteolysis_custom_cleaners.py
 from __future__ import annotations
 
 import pandas as pd
