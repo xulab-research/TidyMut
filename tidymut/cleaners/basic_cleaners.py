@@ -54,6 +54,7 @@ __all__ = [
     "average_labels_by_name",
     "convert_to_mutation_dataset_format",
     "replace_in_column",
+    "add_protein_name_column",
 ]
 
 
@@ -93,17 +94,44 @@ def read_dataset(
     if file_format is None:
         file_format = Path(file_path).suffix.lstrip(".").lower()
 
+    csv_reader = lambda path, **kw: pd.read_csv(path, sep=None, engine="python", **kw)
+
     readers = {
-        "csv": lambda path, **kw: pd.read_csv(path, **kw),
+        "csv": csv_reader,
+        "txt": csv_reader,
         "tsv": lambda path, **kw: pd.read_csv(path, sep="\t", **kw),
         "xlsx": lambda path, **kw: pd.read_excel(path, **kw),
+        "xls": lambda path, **kw: pd.read_excel(path, **kw),
+        "parquet": lambda path, **kw: pd.read_parquet(path, **kw),
     }
 
     tqdm.write(f"Reading dataset from {file_path}...")
     try:
-        return readers[file_format](file_path, **kwargs)
-    except KeyError:
-        raise ValueError(f"Unsupported file format: {file_format}")
+        if file_format not in readers:
+            raise ValueError(f"Unsupported file format: {file_format}")
+
+        df = readers[file_format](file_path, **kwargs)
+
+        if df.shape[1] == 1 and isinstance(df.columns[0], str) and "," in df.columns[0]:
+            tqdm.write(
+                "Warning: Dataset loaded as single column but ',' detected. Trying fallback to explicit comma separator..."
+            )
+            df = pd.read_csv(file_path, sep=",", **kwargs)
+        if "Unnamed: 0" in df.columns:
+            if pd.api.types.is_integer_dtype(df["Unnamed: 0"]):
+                df.set_index("Unnamed: 0", inplace=True)
+                df.index.name = None
+            else:
+                df.rename(columns={"Unnamed: 0": "index_col"}, inplace=True)
+        return df
+    except pd.errors.EmptyDataError:
+        raise ValueError(f"The file {file_path} is empty.")
+    except pd.errors.ParserError as e:
+        raise ValueError(
+            f"Error parsing file {file_path}. Check the delimiter or file integrity. Details: {e}"
+        )
+    except Exception as e:
+        raise RuntimeError(f"Unexpected error reading {file_path}: {e}")
 
 
 @pipeline_step
@@ -973,7 +1001,7 @@ def validate_mutations(
         cache = None
 
     # Prepare arguments for parallel processing
-    mutation_values = result[mutation_column].tolist()
+    mutation_values = validation_dataset[mutation_column].tolist()
     args_list = [
         (
             mut_info,
@@ -995,15 +1023,15 @@ def validate_mutations(
     formatted_mutations, error_messages = map(list, zip(*results))
 
     # Add results to dataset
-    result_dataset = result.copy()
-    result_dataset["formatted_" + mutation_column] = formatted_mutations
-    result_dataset["error_message"] = error_messages
+    validation_dataset = validation_dataset.copy()
+    validation_dataset["formatted_" + mutation_column] = formatted_mutations
+    validation_dataset["error_message"] = error_messages
 
     # Create success mask based on whether formatted mutation is available
-    success_mask = pd.notnull(result_dataset["formatted_" + mutation_column])
+    success_mask = pd.notnull(validation_dataset["formatted_" + mutation_column])
 
     # Create successful dataset
-    successful_dataset = result_dataset[success_mask].copy()
+    successful_dataset = validation_dataset[success_mask].copy()
     if format_mutations:
         # Replace original mutation column with formatted version
         successful_dataset[mutation_column] = successful_dataset[
@@ -1018,7 +1046,7 @@ def validate_mutations(
     )
 
     # Create failed dataset
-    failed_dataset = result_dataset[~success_mask].copy()
+    failed_dataset = validation_dataset[~success_mask].copy()
     failed_dataset = failed_dataset.drop(columns=["formatted_" + mutation_column])
 
     tqdm.write(
@@ -2076,3 +2104,32 @@ def replace_in_column(
         out[name_column].astype("string").str.replace(old, new, regex=False)
     )
     return out
+
+
+@pipeline_step
+def add_protein_name_column(
+    dataset: pd.DataFrame,
+    protein_name: str,
+    column_name: str = "name",
+) -> pd.DataFrame:
+    """
+    Add a new column with protein names to the given DataFrame.
+
+    Argument
+    --------
+        dataset : pd.DataFrame
+            The input DataFrame to which the protein name will be added.
+        protein_name : str
+            The protein name to be added.
+
+    Returns
+    -------
+        dataset: pd.DataFrame
+            The DataFrame with an additional column of protein names.
+    """
+
+    dataset = dataset.copy()
+
+    dataset[column_name] = protein_name
+    print("dataset:\n", dataset)
+    return dataset
