@@ -2127,9 +2127,16 @@ def add_protein_name_column(
         dataset: pd.DataFrame
             The DataFrame with an additional column of protein names.
     """
+    if not protein_name:
+        raise ValueError("Missing protein name")
+
+    tqdm.write(f"Adding protein name {protein_name} to the column {column_name}")
 
     dataset = dataset.copy()
-
     dataset[column_name] = protein_name
-    print("dataset:\n", dataset)
+
+    tqdm.write(
+        f"Successfully adding protein name {protein_name} to the column {column_name}"
+    )
+
     return dataset
