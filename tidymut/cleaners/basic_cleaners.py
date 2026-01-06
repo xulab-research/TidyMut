@@ -54,7 +54,7 @@ __all__ = [
     "average_labels_by_name",
     "convert_to_mutation_dataset_format",
     "replace_in_column",
-    "add_protein_name_column",
+    "add_column",
 ]
 
 
@@ -94,29 +94,28 @@ def read_dataset(
     if file_format is None:
         file_format = Path(file_path).suffix.lstrip(".").lower()
 
-    csv_reader = lambda path, **kw: pd.read_csv(path, sep=None, engine="python", **kw)
-
     readers = {
-        "csv": csv_reader,
-        "txt": csv_reader,
-        "tsv": lambda path, **kw: pd.read_csv(path, sep="\t", **kw),
-        "xlsx": lambda path, **kw: pd.read_excel(path, **kw),
-        "xls": lambda path, **kw: pd.read_excel(path, **kw),
-        "parquet": lambda path, **kw: pd.read_parquet(path, **kw),
+        "csv": pd.read_csv,
+        "txt": pd.read_csv,
+        "tsv": lambda path, **kw: pd.read_csv(path, **{**kw, "sep": "\t"}),
+        "xlsx": pd.read_excel,
+        "xls": pd.read_excel,
+        "parquet": pd.read_parquet,
     }
+
+    if file_format not in readers:
+        raise ValueError(f"Unsupported file format: {file_format}")
 
     tqdm.write(f"Reading dataset from {file_path}...")
     try:
-        if file_format not in readers:
-            raise ValueError(f"Unsupported file format: {file_format}")
-
         df = readers[file_format](file_path, **kwargs)
-
-        if df.shape[1] == 1 and isinstance(df.columns[0], str) and "," in df.columns[0]:
-            tqdm.write(
-                "Warning: Dataset loaded as single column but ',' detected. Trying fallback to explicit comma separator..."
-            )
-            df = pd.read_csv(file_path, sep=",", **kwargs)
+        if file_format in {"csv", "txt"} and df.shape[1] == 1:
+            col0 = df.columns[0]
+            if isinstance(col0, str) and "," in col0:
+                tqdm.write(
+                    "Warning: Dataset loaded as single column but ',' detected. Trying fallback to explicit comma separator..."
+                )
+                df = pd.read_csv(file_path, sep=",", **kwargs)
         if "Unnamed: 0" in df.columns:
             if pd.api.types.is_integer_dtype(df["Unnamed: 0"]):
                 df.set_index("Unnamed: 0", inplace=True)
@@ -2107,36 +2106,49 @@ def replace_in_column(
 
 
 @pipeline_step
-def add_protein_name_column(
+def add_column(
     dataset: pd.DataFrame,
-    protein_name: str,
-    column_name: str = "name",
+    dataset_name: str,
+    column_name: str = "protein_name",
 ) -> pd.DataFrame:
     """
-    Add a new column with protein names to the given DataFrame.
+    Add a constant-valued column to a DataFrame.
 
-    Argument
-    --------
-        dataset : pd.DataFrame
-            The input DataFrame to which the protein name will be added.
-        protein_name : str
-            The protein name to be added.
+    Parameters
+    ----------
+    dataset : pd.DataFrame
+        The input DataFrame to which the 'dataset_name' will be added.
+    dataset_name : str
+        Value to assign to the new column for all rows.
+    column_name : str
+        Name of the column to create or overwrite.
 
     Returns
     -------
-        dataset: pd.DataFrame
-            The DataFrame with an additional column of protein names.
-    """
-    if not protein_name:
-        raise ValueError("Missing protein name")
+    dataset : pd.DataFrame
+        The DataFrame with an additional column.
 
-    tqdm.write(f"Adding protein name {protein_name} to the column {column_name}")
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> df = pd.DataFrame({
+    >>>     'mut_info' : ['A0G', 'V1D', 'K2A'],
+    >>>     'mut_seq' : ['GVKDF', 'ADKDF', 'AVADF']})
+    >>> df = add_column(df, dataset_name="protein1", column_name="protein_name")
+    >>> df
+      mut_info mut_seq protein_name
+    0      A0G   GVKDF     protein1
+    1      V1D   ADKDF     protein1
+    2      K2A   AVADF     protein1
+    """
+    if not dataset_name:
+        raise ValueError(f"Missing name {dataset_name}")
+
+    tqdm.write(f"Adding name {dataset_name} to the column {column_name}")
 
     dataset = dataset.copy()
-    dataset[column_name] = protein_name
+    dataset[column_name] = dataset_name
 
-    tqdm.write(
-        f"Successfully adding protein name {protein_name} to the column {column_name}"
-    )
+    tqdm.write(f"Successfully adding name {dataset_name} to the column {column_name}")
 
     return dataset
