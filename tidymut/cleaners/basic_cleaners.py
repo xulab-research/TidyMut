@@ -54,6 +54,7 @@ __all__ = [
     "average_labels_by_name",
     "convert_to_mutation_dataset_format",
     "replace_in_column",
+    "add_column",
 ]
 
 
@@ -94,16 +95,42 @@ def read_dataset(
         file_format = Path(file_path).suffix.lstrip(".").lower()
 
     readers = {
-        "csv": lambda path, **kw: pd.read_csv(path, **kw),
-        "tsv": lambda path, **kw: pd.read_csv(path, sep="\t", **kw),
-        "xlsx": lambda path, **kw: pd.read_excel(path, **kw),
+        "csv": pd.read_csv,
+        "txt": pd.read_csv,
+        "tsv": lambda path, **kw: pd.read_csv(path, **{**kw, "sep": "\t"}),
+        "xlsx": pd.read_excel,
+        "xls": pd.read_excel,
+        "parquet": pd.read_parquet,
     }
+
+    if file_format not in readers:
+        raise ValueError(f"Unsupported file format: {file_format}")
 
     tqdm.write(f"Reading dataset from {file_path}...")
     try:
-        return readers[file_format](file_path, **kwargs)
-    except KeyError:
-        raise ValueError(f"Unsupported file format: {file_format}")
+        df = readers[file_format](file_path, **kwargs)
+        if file_format in {"csv", "txt"} and df.shape[1] == 1:
+            col0 = df.columns[0]
+            if isinstance(col0, str) and "," in col0:
+                tqdm.write(
+                    "Warning: Dataset loaded as single column but ',' detected. Trying fallback to explicit comma separator..."
+                )
+                df = pd.read_csv(file_path, sep=",", **kwargs)
+        if "Unnamed: 0" in df.columns:
+            if pd.api.types.is_integer_dtype(df["Unnamed: 0"]):
+                df.set_index("Unnamed: 0", inplace=True)
+                df.index.name = None
+            else:
+                df.rename(columns={"Unnamed: 0": "index_col"}, inplace=True)
+        return df
+    except pd.errors.EmptyDataError:
+        raise ValueError(f"The file {file_path} is empty.")
+    except pd.errors.ParserError as e:
+        raise ValueError(
+            f"Error parsing file {file_path}. Check the delimiter or file integrity. Details: {e}"
+        )
+    except Exception as e:
+        raise RuntimeError(f"Unexpected error reading {file_path}: {e}")
 
 
 @pipeline_step
@@ -973,7 +1000,7 @@ def validate_mutations(
         cache = None
 
     # Prepare arguments for parallel processing
-    mutation_values = result[mutation_column].tolist()
+    mutation_values = validation_dataset[mutation_column].tolist()
     args_list = [
         (
             mut_info,
@@ -995,15 +1022,15 @@ def validate_mutations(
     formatted_mutations, error_messages = map(list, zip(*results))
 
     # Add results to dataset
-    result_dataset = result.copy()
-    result_dataset["formatted_" + mutation_column] = formatted_mutations
-    result_dataset["error_message"] = error_messages
+    validation_dataset = validation_dataset.copy()
+    validation_dataset["formatted_" + mutation_column] = formatted_mutations
+    validation_dataset["error_message"] = error_messages
 
     # Create success mask based on whether formatted mutation is available
-    success_mask = pd.notnull(result_dataset["formatted_" + mutation_column])
+    success_mask = pd.notnull(validation_dataset["formatted_" + mutation_column])
 
     # Create successful dataset
-    successful_dataset = result_dataset[success_mask].copy()
+    successful_dataset = validation_dataset[success_mask].copy()
     if format_mutations:
         # Replace original mutation column with formatted version
         successful_dataset[mutation_column] = successful_dataset[
@@ -1018,7 +1045,7 @@ def validate_mutations(
     )
 
     # Create failed dataset
-    failed_dataset = result_dataset[~success_mask].copy()
+    failed_dataset = validation_dataset[~success_mask].copy()
     failed_dataset = failed_dataset.drop(columns=["formatted_" + mutation_column])
 
     tqdm.write(
@@ -2076,3 +2103,52 @@ def replace_in_column(
         out[name_column].astype("string").str.replace(old, new, regex=False)
     )
     return out
+
+
+@pipeline_step
+def add_column(
+    dataset: pd.DataFrame,
+    dataset_name: str,
+    column_name: str = "protein_name",
+) -> pd.DataFrame:
+    """
+    Add a constant-valued column to a DataFrame.
+
+    Parameters
+    ----------
+    dataset : pd.DataFrame
+        The input DataFrame to which the 'dataset_name' will be added.
+    dataset_name : str
+        Value to assign to the new column for all rows.
+    column_name : str
+        Name of the column to create or overwrite.
+
+    Returns
+    -------
+    dataset : pd.DataFrame
+        The DataFrame with an additional column.
+
+    Examples
+    --------
+    >>> import pandas as pd
+    >>> df = pd.DataFrame({
+    >>>     'mut_info' : ['A0G', 'V1D', 'K2A'],
+    >>>     'mut_seq' : ['GVKDF', 'ADKDF', 'AVADF']})
+    >>> df = add_column(df, dataset_name="protein1", column_name="protein_name")
+    >>> df
+      mut_info mut_seq protein_name
+    0      A0G   GVKDF     protein1
+    1      V1D   ADKDF     protein1
+    2      K2A   AVADF     protein1
+    """
+    if not dataset_name:
+        raise ValueError(f"Missing name {dataset_name}")
+
+    tqdm.write(f"Adding name {dataset_name} to the column {column_name}")
+
+    dataset = dataset.copy()
+    dataset[column_name] = dataset_name
+
+    tqdm.write(f"Successfully adding name {dataset_name} to the column {column_name}")
+
+    return dataset
