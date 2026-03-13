@@ -242,8 +242,8 @@ def create_cdna_proteolysis_cleaner(
             .delayed_then(
                 replace_in_column,
                 name_column=final_config.column_mapping.get("WT_name", "WT_name"),
-                old = ".pdb",
-            )    
+                old=".pdb",
+            )
             .delayed_then(
                 convert_to_mutation_dataset_format,
                 name_column=final_config.column_mapping.get("WT_name", "WT_name"),
@@ -292,21 +292,20 @@ def clean_cdna_proteolysis_dataset(
 
     Examples
     --------
-    >>> pipeline = create_cdna_proteolysis_cleaner(df)  # df is raw cDNAProteolysis dataset file
-
     Use default configuration:
 
-    >>> pipeline, dataset = clean_cnda_proteolysis_dataset(pipeline)
+    >>> pipeline = create_cdna_proteolysis_cleaner(df)  # df is raw cDNAProteolysis dataset file
 
     Use partial configuration:
 
-    >>> pipeline, dataset = clean_cdna_proteolysis_dataset(df, config={
+    >>> pipeline = create_cdna_proteolysis_cleaner(df, config={
     ...     "validate_mut_workers": 8,
     ... })
 
     Load configuration from file:
 
-    >>> pipeline, dataset = clean_cdna_proteolysis_dataset(df, config="config.json")
+    >>> pipeline = create_cdna_proteolysis_cleaner(df, config="config.json")
+    >>> pipeline, dataset = clean_cnda_proteolysis_dataset(pipeline)
     """
     try:
         # Run pipeline
