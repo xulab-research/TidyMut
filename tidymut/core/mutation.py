@@ -181,8 +181,10 @@ class AminoAcidMutation(BaseMutation):
                 mutant_amino_acid = alphabet.get_one_letter_code(mutant_three)
             except KeyError as e:
                 raise ValueError(f"Unknown three-letter amino acid code: {e}")
-
-            return cls(wild_amino_acid, int(position), mutant_amino_acid, alphabet)
+            if is_zero_based:
+                return cls(wild_amino_acid, int(position), mutant_amino_acid, alphabet)
+            else:
+                return cls(wild_amino_acid, int(position) - 1, mutant_amino_acid, alphabet)
 
         # Handle one-letter codes
         one_letter_pattern = r"^([A-Z\*])(\d+)([A-Z\*])$"

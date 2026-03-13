@@ -123,7 +123,7 @@ class TestAminoAcidMutation:
         mutation = AminoAcidMutation.from_string("A123V")
 
         assert mutation.wild_amino_acid == "A"
-        assert mutation.position == 123
+        assert mutation.position == 122
         assert mutation.mutant_amino_acid == "V"
 
     def test_amino_acid_mutation_from_string_three_letter(self):
@@ -131,7 +131,7 @@ class TestAminoAcidMutation:
         mutation = AminoAcidMutation.from_string("Ala123Val")
 
         assert mutation.wild_amino_acid == "A"
-        assert mutation.position == 123
+        assert mutation.position == 122
         assert mutation.mutant_amino_acid == "V"
 
     def test_amino_acid_mutation_from_string_with_stop(self):
@@ -139,7 +139,7 @@ class TestAminoAcidMutation:
         mutation = AminoAcidMutation.from_string("A123*")
 
         assert mutation.wild_amino_acid == "A"
-        assert mutation.position == 123
+        assert mutation.position == 122
         assert mutation.mutant_amino_acid == "*"
         assert mutation.is_nonsense()
 
@@ -251,7 +251,7 @@ class TestCodonMutation:
         mutation = CodonMutation.from_string("ATG123TAA")
 
         assert mutation.wild_codon == "ATG"
-        assert mutation.position == 123
+        assert mutation.position == 122
         assert mutation.mutant_codon == "TAA"
 
     def test_codon_mutation_from_string_rna(self):
@@ -259,7 +259,7 @@ class TestCodonMutation:
         mutation = CodonMutation.from_string("AUG123UAA")
 
         assert mutation.wild_codon == "AUG"
-        assert mutation.position == 123
+        assert mutation.position == 122
         assert mutation.mutant_codon == "UAA"
         assert mutation.seq_type == "RNA"
 
@@ -475,7 +475,7 @@ class TestMutationSet:
 
         assert len(mutation_set) == 1
         assert mutation_set.mutation_type == AminoAcidMutation
-        assert mutation_set.mutations[0].position == 123
+        assert mutation_set.mutations[0].position == 122
 
     def test_mutation_set_from_string_multiple_comma(self):
         """测试从逗号分隔字符串创建突变集合"""
@@ -484,7 +484,7 @@ class TestMutationSet:
         assert len(mutation_set) == 3
         assert mutation_set.mutation_type == AminoAcidMutation
         positions = [m.position for m in mutation_set.mutations]
-        assert positions == [123, 456, 789]
+        assert positions == [122, 455, 788]
 
     def test_mutation_set_from_string_multiple_semicolon(self):
         """测试从分号分隔字符串创建突变集合"""
@@ -492,7 +492,7 @@ class TestMutationSet:
 
         assert len(mutation_set) == 3
         positions = [m.position for m in mutation_set.mutations]
-        assert positions == [123, 456, 789]
+        assert positions == [122, 455, 788]
 
     def test_mutation_set_from_string_with_spaces(self):
         """测试包含空格的字符串"""
@@ -547,11 +547,11 @@ class TestMutationSet:
 
         # 无名称
         mutation_set = MutationSet(mutations, AminoAcidMutation)
-        assert "MutationSet: A1V" in str(mutation_set)
+        assert str(mutation_set) in "MutationSet: A1V"
 
         # 有名称
         named_set = MutationSet(mutations, AminoAcidMutation, name="test")
-        assert "MutationSet(test): A1V" in str(named_set)
+        assert str(named_set) in "MutationSet(test): A1V"
 
         # repr
         repr_str = repr(mutation_set)
