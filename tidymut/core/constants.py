@@ -36,9 +36,9 @@ AMBIGUOUSE_AMINO_ACIDS : set of str
     Ambiguous/non-standard amino-acid symbols (e.g. ``'B','Z','X','J','U','O'``).
 
 DNA_BASE_COMPLEMENTS : dict[str, str]
-    DNA Watson–Crick complements.
+    DNA Watson-Crick complements.
 RNA_BASE_COMPLEMENTS : dict[str, str]
-    RNA Watson–Crick complements.
+    RNA Watson-Crick complements.
 
 AA3_TO_1 : dict[str, str]
     Amino-acid 3-letter → 1-letter code map (case-tolerant; includes ``'*' → 'Ter'``).
@@ -93,7 +93,7 @@ AA1_TO_3 = {
     "*": "Ter"
 }
 
-# ==== Coden AA Conversion ====
+# ==== Codon AA Conversion ====
 STANDARD_GENETIC_CODE_DNA = {
     "TTT": "F", "TTC": "F", "TTA": "L", "TTG": "L",
     "TCT": "S", "TCC": "S", "TCA": "S", "TCG": "S",
