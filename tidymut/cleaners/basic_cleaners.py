@@ -1779,6 +1779,7 @@ def average_labels_by_name(
             .rename(columns={c: f"{c}_mean_by_name" for c in label_cols})
         )
         out = pd.concat([dataset, means], axis=1)
+    print("out:\n", out)
     return out
 
 

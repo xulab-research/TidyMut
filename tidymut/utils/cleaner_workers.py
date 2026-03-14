@@ -22,6 +22,7 @@ __all__ = [
     "apply_single_mutation",
     "infer_wt_sequence_grouped",
     "infer_single_mutationset",
+    "validate_single_mutation_and_sequence",
 ]
 
 
@@ -348,3 +349,43 @@ def infer_single_mutationset(
         return inferred_mutations, None
     except Exception as e:
         return None, str(e)
+
+def validate_single_mutation_and_sequence(
+    row_data: Tuple,
+    dataset_columns: Index,
+    wt_sequence_column: str,
+    name_column: str,
+    mutation_column: str,
+    mut_sequence_column: str,
+    mutation_sep: str,
+    is_zero_based: bool,
+    sequence_class: Type[Union[ProteinSequence, DNASequence, RNASequence]],
+) -> Tuple[Optional[str], Optional[str]]:
+
+    try:
+        row_dict = dict(zip(dataset_columns, row_data))
+
+        name = row_dict.get(name_column)
+        mut_info = row_dict.get(mutation_column)
+        wt_sequence_str = row_dict.get(wt_sequence_column)
+        mut_sequence_str = row_dict.get(mut_sequence_column)
+
+        if not name or not mut_info:
+            return None, f"Missing name or mutation info"
+
+        if not wt_sequence_str or not mut_sequence_str:
+            return None, f"Missing wildtype sequence or mutant sequence for {name}"
+
+        wt_sequence = sequence_class(wt_sequence_str, name=name)
+        mutation_set = MutationSet.from_string(
+            mut_info, sep=mutation_sep, is_zero_based=is_zero_based
+        )
+        mut_sequence = sequence_class(mut_sequence_str, name=name)
+        inferred_mutated_sequence = wt_sequence.apply_mutation(mutation_set)
+        if str(inferred_mutated_sequence) != str(mut_sequence):
+            return None, f"Mutated sequence does not match applied mutations for {name}"
+
+        return str(inferred_mutated_sequence), None
+
+    except Exception as e:
+        return None, f"{type(e).__name__}: {str(e)}"
