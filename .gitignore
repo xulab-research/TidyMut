@@ -52,3 +52,12 @@ doc/build/
 **/.doctrees/
 doc/source/api/generated/
 doc/source/generated/
+
+# Datasets and outputs
+dataset/
+clean_dataset/
+outputs/
+validation/
+
+# Logs
+logs/

@@ -50,7 +50,11 @@ See [ReadtheDocs](https://tidymut.readthedocs.io/en/latest/user_guide/cleaners.h
 | HumanDomainome  | Site-saturation mutagenesis of 500 human protein domains                            | SupplementaryTable2.txt or SupplementaryTable4.txt | https://www.nature.com/articles/s41586-024-08370-4                            |
 | ddG             | None                                                                                | M1261.csv, S461.csv, S669.csv, S783.csv, S8754.csv | https://huggingface.co/datasets/xulab-research/TidyMut/tree/main/ddG_datasets |
 | dTm             | None                                                                                | S4346.csv, S557.csv, S571.csv                      | https://huggingface.co/datasets/xulab-research/TidyMut/tree/main/dTm_datasets |
-| ArchStabMS1E10  | The genetic architecture of protein stability                                       | archstabms_1e10.csv                                | https://huggingface.co/datasets/xulab-research/TidyMut/blob/main/archstabms1e_10/archstabms_1e10.csv |
+| ArchStabMS1E10  | The genetic architecture of protein stability                                       | ArchStabMS_1E10.csv                                | https://huggingface.co/datasets/xulab-research/TidyMut/blob/main/archstabms1e_10/archstabms_1e10.csv |
+| Antitoxin ParD3 | Protein design using structure-based residue preferences | Antitoxin_ParD3.csv | https://huggingface.co/datasets/xulab-research/TidyMut/blob/main/AntitoxinParD3 |
+| CTXM | Network of epistatic interactions in an enzyme active site revealed by DMS | CTXM_cefotaxime.csv or CTXM_ampicillin.csv | https://huggingface.co/datasets/xulab-research/TidyMut/tree/main/CTXM |
+| hMb | Decoding Stability and Epistasis in Human Myoglobin by Deep Mutational Scanning and Codon-level Machine Learning | Human_Myoglobin.csv | https://huggingface.co/datasets/xulab-research/TidyMut/tree/main/HumanMyoglobin |
+| TrpB | A combinatorially complete epistatic fitness landscape in an enzyme active site | TrpB.csv | https://huggingface.co/datasets/xulab-research/TidyMut/tree/main/TrpB |
 
 ### Processing cDNAProteolysis Dataset
 

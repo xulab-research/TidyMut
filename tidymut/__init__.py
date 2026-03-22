@@ -5,7 +5,7 @@ TidyMut: A Python package for cleaning protein mutation data
 
 __author__ = "Yuxiang Tang"
 
-__version__ = "0.4.1"
+__version__ = "0.8.0"
 
 from .core import (
     # Alphabet
@@ -33,6 +33,10 @@ from .cleaners import (
     protein_gym_cleaner,
     ddg_dtm_cleaners,
     archstabms_1e10_cleaner,
+    human_myoglobin_cleaner,
+    ctxm_cleaner,
+    trpb_cleaner,
+    antitoxin_pard3_cleaner,
 )
 
 from .utils import (
@@ -44,4 +48,8 @@ from .utils import (
     list_datasets_with_built_in_cleaners,
     show_download_instructions,
     download_archstabms1e10_source_file,
+    download_human_myoglobin_source_file,
+    download_ctxm_source_file,
+    download_trpb_source_file,
+    download_antitoxin_pard3_source_file,
 )

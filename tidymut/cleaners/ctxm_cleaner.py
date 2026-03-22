@@ -1,4 +1,4 @@
-# tidymut/cleaners/gfp_cleaner.py
+# tidymut/cleaners/CTXM_cleaners.py
 from __future__ import annotations
 
 import pandas as pd
@@ -13,11 +13,11 @@ from .basic_cleaners import (
     extract_and_rename_columns,
     filter_and_clean_data,
     convert_data_types,
+    add_column,
     validate_mutations,
-    infer_wildtype_sequences,
     average_labels_by_name,
     convert_to_mutation_dataset_format,
-    add_column,
+    apply_mutations_to_sequences,
 )
 from ..core.dataset import MutationDataset
 from ..core.pipeline import Pipeline, create_pipeline
@@ -26,9 +26,9 @@ if TYPE_CHECKING:
     from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 __all__ = [
-    "GFPCleanerConfig",
-    "create_GFP_cleaner",
-    "clean_GFP_dataset",
+    "CTXMCleanerConfig",
+    "create_ctxm_cleaner",
+    "clean_ctxm_dataset",
 ]
 
 
@@ -41,14 +41,41 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class GFPCleanerConfig(BaseCleanerConfig):
+class CTXMCleanerConfig(BaseCleanerConfig):
+    """
+    Configuration class for CTXM dataset cleaner.
+    Inherits from BaseCleanerConfig and adds CTXM-specific configuration options.
+
+    Simply run `tidymut.download_ctxm_source_file()` to download the dataset.
+
+    Alternatively, the raw CTXM file can be obtained from:
+
+    - Hugging Face: https://huggingface.co/datasets/xulab-research/TidyMut/blob/main/CTXM/CTXM_ampicillin.csv
+    - Hugging Face: https://huggingface.co/datasets/xulab-research/TidyMut/blob/main/CTXM/CTXM_cefotaxime.csv
+
+    Attributes
+    ----------
+    column_mapping : Dict[str, str]
+        Mapping from source to target column names
+    filters : Dict[str, Callable]
+        Filter conditions for data cleaning
+    type_conversions : Dict[str, str]
+        Data type conversion specifications
+    validate_mut_workers : int
+        Number of workers for mutation validation, set to -1 to use all available CPUs
+    validate_wt_workers : int
+        Number of workers for wildtype sequence validation, set to -1 to use all available CPUs
+    label_columns : List[str]
+        List of score columns to process
+    primary_label_column : str
+        Primary score column for the dataset
+    """
 
     # Column mapping configuration
     column_mapping: Dict[str, str] = field(
         default_factory=lambda: {
-            "mutated_sequence": "mut_seq",
             "mutant": "mut_info",
-            "DMS_score": "label",
+            "label": "label",
         }
     )
 
@@ -62,21 +89,24 @@ class GFPCleanerConfig(BaseCleanerConfig):
     # Type conversion configuration
     type_conversions: Dict[str, str] = field(default_factory=lambda: {"label": "float"})
 
-    # Mutation validation parameters
-    validate_mut_workers: int = 16
+    # Wildtype sequence obtained from article
+    wt_sequence = "QTSAVQQKLAALEKSSGGRLGVALIDTADNTQVLYRGDERFPMCSTSKVMAAAAVLKQSETQKQLLNQPVEIKPADLVNYNPIAEKHVNGTMTLAELSAAALQYSDNTAMNKLIAQLGGPGGVTAFARAIGDETFRLDRTEPTLNTAIPGDPRDTTTPRAMAQTLRQLTLGHALGETQRAQLVTWLKGNTTGAASIRAGLPTSWTVGDKTGSGDYGTTNDIAVIWPQGRAPLVLVTYFTQPQQNAESRRDVLASAARIIAEGL"
 
-    # Wildtype validation parameters
-    validate_wt_workers: int = 16
+    # process parameters
+    process_workers: int = 16
+
+    # validation parameters
+    validate_mut_workers: int = 16
 
     # Score columns configuration
     label_columns: List[str] = field(default_factory=lambda: ["label"])
     primary_label_column: str = "label"
 
     # Override default pipeline name
-    pipeline_name: str = "GFP pipeline"
+    pipeline_name: str = "CTXM Cleaning Pipeline"
 
     def validate(self) -> None:
-        """Validate GFP-specific configuration parameters
+        """Validate CTXM-specific configuration parameters
 
         Raises
         ------
@@ -97,25 +127,25 @@ class GFPCleanerConfig(BaseCleanerConfig):
             )
 
         # Validate column mapping
-        required_mappings = {"mutated_sequence", "mutant", "DMS_score"}
+        required_mappings = {"mutant", "label"}
         missing = required_mappings - set(self.column_mapping.keys())
         if missing:
             raise ValueError(f"Missing required column mappings: {missing}")
 
 
-def create_GFP_cleaner(
+def create_ctxm_cleaner(
     dataset_or_path: Optional[Union[pd.DataFrame, str, Path]] = None,
-    config: Optional[Union[GFPCleanerConfig, Dict[str, Any], str, Path]] = None,
+    config: Optional[Union[CTXMCleanerConfig, Dict[str, Any], str, Path]] = None,
 ) -> Pipeline:
-    """Create GFP dataset cleaning pipeline
+    """Create CTXM dataset cleaning pipeline
 
     Parameters
     ----------
     dataset_or_path : Optional[Union[pd.DataFrame, str, Path]], default=None
-        Raw dataset DataFrame or file path to GFP dataset.
-    config : Optional[Union[GFPCleanerConfig, Dict[str, Any], str, Path]]
+        Raw dataset DataFrame or file path to CTXM dataset.
+    config : Optional[Union[CTXMCleanerConfig, Dict[str, Any], str, Path]]
         Configuration for the cleaning pipeline. Can be:
-        - GFPCleanerConfig object
+        - CTXMCleanerConfig object
         - Dictionary with configuration parameters (merged with defaults)
         - Path to JSON configuration file (str or Path)
         - None (uses default configuration)
@@ -134,25 +164,25 @@ def create_GFP_cleaner(
     """
     # Handle configuration parameter
     if config is None:
-        final_config = GFPCleanerConfig()
-    elif isinstance(config, GFPCleanerConfig):
+        final_config = CTXMCleanerConfig()
+    elif isinstance(config, CTXMCleanerConfig):
         final_config = config
     elif isinstance(config, dict):
         # Partial configuration - merge with defaults
-        default_config = GFPCleanerConfig()
+        default_config = CTXMCleanerConfig()
         final_config = default_config.merge(config)
     elif isinstance(config, (str, Path)):
         # Load from file
-        final_config = GFPCleanerConfig.from_json(config)
+        final_config = CTXMCleanerConfig.from_json(config)
     else:
         raise TypeError(
-            f"config must be GFPCleanerConfig, dict, str, Path or None, "
+            f"config must be CTXMCleanerConfig, dict, str, Path or None, "
             f"got {type(config)}"
         )
 
     # Log configuration summary
     logger.info(
-        f"GFP dataset will be cleaned with pipeline: {final_config.pipeline_name}"
+        f"CTXM dataset will cleaning with pipeline: {final_config.pipeline_name}"
     )
     logger.debug(f"Configuration:\n{final_config.get_summary()}")
 
@@ -172,37 +202,38 @@ def create_GFP_cleaner(
             )
             .delayed_then(
                 add_column,
-                dataset_name="gfp",
+                dataset_name="CTXM_ampicillin",
                 column_name="name",
+            )
+            .delayed_then(
+                add_column,
+                dataset_name=final_config.wt_sequence,
+                column_name="wt_seq",
             )
             .delayed_then(
                 validate_mutations,
                 mutation_column=final_config.column_mapping.get("mutant", "mutant"),
-                mutation_sep=":",
-                is_zero_based=False,
                 num_workers=final_config.validate_mut_workers,
             )
             .delayed_then(
-                infer_wildtype_sequences,
-                mutation_column=final_config.column_mapping.get("mutant", "mutant"),
-                sequence_column=final_config.column_mapping.get(
-                    "mutated_sequence", "mutated_sequence"
-                ),
-                is_zero_based=True,
-                num_workers=final_config.validate_wt_workers,
+                average_labels_by_name,
+                name_columns="mut_info",
+                label_columns=final_config.label_columns,
             )
             .delayed_then(
-                average_labels_by_name,
-                name_columns=final_config.column_mapping.get("mutant", "mutant"),
-                label_columns=final_config.label_columns,
+                apply_mutations_to_sequences,
+                sequence_column="wt_seq",
+                name_column="name",
+                mutation_column=final_config.column_mapping.get("mutant", "mutant"),
+                is_zero_based=True,
+                num_workers=final_config.process_workers,
             )
             .delayed_then(
                 convert_to_mutation_dataset_format,
                 name_column="name",
                 mutation_column=final_config.column_mapping.get("mutant", "mutant"),
-                mutated_sequence_column=final_config.column_mapping.get(
-                    "mutated_sequence", "mutated_sequence"
-                ),
+                sequence_column="wt_seq",
+                mutated_sequence_column="mut_seq",
                 label_column=final_config.primary_label_column,
                 is_zero_based=True,
             )
@@ -220,57 +251,57 @@ def create_GFP_cleaner(
         return pipeline
 
     except Exception as e:
-        logger.error(f"Error in creating GFP cleaning pipeline: {str(e)}")
-        raise RuntimeError(f"Error in creating GFP cleaning pipeline: {str(e)}")
+        logger.error(f"Error in creating CTXM cleaning pipeline: {str(e)}")
+        raise RuntimeError(f"Error in creating CTXM cleaning pipeline: {str(e)}")
 
 
-def clean_GFP_dataset(
+def clean_ctxm_dataset(
     pipeline: Pipeline,
 ) -> Tuple[Pipeline, MutationDataset]:
-    """Clean GFP dataset using configurable pipeline
+    """Clean CTXM dataset using configurable pipeline
 
     Parameters
     ----------
     pipeline : Pipeline
-        GFP dataset cleaning pipeline
+        CTXM dataset cleaning pipeline
 
     Returns
     -------
     Tuple[Pipeline, MutationDataset]
         - Pipeline: The cleaned pipeline
-        - MutationDataset: The cleaned GFP dataset
+        - MutationDataset: The cleaned CTXM dataset
 
     Examples
     --------
-    >>> pipeline = create_gfp_cleaner(df)  # df is raw GFP dataset file
+    >>> pipeline = create_CTXM_cleaner(df)  # df is raw CTXM dataset file
     Use default configuration:
 
-    >>> pipeline, dataset = clean_GFP_dataset(pipeline)
+    >>> pipeline, dataset = clean_CTXM_dataset(pipeline)
 
     Use partial configuration:
 
-    >>> pipeline, dataset = clean_GFP_dataset(df, config={
-    ...     "validate_mut_workers": 8,
+    >>> pipeline, dataset = clean_CTXM_dataset(df, config={
+    ...     "process_workers": 8,
     ... })
 
     Load configuration from file:
 
-    >>> pipeline, dataset = clean_GFP_dataset(df, config="config.json")
+    >>> pipeline, dataset = clean_CTXM_dataset(df, config="config.json")
     """
     try:
         # Run pipeline
         pipeline.execute()
 
         # Extract results
-        gfp_dataset_df, gfp_ref_seq = pipeline.data
-        gfp_dataset = MutationDataset.from_dataframe(gfp_dataset_df, gfp_ref_seq)
+        CTXM_dataset_df, CTXM_ref_seq = pipeline.data
+        CTXM_dataset = MutationDataset.from_dataframe(CTXM_dataset_df, CTXM_ref_seq)
 
         logger.info(
-            f"Successfully cleaned GFP dataset: "
-            f"{len(gfp_dataset_df)} mutations from {len(gfp_ref_seq)} proteins"
+            f"Successfully cleaned CTXM dataset: "
+            f"{len(CTXM_dataset_df)} mutations from {len(CTXM_ref_seq)} proteins"
         )
 
-        return pipeline, gfp_dataset
+        return pipeline, CTXM_dataset
     except Exception as e:
-        logger.error(f"Error in running GFP dataset cleaning pipeline: {str(e)}")
-        raise RuntimeError(f"Error in running GFP dataset cleaning pipeline: {str(e)}")
+        logger.error(f"Error in running CTXM dataset cleaning pipeline: {str(e)}")
+        raise RuntimeError(f"Error in running CTXM dataset cleaning pipeline: {str(e)}")

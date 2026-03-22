@@ -12,6 +12,10 @@ from .raw_data_downloader import (
     download_human_domainome_source_file,
     download_ddg_dtm_source_file,
     download_archstabms1e10_source_file,
+    download_human_myoglobin_source_file,
+    download_ctxm_source_file,
+    download_trpb_source_file,
+    download_antitoxin_pard3_source_file,
 )
 
 # fmt: off
@@ -24,4 +28,8 @@ __all__ = [
     "download_human_domainome_source_file",
     "download_ddg_dtm_source_file",
     "download_archstabms1e10_source_file",
+    "download_human_myoglobin_source_file",
+    "download_ctxm_source_file",
+    "download_trpb_source_file",
+    "download_antitoxin_pard3_source_file",
 ]

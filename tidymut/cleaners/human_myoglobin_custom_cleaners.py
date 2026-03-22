@@ -75,5 +75,5 @@ def convert_codon_to_amino_acid(
         out_df = out_df.drop(columns=[codon_column], errors="ignore")
 
     tqdm.write("Successfully converting codons to amino acids!")
-    
+
     return out_df
