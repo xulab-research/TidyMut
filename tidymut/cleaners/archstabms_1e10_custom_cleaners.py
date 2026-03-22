@@ -31,9 +31,12 @@ def compute_mutations(
 
     def get_mut_info(group):
         # get wt sequence
+        name = group.name
+
         wt_rows = group[group[WT_column] == True]
         if len(wt_rows) == 0:
             return pd.Series([""] * len(group), index=group.index)
+
         wt_seq = wt_rows[mut_seq].values[0]  # means wt_seq
         wt_array = np.array(list(wt_seq))
 
@@ -42,7 +45,6 @@ def compute_mutations(
         diff_mask = aa_array != wt_array
 
         # generate mutation info for each sequence
-        name = group[name_column].iloc[0]
         desc = f"Processing name_column {name}"
         mut_info_list = []
         for i, row in enumerate(tqdm(aa_array, desc=desc)):
@@ -59,7 +61,7 @@ def compute_mutations(
             )
         return pd.Series(mut_info_list, index=group.index)
 
-    dataset["mut_info"] = dataset.groupby([name_column], group_keys=False).apply(
+    dataset["mut_info"] = dataset.groupby(name_column, group_keys=False).apply(
         get_mut_info
     )
 

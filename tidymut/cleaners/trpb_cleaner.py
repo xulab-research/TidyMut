@@ -27,8 +27,8 @@ if TYPE_CHECKING:
 
 __all__ = [
     "TrpBCleanerConfig",
-    "create_trpB_cleaner",
-    "clean_trpB_dataset",
+    "create_trpb_cleaner",
+    "clean_trpb_dataset",
 ]
 
 
@@ -90,7 +90,9 @@ class TrpBCleanerConfig(BaseCleanerConfig):
     type_conversions: Dict[str, str] = field(default_factory=lambda: {"label": "float"})
 
     # Obtained from article
-    wt_sequence: str = "MKGYFGPYGGQYVPEILMGALEELEAAYEGIMKDESFWKEFNDLLRDYAGRPTPLYFARRLSEKYGARVYLKREDLLHTGAHKINNAIGQVLLAKLMGKTRIIAETGAGQHGVATATAAALFGMECVIYMGEEDTIRQKLNVERMKLLGAKVVPVKSGSRTLKDAIDEALRDWITNLQTTYYVFGSVVGPHPYPIIVRNFQKVIGEETKKQIPEKEGRLPDYIVACVSGGSNAAGIFYPFIDSGVKLIGVEAGGEGLETGKHAASLLKGKIGYLHGSKTFVLQDDWGQVQVSHSVSAGLDYSGVGPEHAYWRETGKVLYDAVTDEEALDAFIELSRLEGIIPALESSHALAYLKKINIKGKVVVVNLSGRGDKDLESVLNHPYVRERIRLEHHHHHH"
+    wt_sequence: str = (
+        "MKGYFGPYGGQYVPEILMGALEELEAAYEGIMKDESFWKEFNDLLRDYAGRPTPLYFARRLSEKYGARVYLKREDLLHTGAHKINNAIGQVLLAKLMGKTRIIAETGAGQHGVATATAAALFGMECVIYMGEEDTIRQKLNVERMKLLGAKVVPVKSGSRTLKDAIDEALRDWITNLQTTYYVFGSVVGPHPYPIIVRNFQKVIGEETKKQIPEKEGRLPDYIVACVSGGSNAAGIFYPFIDSGVKLIGVEAGGEGLETGKHAASLLKGKIGYLHGSKTFVLQDDWGQVQVSHSVSAGLDYSGVGPEHAYWRETGKVLYDAVTDEEALDAFIELSRLEGIIPALESSHALAYLKKINIKGKVVVVNLSGRGDKDLESVLNHPYVRERIRLEHHHHHH"
+    )
 
     # Wildtype inference parameters
     infer_mut_workers: int = 16
@@ -130,10 +132,35 @@ class TrpBCleanerConfig(BaseCleanerConfig):
             raise ValueError(f"Missing required column mappings: {missing}")
 
 
-def create_TrpB_cleaner(
+def create_trpb_cleaner(
     dataset_or_path: Union[str, Path],
     config: Optional[Union[TrpBCleanerConfig, Dict[str, Any], str, Path]] = None,
 ) -> Pipeline:
+    """Create TrpB dataset cleaning pipeline
+
+    Parameters
+    ----------
+    dataset_or_path : Optional[Union[pd.DataFrame, str, Path]], default=None
+        Raw dataset DataFrame or file path to TrpB dataset.
+    config : Optional[Union[TrpBCleanerConfig, Dict[str, Any], str, Path]]
+        Configuration for the cleaning pipeline. Can be:
+        - TrpBCleanerConfig object
+        - Dictionary with configuration parameters (merged with defaults)
+        - Path to JSON configuration file (str or Path)
+        - None (uses default configuration)
+
+    Returns
+    -------
+    Pipeline
+        Pipeline: The cleaning pipeline used
+
+    Raises
+    ------
+    TypeError
+        If config has invalid type
+    ValueError
+        If configuration validation fails
+    """
 
     # Handle configuration parameter
     if config is None:
@@ -186,7 +213,9 @@ def create_TrpB_cleaner(
             .delayed_then(
                 infer_mutations_from_sequences,
                 wt_sequence_column="wt_seq",
-                mut_sequence_column=final_config.column_mapping.get("protein", "protein"),
+                mut_sequence_column=final_config.column_mapping.get(
+                    "protein", "protein"
+                ),
                 num_workers=final_config.infer_mut_workers,
             )
             .delayed_then(
@@ -220,12 +249,10 @@ def create_TrpB_cleaner(
 
     except Exception as e:
         logger.error(f"Error in creating TrpB cleaning pipeline: {str(e)}")
-        raise RuntimeError(
-            f"Error in creating TrpB cleaning pipeline: {str(e)}"
-        )
+        raise RuntimeError(f"Error in creating TrpB cleaning pipeline: {str(e)}")
 
 
-def clean_TrpB_dataset(
+def clean_trpb_dataset(
     pipeline: Pipeline,
 ) -> Tuple[Pipeline, MutationDataset]:
     """Clean TrpB dataset using configurable pipeline
@@ -264,9 +291,7 @@ def clean_TrpB_dataset(
 
         # Extract results
         TrpB_dataset_df, TrpB_ref_seq = pipeline.data
-        TrpB_dataset = MutationDataset.from_dataframe(
-            TrpB_dataset_df, TrpB_ref_seq
-        )
+        TrpB_dataset = MutationDataset.from_dataframe(TrpB_dataset_df, TrpB_ref_seq)
 
         logger.info(
             f"Successfully cleaned TrpB dataset: "
@@ -275,9 +300,5 @@ def clean_TrpB_dataset(
 
         return pipeline, TrpB_dataset
     except Exception as e:
-        logger.error(
-            f"Error in running TrpB dataset cleaning pipeline: {str(e)}"
-        )
-        raise RuntimeError(
-            f"Error in running TrpB dataset cleaning pipeline: {str(e)}"
-        )
+        logger.error(f"Error in running TrpB dataset cleaning pipeline: {str(e)}")
+        raise RuntimeError(f"Error in running TrpB dataset cleaning pipeline: {str(e)}")

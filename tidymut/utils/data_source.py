@@ -153,12 +153,71 @@ DATASETS = {
     },
     "ArchStabMS1E10_datasets": {
         "name": "ArchStabMS1E10_datasets",
-        "official_url": None,
-        "files": ["archstabms_1e10.csv"],
+        "official_url": "https://www.nature.com/articles/s41586-024-07966-0",
+        "files": ["Supplementary Table 4"],
         "huggingface_repos": [
-            "datasets/xulab-research/TidyMut/resolve/main/archstabms_1e10/archstabms_1e10.csv?download=true"
+            "datasets/xulab-research/TidyMut/blob/main/ArchStabMS1E10/ArchStabMS_1E10.csv?download=true"
         ],
-        "file_name": ["archstabms_1e10.csv"],
+        "file_name": ["ArchStabMS_1E10.csv"],
+    },
+    "Human_Myoglobin_datasets":{
+        "name": "Human_Myoglobin_datasets",
+        "official_url": "https://europepmc.org/article/ppr/ppr811402",
+        "files": ["CODON_DATASET_Myoglobin.tsv"],
+        "huggingface_repos": [
+            "datasets/xulab-research/TidyMut/blob/main/HumanMyoglobin/Human_Myoglobin.csv?download=true"
+        ],
+        "file_name": ["Human_Myoglobin.csv"],
+    },
+    "CTXM":{
+        "name": "CTX-M_datasets",
+        "official_url": "https://www.pnas.org/doi/10.1073/pnas.2313513121",
+        "files": [
+            "github.com/Palzkill-Lab/CTXM_epistasis/blob/main/fitness_data/Doubles_A3_processed.txt",
+            "github.com/Palzkill-Lab/CTXM_epistasis/blob/main/fitness_data/Doubles_C2_processed.txt"
+        ],
+        "huggingface_repos": [
+            "datasets/xulab-research/TidyMut/blob/main/CTXM/CTXM_ampicillin.csv?download=true",
+            "datasets/xulab-research/TidyMut/blob/main/CTXM/CTXM_cefotaxime.csv?download=true",
+        ],
+        "file_name": [
+            "CTXM_ampicillin.csv",
+            "CTXM_cefotaxime.csv"
+        ],
+        "sub_datasets": {
+            "CTXM_ampicillin": {
+                "files": ["github.com/Palzkill-Lab/CTXM_epistasis/blob/main/fitness_data/Doubles_A3_processed.txt"],
+                "huggingface_repos": [
+                    "datasets/xulab-research/TidyMut/blob/main/CTXM/CTXM_ampicillin.csv?download=true"
+                ],
+                "file_name": ["CTXM_ampicillin.csv"],
+            },
+            "CTXM_cefotaxime": {
+                "files": ["github.com/Palzkill-Lab/CTXM_epistasis/blob/main/fitness_data/Doubles_C2_processed.txt"],
+                "huggingface_repos": [
+                    "datasets/xulab-research/TidyMut/blob/main/CTXM/CTXM_cefotaxime.csv?download=true"
+                ],
+                "file_name": ["CTXM_cefotaxime.csv"],
+            }
+        }
+    },
+    "TrpB":{
+        "name": "TrpB_datasets",
+        "official_url": "https://www.pnas.org/doi/abs/10.1073/pnas.2400439121",
+        "files": ["huggingface.co/datasets/SaProtHub/Dataset-TrpB_fitness_landsacpe/blob/main/dataset.csv"],
+        "huggingface_repos": [
+            "datasets/xulab-research/TidyMut/blob/main/TrpB/TrpB.csv?download=true"
+        ],
+        "file_name": ["TrpB.csv"],
+    },
+    "Antitoxin_ParD3":{
+        "name": "Antitoxin_ParD3_datasets",
+        "official_url": "https://www.nature.com/articles/s41559-022-01688-0",
+        "files": ["github.com/ddingding/CoVES/blob/main/data/DMS_data/df_mut_all_norm.csv"],
+        "huggingface_repos": [
+            "datasets/xulab-research/TidyMut/blob/main/AntitoxinParD3/Antitoxin_ParD3.csv?download=true"
+        ],
+        "file_name": ["Antitoxin_ParD3.csv"],
     },
 }
 

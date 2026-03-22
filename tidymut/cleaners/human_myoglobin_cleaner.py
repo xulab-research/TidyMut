@@ -19,7 +19,7 @@ from .basic_cleaners import (
     validate_mutations,
     apply_mutations_to_sequences,
 )
-from .hMb_custom_cleaners import convert_codon_to_amino_acid
+from .human_myoglobin_custom_cleaners import convert_codon_to_amino_acid
 
 from ..core.dataset import MutationDataset
 from ..core.pipeline import Pipeline, create_pipeline
@@ -28,9 +28,9 @@ if TYPE_CHECKING:
     from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 __all__ = [
-    "hMbCleanerConfig",
-    "create_hMb_cleaner",
-    "clean_hMb_dataset",
+    "HumanMyoglobinCleanerConfig",
+    "create_human_myoglobin_cleaner",
+    "clean_human_myoglobin_dataset",
 ]
 
 
@@ -43,7 +43,35 @@ logger = logging.getLogger(__name__)
 
 
 @dataclass
-class hMbCleanerConfig(BaseCleanerConfig):
+class HumanMyoglobinCleanerConfig(BaseCleanerConfig):
+    """
+    Configuration class for human Myoglobin dataset cleaner.
+    Inherits from BaseCleanerConfig and adds hMb-specific configuration options.
+
+    Simply run `tidymut.download_hMb_source_file()` to download the dataset.
+
+    Alternatively, the raw hMb file can be obtained from:
+
+    - Zenodo: https://zenodo.org/records/7992926, File `Tsuboyama2023_Dataset2_Dataset3_20230416.csv` in `Processed_K50_dG_datasets.zip`
+    - Hugging Face: https://huggingface.co/datasets/xulab-research/TidyMut/blob/main/hMb/hMb.csv
+
+    Attributes
+    ----------
+    column_mapping : Dict[str, str]
+        Mapping from source to target column names
+    filters : Dict[str, Callable]
+        Filter conditions for data cleaning
+    type_conversions : Dict[str, str]
+        Data type conversion specifications
+    validate_mut_workers : int
+        Number of workers for mutation validation, set to -1 to use all available CPUs
+    process_workers : int
+        Number of workers for parallel processing
+    label_columns : List[str]
+        List of score columns to process
+    primary_label_column : str
+        Primary score column for the dataset
+    """
 
     # Column mapping configuration
     column_mapping: Dict[str, str] = field(
@@ -107,31 +135,56 @@ class hMbCleanerConfig(BaseCleanerConfig):
             raise ValueError(f"Missing required column mappings: {missing}")
 
 
-def create_hMb_cleaner(
+def create_human_myoglobin_cleaner(
     dataset_or_path: Optional[Union[pd.DataFrame, str, Path]] = None,
-    config: Optional[Union[hMbCleanerConfig, Dict[str, Any], str, Path]] = None,
+    config: Optional[Union[HumanMyoglobinCleanerConfig, Dict[str, Any], str, Path]] = None,
 ) -> Pipeline:
+    """Create human myoglobin dataset cleaning pipeline
+
+    Parameters
+    ----------
+    dataset_or_path : Optional[Union[pd.DataFrame, str, Path]], default=None
+        Raw dataset DataFrame or file path to human myoglobin dataset.
+    config : Optional[Union[HumanMyoglobinCleanerConfig, Dict[str, Any], str, Path]]
+        Configuration for the cleaning pipeline. Can be:
+        - HumanMyoglobinCleanerConfig object
+        - Dictionary with configuration parameters (merged with defaults)
+        - Path to JSON configuration file (str or Path)
+        - None (uses default configuration)
+
+    Returns
+    -------
+    Pipeline
+        Pipeline: The cleaning pipeline used
+
+    Raises
+    ------
+    TypeError
+        If config has invalid type
+    ValueError
+        If configuration validation fails
+    """
     # Handle configuration parameter
     if config is None:
-        final_config = hMbCleanerConfig()
-    elif isinstance(config, hMbCleanerConfig):
+        final_config = HumanMyoglobinCleanerConfig()
+    elif isinstance(config, HumanMyoglobinCleanerConfig):
         final_config = config
     elif isinstance(config, dict):
         # Partial configuration - merge with defaults
-        default_config = hMbCleanerConfig()
+        default_config = HumanMyoglobinCleanerConfig()
         final_config = default_config.merge(config)
     elif isinstance(config, (str, Path)):
         # Load from file
-        final_config = hMbCleanerConfig.from_json(config)
+        final_config = HumanMyoglobinCleanerConfig.from_json(config)
     else:
         raise TypeError(
-            f"config must be hMbCleanerConfig, dict, str, Path or None, "
+            f"config must be HumanMyoglobinCleanerConfig, dict, str, Path or None, "
             f"got {type(config)}"
         )
 
     # Log configuration summary
     logger.info(
-        f"hMb dataset will be cleaned with pipeline: {final_config.pipeline_name}"
+        f"Human myoglobin dataset will be cleaned with pipeline: {final_config.pipeline_name}"
     )
     logger.debug(f"Configuration:\n{final_config.get_summary()}")
 
@@ -202,27 +255,57 @@ def create_hMb_cleaner(
         return pipeline
 
     except Exception as e:
-        logger.error(f"Error in creating hMb cleaning pipeline: {str(e)}")
-        raise RuntimeError(f"Error in creating hMb cleaning pipeline: {str(e)}")
+        logger.error(f"Error in creating human myoglobin cleaning pipeline: {str(e)}")
+        raise RuntimeError(f"Error in creating human myoglobin cleaning pipeline: {str(e)}")
 
 
-def clean_hMb_dataset(
+def clean_human_myoglobin_dataset(
     pipeline: Pipeline,
 ) -> Tuple[Pipeline, MutationDataset]:
+    """Clean human myoglobin dataset using configurable pipeline
+
+    Parameters
+    ----------
+    pipeline : Pipeline
+        Human myoglobin dataset cleaning pipeline
+
+    Returns
+    -------
+    Tuple[Pipeline, MutationDataset]
+        - Pipeline: The cleaned pipeline
+        - MutationDataset: The cleaned human myoglobin dataset
+
+    Examples
+    --------
+    Use default configuration:
+
+    >>> pipeline = create_human_myoglobin_cleaner(df)  # df is raw human myoglobin dataset file
+
+    Use partial configuration:
+
+    >>> pipeline = create_human_myoglobin_cleaner(df, config={
+    ...     "validate_mut_workers": 8,
+    ... })
+
+    Load configuration from file:
+
+    >>> pipeline = create_human_myoglobin_cleaner(df, config="config.json")
+    >>> pipeline, dataset = clean_human_myoglobin_dataset(pipeline)
+    """
     try:
         # Run pipeline
         pipeline.execute()
 
         # Extract results
-        hMb_dataset_df, hMb_ref_seq = pipeline.data
-        hMb_dataset = MutationDataset.from_dataframe(hMb_dataset_df, hMb_ref_seq)
+        human_myoglobin_dataset_df, human_myoglobin_ref_seq = pipeline.data
+        human_myoglobin_dataset = MutationDataset.from_dataframe(human_myoglobin_dataset_df, human_myoglobin_ref_seq)
 
         logger.info(
-            f"Successfully cleaned hMb dataset: "
-            f"{len(hMb_dataset_df)} mutations from {len(hMb_ref_seq)} proteins"
+            f"Successfully cleaned human myoglobin dataset: "
+            f"{len(human_myoglobin_dataset_df)} mutations from {len(human_myoglobin_ref_seq)} proteins"
         )
 
-        return pipeline, hMb_dataset
+        return pipeline, human_myoglobin_dataset
     except Exception as e:
-        logger.error(f"Error in running hMb dataset cleaning pipeline: {str(e)}")
-        raise RuntimeError(f"Error in running hMb dataset cleaning pipeline: {str(e)}")
+        logger.error(f"Error in running human myoglobin dataset cleaning pipeline: {str(e)}")
+        raise RuntimeError(f"Error in running human myoglobin dataset cleaning pipeline: {str(e)}")

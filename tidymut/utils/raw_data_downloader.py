@@ -32,6 +32,7 @@ HF_ENDPOINTS: Sequence[str] = (
     "https://huggingface.co/",
     "https://hf-mirror.com/",
 )
+# 创建隐藏文件夹和配置文件路径
 CONFIG_DIR = Path(sys.prefix) / ".tidymut"
 CONFIG_FILE = CONFIG_DIR / "config.json"
 CONFIG_KEY = "hf_endpoint"
@@ -65,7 +66,9 @@ def _save_cached_endpoint(endpoint: str) -> None:
 
 def _reachable(url: str, *, timeout: int = 4) -> bool:
     try:
+        # 发送 HEAD 请求检查 URL 是否可达
         response = requests.head(url, timeout=timeout)
+        # 检查服务器返回的状态
         response.raise_for_status()
         return True
     except requests.exceptions.RequestException:
@@ -393,6 +396,7 @@ def download_source_file_from_huggingface(
                     f"File already exists: {local_path}. Use overwrite=True to replace it."
                 )
             else:
+                # 删除旧的文件以便重新下载
                 local_path.unlink()
         print(url)
         download(url, local_path)
@@ -537,3 +541,98 @@ def download_archstabms1e10_source_file(
     return download_source_file_from_huggingface(
         "ArchStabMS1E10_datasets", dir, overwrite=overwrite
     )
+
+
+def download_human_myoglobin_source_file(
+    dir: str, *, overwrite: bool = False
+) -> Dict[str, str]:
+    """
+    Download the source file for HumanMyoglobin dataset from the original source.
+
+    Parameters
+    ----------
+    dir : str
+        The target directory where the file will be saved
+    overwite bool, default=False
+        Whether to overwrite the file if it already exists. Default is False.
+
+    Returns
+    -------
+    Dict[str, str]
+        key: file name,
+        value: file path pointing to HumanMyoglobin dataset source file
+    """
+    return download_source_file_from_huggingface(
+        "Human_Myoglobin_datasets", dir, overwrite=overwrite
+    )
+
+
+def download_ctxm_source_file(
+    dir: str,
+    *, 
+    overwrite: bool = False,
+    sub_dataset: Optional[Literal["CTXM_ampicillin", "CTXM_cefotaxime"]] = None, 
+) -> Dict[str, str]:
+    """
+    Download the source file for CTX-M dataset from the original source.
+
+    Parameters
+    ----------
+    dir : str
+        The target directory where the file will be saved
+    overwite bool, default=False
+        Whether to overwrite the file if it already exists. Default is False.
+
+    Returns
+    -------
+    Dict[str, str]
+        key: file name,
+        value: file path pointing to CTX-M dataset source file
+    """
+    if sub_dataset is not None and sub_dataset not in ["CTXM_ampicillin", "CTXM_cefotaxime"]:
+        raise ValueError("Unsupported sub-dataset. Supported options: CTXM_ampicillin, CTXM_cefotaxime")
+    return download_source_file_from_huggingface("CTXM", dir, overwrite=overwrite, sub_dataset=sub_dataset)
+
+
+def download_trpb_source_file(
+    dir: str, *, overwrite: bool = False
+) -> Dict[str, str]:
+    """
+    Download the source file for TrpB dataset from the original source.
+
+    Parameters
+    ----------
+    dir : str
+        The target directory where the file will be saved
+    overwite bool, default=False
+        Whether to overwrite the file if it already exists. Default is False.
+
+    Returns
+    -------
+    Dict[str, str]
+        key: file name,
+        value: file path pointing to TrpB dataset source file
+    """
+    return download_source_file_from_huggingface("TrpB", dir, overwrite=overwrite)
+
+
+def download_antitoxin_pard3_source_file(
+    dir: str, *, overwrite: bool = False
+) -> Dict[str, str]:
+    """
+    Download the source file for Antitoxin_ParD3 dataset from the original source.
+
+    Parameters
+    ----------
+    dir : str
+        The target directory where the file will be saved
+    overwite bool, default=False
+        Whether to overwrite the file if it already exists. Default is False.
+
+    Returns
+    -------
+    Dict[str, str]
+        key: file name,
+        value: file path pointing to Antitoxin_ParD3 dataset source file
+    """
+    return download_source_file_from_huggingface("Antitoxin_ParD3", dir, overwrite=overwrite)

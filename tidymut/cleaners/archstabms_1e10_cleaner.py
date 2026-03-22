@@ -1,4 +1,4 @@
-# cleaner/archstabms_1e10_cleaner.py
+# tidymut/cleaners/archstabms_1e10_cleaner.py
 from __future__ import annotations
 
 import pandas as pd
@@ -20,7 +20,6 @@ from .base_config import BaseCleanerConfig
 
 from ..core.pipeline import Pipeline, create_pipeline
 from ..core.dataset import MutationDataset
-
 
 if TYPE_CHECKING:
     from typing import Callable, Optional, Tuple, Dict, Union, Any, List
@@ -71,7 +70,7 @@ class ArchStabMS1E10CleanerConfig(BaseCleanerConfig):
         default_factory=lambda: {
             "name": "name",
             "WT": "WT",
-            "aa_seq": "mut_seq",
+            "full_aa_seq": "mut_seq",
             "fitness": "fitness",
         }
     )
@@ -115,7 +114,7 @@ class ArchStabMS1E10CleanerConfig(BaseCleanerConfig):
             )
 
         # Validate column mapping
-        required_mappings = {"name", "aa_seq", "fitness", "aa_seq"}
+        required_mappings = {"name", "full_aa_seq", "fitness", "WT"}
         missing = required_mappings - set(self.column_mapping.keys())
         if missing:
             raise ValueError(f"Missing required column mappings: {missing}")
@@ -197,11 +196,12 @@ def create_archstabms_1e10_cleaner(
                 compute_mutations,
                 WT_column=final_config.column_mapping.get("WT", "WT"),
                 mut_seq=final_config.column_mapping.get("mut_seq", "mut_seq"),
+                name_column=final_config.column_mapping.get("name", "name"),
             )
             .delayed_then(
                 convert_to_mutation_dataset_format,
                 mutated_sequence_column=final_config.column_mapping.get(
-                    "aa_seq", "aa_seq"
+                    "full_aa_seq", "full_aa_seq"
                 ),
                 label_column=final_config.primary_label_column,
                 is_zero_based=True,
@@ -252,7 +252,7 @@ def clean_archstabms_1e10_dataset(
     ...     "column_mapping": {
     ...         "name": "name_column",
     ...         "WT":"wt",
-    ...         "aa_seq": "mut_seq",
+    ...         "full_aa_seq": "mut_seq",
     ...         "fitness": "fitness",
     ... }})
 
