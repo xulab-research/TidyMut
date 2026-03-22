@@ -10,7 +10,14 @@ This guide provides usage examples for data cleaning modules organized by databa
 - [**ProteinGym**](#protein-gym-database): ProteinGym: Large-Scale Benchmarks for Protein Design and Fitness Prediction
 - [**cDNAProteolysis**](#cdna-proteolysis-database): Mega-scale experimental analysis of protein folding stability in biology and design
 - [**ddG-dTm Datasets**](#ddg-dtm-datasets): A collection of datasets providing single- and multiple-mutant measurements, labeled by thermodynamic parameters (ΔΔG, ΔTm)
-- [**archstabms1e10 Datasets**](#archstabms1e10-datasets): High-order multi-mutant libraries (“1e10”) measuring protein stability for GRB2-SH3 and SRC.
+- [**ArchStabMS1E10 Datasets**](#archstabms1e10-datasets): High-order multi-mutant libraries (“1e10”) measuring protein stability for GRB2-SH3 and SRC.
+- [**Antitoxin ParD3 Datasets**](#antitoxin-pard3): The antitoxin ParD3 3-position library is a combinatorially exhaustive dataset of 8,000 variants demonstrating that simple, independent per-residue mutation preferences are sufficient to almost perfectly predict combinatorial protein fitness.
+- [**TrpB Datasets**](#trpb-datasets): a combinatorially complete sequence-fitness landscape comprising 160,000 variants across four active-site residues of the enzyme tryptophan synthase, capturing significant epistatic interactions to serve as a benchmark for model-guided enzyme engineering.
+- [**Human Myoglobin Datasets**](#human-myoglobin-datasets): a deep mutational scanning library detailing the expression fitness scores for near-comprehensive single-codon and small-fraction double-codon mutations in yeast surface-displayed human myoglobin, which was used to train machine learning models for predicting epistatic effects and discovering stability-enhancing variants.
+- [**CTXM Datasets**](#ctxm-database): a comprehensive deep mutational scanning library of 49,096 pairwise double mutations across 17 active site residues of the CTX-M-14 $\beta$-lactamase enzyme, constructed to systematically map the epistatic interaction network driving antibiotic resistance.
+    - [**CTXM ampicillin**]: A subset of the CTX-M library quantifying the functional fitness and epistatic interactions of the enzyme variants under ampicillin selection, revealing a broader mutational tolerance and distinct compensatory pathways.
+    - [**CTXM cefotaxime**]: A subset of the CTX-M library quantifying the functional fitness and epistatic interactions of the enzyme variants under cefotaxime selection, characterized by highly stringent sequence requirements and substrate-specific epistasis.
+
 
 ## Prerequisites
 
@@ -202,7 +209,7 @@ ddgdtm_cleaning_pipeline, ddgdtm_dataset = clean_ddg_dtm_dataset(ddgdtm_cleaning
 
 See {py:func}`tidymut.cleaners.DdgDtmCleanerConfig` for details.
 
-## archstabms1e10 Datasets
+## ArchStabMS1E10 Datasets
 
 ### File Preparation
 
@@ -231,3 +238,125 @@ archstabms_cleaning_pipeline, archstabms_dataset = clean_archstabms_1e10_dataset
 ### Advanced Settings
 
 See {py:func}`tidymut.cleaners.ArchStabMS1E10CleanerConfig` for details.
+
+## Antitoxin ParD3
+
+### File Preparation
+
+You can download the source file directy by running (see {py:func}`tidymut.utils.download_antitoxin_pard3_source_file` for details):
+```python
+from tidymut import download_antitoxin_pard3_source_file
+filepaths = download_antitoxin_pard3_source_file("path/to/target/folder")
+```
+
+### Basic Usage
+
+```python
+from tidymut.cleaners import (
+    create_antitoxin_pard3_cleaner,
+    clean_antitoxin_pard3_dataset
+)
+
+# File settings
+dataset_filepath = "path/to/dataset/file"
+
+# Clean data
+antitoxin_pard3_cleaning_pipeline = create_antitoxin_pard3_cleaner(dataset_filepath)
+antitoxin_pard3_cleaning_pipeline, antitoxin_pard3_dataset = clean_antitoxin_pard3_dataset(ddgdtm_cleaning_pipeline)
+```
+
+### Advanced Settings
+
+See {py:func}`tidymut.cleaners.AntitoxinParD3CleanerConfig` for details.
+
+## TrpB Datasets
+
+### File Preparation
+
+You can download the source file directy by running (see {py:func}`tidymut.utils.download_trpb_source_file` for details):
+```python
+from tidymut import download_trpb_source_file
+filepaths = download_trpb_source_file("path/to/target/folder")
+```
+
+### Basic Usage
+
+```python
+from tidymut.cleaners import (
+    create_trpb_cleaner,
+    clean_trpb_dataset
+)
+
+# File settings
+dataset_filepath = "path/to/dataset/file"
+
+# Clean data
+trpB_cleaning_pipeline = create_trpb_cleaner(dataset_filepath)
+trpB_cleaning_pipeline, trpB_dataset = clean_trpb_dataset(trpB_cleaning_pipeline)
+```
+
+### Advanced Settings
+
+See {py:func}`tidymut.cleaners.TrpBCleanerConfig` for details.
+
+## Human Myoglobin Datasets
+
+
+### File Preparation
+
+You can download the source file directy by running (see {py:func}`tidymut.utils.download_human_myoglobin_source_file` for details):
+```python
+from tidymut import download_human_myoglobin_source_file
+filepaths = download_human_myoglobin_source_file("path/to/target/folder")
+```
+
+### Basic Usage
+
+```python
+from tidymut.cleaners import (
+    create_trpb_cleaner,
+    clean_trpb_dataset
+)
+
+# File settings
+dataset_filepath = "path/to/dataset/file"
+
+# Clean data
+human_myoglobin_cleaning_pipeline = create_human_myoglobin_cleaner(dataset_filepath)
+human_myoglobin_cleaning_pipeline, human_myoglobin_dataset = clean_trpb_dataset(human_myoglobin_cleaning_pipeline)
+```
+
+### Advanced Settings
+
+See {py:func}`tidymut.cleaners.HumanMyoglobinCleanerConfig` for details.
+
+## CTXM DataBase
+
+
+### File Preparation
+
+You can download the source file directy by running (see {py:func}`tidymut.utils.download_ctxm_source_file` for details):
+```python
+from tidymut import download_ctxm_source_file
+filepaths = download_ctxm_source_file("path/to/target/folder")
+```
+
+### Basic Usage
+
+```python
+from tidymut.cleaners import (
+    create_ctxm_cleaner,
+    clean_ctxm_dataset,
+)
+
+# File settings
+dataset_filepath = "path/to/dataset/file"
+
+# Clean data
+ctxm_cleaning_pipeline = create_ctxm_cleaner(dataset_filepath)
+ctxm_cleaning_pipeline, ctxm_dataset = clean_trpb_dataset(ctxm_cleaning_pipeline)
+```
+
+### Advanced Settings
+
+See {py:func}`tidymut.cleaners.CTXMCleanerConfig` for details.
