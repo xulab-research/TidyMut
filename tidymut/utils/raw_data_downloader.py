@@ -21,6 +21,14 @@ __all__ = [
     "download_cdna_proteolysis_source_file",
     "download_protein_gym_source_file",
     "download_human_domainome_source_file",
+    "download_ddg_dtm_source_file",
+    "download_archstabms1e10_source_file",
+    "download_human_myoglobin_source_file",
+    "download_ctxm_source_file",
+    "download_trpb_source_file",
+    "download_antitoxin_pard3_source_file",
+    "download_RBD_antibody_source_file",
+    "download_ACE2_source_file",
 ]
 
 
@@ -636,3 +644,109 @@ def download_antitoxin_pard3_source_file(
         value: file path pointing to Antitoxin_ParD3 dataset source file
     """
     return download_source_file_from_huggingface("Antitoxin_ParD3", dir, overwrite=overwrite)
+
+
+def download_RBD_antibody_source_file(
+    dir: str,
+    *,
+    overwrite: bool = False,
+    sub_dataset: Optional[
+        Literal[
+            "AZ_Abs",
+            "HAARVI_sera",
+            "Moderna",
+            "Rockefeller",
+            "Vir_mAbs",
+            "clinical_Abs",
+        ]
+    ] = None,
+) -> Dict[str, str]:
+    """
+    Download the source file(s) for the RBD_Antibody dataset from Hugging Face.
+
+    Parameters
+    ----------
+    dir : str
+        The target directory where the file(s) will be saved.
+    overwrite : bool, default=False
+        Whether to overwrite existing files.
+    sub_dataset : Optional[Literal[...]], default=None
+        If provided, download only the specified RBD antibody sub-dataset.
+
+    Returns
+    -------
+    Dict[str, str]
+        key: file name,
+        value: local file path
+    """
+    valid_sub_datasets = [
+        "AZ_Abs",
+        "HAARVI_sera",
+        "Moderna",
+        "Rockefeller",
+        "Vir_mAbs",
+        "clinical_Abs",
+    ]
+    if sub_dataset is not None and sub_dataset not in valid_sub_datasets:
+        raise ValueError(
+            f"Unsupported sub-dataset. Supported options: {valid_sub_datasets}"
+        )
+
+    return download_source_file_from_huggingface(
+        "RBD_Antibody",
+        dir,
+        overwrite=overwrite,
+        sub_dataset=sub_dataset,
+    )
+
+
+def download_ACE2_source_file(
+    dir: str,
+    *,
+    overwrite: bool = False,
+    sub_dataset: Optional[
+        Literal[
+            "Omicron_EG5_FLip_BA286",
+            "Omicron_XBB_BQ",
+            "Omicron",
+            "DMS_variants",
+            "Delta",
+        ]
+    ] = None,
+) -> Dict[str, str]:
+    """
+    Download the source file(s) for the RBD_ACE2 dataset from Hugging Face.
+
+    Parameters
+    ----------
+    dir : str
+        The target directory where the file(s) will be saved.
+    overwrite : bool, default=False
+        Whether to overwrite existing files.
+    sub_dataset : Optional[Literal[...]], default=None
+        If provided, download only the specified ACE2 sub-dataset.
+
+    Returns
+    -------
+    Dict[str, str]
+        key: file name,
+        value: local file path
+    """
+    valid_sub_datasets = [
+        "Omicron_EG5_FLip_BA286",
+        "Omicron_XBB_BQ",
+        "Omicron",
+        "DMS_variants",
+        "Delta",
+    ]
+    if sub_dataset is not None and sub_dataset not in valid_sub_datasets:
+        raise ValueError(
+            f"Unsupported sub-dataset. Supported options: {valid_sub_datasets}"
+        )
+
+    return download_source_file_from_huggingface(
+        "RBD_ACE2",
+        dir,
+        overwrite=overwrite,
+        sub_dataset=sub_dataset,
+    )
