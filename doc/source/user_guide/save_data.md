@@ -17,6 +17,8 @@ This guide provides usage examples for saving cleaned datasets and cleaning arti
 - [**CTXM Datasets**](#ctxm-database): a comprehensive deep mutational scanning library of 49,096 pairwise double mutations across 17 active site residues of the CTX-M-14 $\beta$-lactamase enzyme, constructed to systematically map the epistatic interaction network driving antibiotic resistance.
     - [**CTXM ampicillin**]: A subset of the CTX-M library quantifying the functional fitness and epistatic interactions of the enzyme variants under ampicillin selection, revealing a broader mutational tolerance and distinct compensatory pathways.
     - [**CTXM cefotaxime**]: A subset of the CTX-M library quantifying the functional fitness and epistatic interactions of the enzyme variants under cefotaxime selection, characterized by highly stringent sequence requirements and substrate-specific epistasis.
+- [**RBD ACE2 Database**](#rbd-ace2-database): SARS-CoV-2 RBD sequences with ACE2 binding affinity scores, labeled by `log10Ka` where higher values indicate stronger ACE2 binding affinity.
+- [**RBD Antibody Database**](#rbd-antibody-database): SARS-CoV-2 RBD antibody binding data with `score` transformed by negative logarithm. Higher scores indicate stronger binding.
 
 ### Main idea
 
@@ -82,6 +84,7 @@ for key, val in obj.items():
     out_path = f"path/to/target_dir/{key}.csv"
     val.to_csv(out_path, index=False)
 ```
+
 
 ### SupplementaryTable4 Dataset
 
@@ -263,4 +266,53 @@ with open("path/to/artifacts.pkl", "rb") as f:
 for key, val in obj.items():
     out_path = f"path/to/target_dir/{key}.csv"
     val.to_csv(out_path, index=False)
+```
+
+
+## RBD ACE2 Database
+
+**save the main data**
+
+```python
+rbd_ace2_dataset.save("path/to/output_dir")
+```
+
+**save the artifacts data**
+
+```python
+import pickle
+
+rbd_ace2_cleaning_pipeline.save_artifacts("path/to/artifacts.pkl")
+
+with open("path/to/artifacts.pkl", "rb") as f:
+    obj = pickle.load(f)
+
+obj["capture_rbd_ace2_wt_score_table.wt_score_table"].to_csv(
+    "path/to/target_dir/rbd_ace2_wt_score_table.csv",
+    index=False,
+)
+```
+
+## RBD Antibody Database
+
+**save the main data**
+
+```python
+rbd_dataset.save("path/to/output_dir")
+```
+
+**save the artifacts data**
+
+```python
+import pickle
+
+rbd_cleaning_pipeline.save_artifacts("path/to/artifacts.pkl")
+
+with open("path/to/artifacts.pkl", "rb") as f:
+    obj = pickle.load(f)
+
+obj["capture_rbd_wt_score_table.wt_score_table"].to_csv(
+    "path/to/target_dir/rbd_wt_score_table.csv",
+    index=False,
+)
 ```

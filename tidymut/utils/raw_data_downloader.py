@@ -27,8 +27,8 @@ __all__ = [
     "download_ctxm_source_file",
     "download_trpb_source_file",
     "download_antitoxin_pard3_source_file",
-    "download_RBD_antibody_source_file",
-    "download_ACE2_source_file",
+    "download_rbd_antibody_source_file",
+    "download_rbd_ace2_source_file",
 ]
 
 
@@ -646,7 +646,7 @@ def download_antitoxin_pard3_source_file(
     return download_source_file_from_huggingface("Antitoxin_ParD3", dir, overwrite=overwrite)
 
 
-def download_RBD_antibody_source_file(
+def download_rbd_antibody_source_file(
     dir: str,
     *,
     overwrite: bool = False,
@@ -700,7 +700,7 @@ def download_RBD_antibody_source_file(
     )
 
 
-def download_ACE2_source_file(
+def download_rbd_ace2_source_file(
     dir: str,
     *,
     overwrite: bool = False,
@@ -724,7 +724,7 @@ def download_ACE2_source_file(
     overwrite : bool, default=False
         Whether to overwrite existing files.
     sub_dataset : Optional[Literal[...]], default=None
-        If provided, download only the specified ACE2 sub-dataset.
+        If provided, download only the specified RBD ACE2 sub-dataset.
 
     Returns
     -------
