@@ -221,7 +221,7 @@ DATASETS = {
     },
     "RBD_Antibody": {
         "name": "RBD_Antibody_datasets",
-        "official_url": "https://huggingface.co/datasets/Zoey13891350636/RBD_Antibody",
+        "official_url": None,
         "files": [
             "SARS-CoV-2-RBD_MAP_AZ_Abs_scores.csv",
             "SARS-CoV-2-RBD_MAP_HAARVI_sera_scores.csv",
@@ -231,12 +231,12 @@ DATASETS = {
             "SARS-CoV-2-RBD_MAP_clinical_Abs_scores.csv",
         ],
         "huggingface_repos": [
-            "datasets/Zoey13891350636/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_AZ_Abs_scores.csv?download=true",
-            "datasets/Zoey13891350636/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_HAARVI_sera_scores.csv?download=true",
-            "datasets/Zoey13891350636/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_Moderna_scores.csv?download=true",
-            "datasets/Zoey13891350636/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_Rockefeller_scores.csv?download=true",
-            "datasets/Zoey13891350636/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_Vir_mAbs_scores.csv?download=true",
-            "datasets/Zoey13891350636/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_clinical_Abs_scores.csv?download=true",
+            "datasets/xulab-research/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_AZ_Abs_scores.csv?download=true",
+            "datasets/xulab-research/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_HAARVI_sera_scores.csv?download=true",
+            "datasets/xulab-research/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_Moderna_scores.csv?download=true",
+            "datasets/xulab-research/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_Rockefeller_scores.csv?download=true",
+            "datasets/xulab-research/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_Vir_mAbs_scores.csv?download=true",
+            "datasets/xulab-research/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_clinical_Abs_scores.csv?download=true",
         ],
         "file_name": [
             "SARS-CoV-2-RBD_MAP_AZ_Abs_scores.csv",
@@ -250,42 +250,42 @@ DATASETS = {
             "AZ_Abs": {
                 "files": ["SARS-CoV-2-RBD_MAP_AZ_Abs_scores.csv"],
                 "huggingface_repos": [
-                    "datasets/Zoey13891350636/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_AZ_Abs_scores.csv?download=true"
+                    "datasets/xulab-research/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_AZ_Abs_scores.csv?download=true"
                 ],
                 "file_name": ["SARS-CoV-2-RBD_MAP_AZ_Abs_scores.csv"],
             },
             "HAARVI_sera": {
                 "files": ["SARS-CoV-2-RBD_MAP_HAARVI_sera_scores.csv"],
                 "huggingface_repos": [
-                    "datasets/Zoey13891350636/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_HAARVI_sera_scores.csv?download=true"
+                    "datasets/xulab-research/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_HAARVI_sera_scores.csv?download=true"
                 ],
                 "file_name": ["SARS-CoV-2-RBD_MAP_HAARVI_sera_scores.csv"],
             },
             "Moderna": {
                 "files": ["SARS-CoV-2-RBD_MAP_Moderna_scores.csv"],
                 "huggingface_repos": [
-                    "datasets/Zoey13891350636/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_Moderna_scores.csv?download=true"
+                    "datasets/xulab-research/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_Moderna_scores.csv?download=true"
                 ],
                 "file_name": ["SARS-CoV-2-RBD_MAP_Moderna_scores.csv"],
             },
             "Rockefeller": {
                 "files": ["SARS-CoV-2-RBD_MAP_Rockefeller_scores.csv"],
                 "huggingface_repos": [
-                    "datasets/Zoey13891350636/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_Rockefeller_scores.csv?download=true"
+                    "datasets/xulab-research/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_Rockefeller_scores.csv?download=true"
                 ],
                 "file_name": ["SARS-CoV-2-RBD_MAP_Rockefeller_scores.csv"],
             },
             "Vir_mAbs": {
                 "files": ["SARS-CoV-2-RBD_MAP_Vir_mAbs_scores.csv"],
                 "huggingface_repos": [
-                    "datasets/Zoey13891350636/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_Vir_mAbs_scores.csv?download=true"
+                    "datasets/xulab-research/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_Vir_mAbs_scores.csv?download=true"
                 ],
                 "file_name": ["SARS-CoV-2-RBD_MAP_Vir_mAbs_scores.csv"],
             },
             "clinical_Abs": {
                 "files": ["SARS-CoV-2-RBD_MAP_clinical_Abs_scores.csv"],
                 "huggingface_repos": [
-                    "datasets/Zoey13891350636/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_clinical_Abs_scores.csv?download=true"
+                    "datasets/xulab-research/RBD_Antibody/resolve/main/SARS-CoV-2-RBD_MAP_clinical_Abs_scores.csv?download=true"
                 ],
                 "file_name": ["SARS-CoV-2-RBD_MAP_clinical_Abs_scores.csv"],
             },
@@ -293,7 +293,7 @@ DATASETS = {
     },
     "RBD_ACE2": {
         "name": "RBD_ACE2_datasets",
-        "official_url": "https://huggingface.co/datasets/Zoey13891350636/RBD_ACE2",
+        "official_url": None,
         "files": [
             "SARS-CoV-2-RBD_DMS_Omicron-EG5-FLip-BA286_bc_binding.csv",
             "SARS-CoV-2-RBD_DMS_Omicron-XBB-BQ_bc_binding.csv",
@@ -302,11 +302,11 @@ DATASETS = {
             "SARS-CoV-2-RBD_Delta_bc_binding.csv",
         ],
         "huggingface_repos": [
-            "datasets/Zoey13891350636/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_Omicron-EG5-FLip-BA286_bc_binding.csv?download=true",
-            "datasets/Zoey13891350636/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_Omicron-XBB-BQ_bc_binding.csv?download=true",
-            "datasets/Zoey13891350636/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_Omicron_bc_binding.csv?download=true",
-            "datasets/Zoey13891350636/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_variants_bc_binding.csv?download=true",
-            "datasets/Zoey13891350636/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_Delta_bc_binding.csv?download=true",
+            "datasets/xulab-research/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_Omicron-EG5-FLip-BA286_bc_binding.csv?download=true",
+            "datasets/xulab-research/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_Omicron-XBB-BQ_bc_binding.csv?download=true",
+            "datasets/xulab-research/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_Omicron_bc_binding.csv?download=true",
+            "datasets/xulab-research/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_variants_bc_binding.csv?download=true",
+            "datasets/xulab-research/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_Delta_bc_binding.csv?download=true",
         ],
         "file_name": [
             "SARS-CoV-2-RBD_DMS_Omicron-EG5-FLip-BA286_bc_binding.csv",
@@ -319,35 +319,35 @@ DATASETS = {
             "Omicron_EG5_FLip_BA286": {
                 "files": ["SARS-CoV-2-RBD_DMS_Omicron-EG5-FLip-BA286_bc_binding.csv"],
                 "huggingface_repos": [
-                    "datasets/Zoey13891350636/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_Omicron-EG5-FLip-BA286_bc_binding.csv?download=true"
+                    "datasets/xulab-research/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_Omicron-EG5-FLip-BA286_bc_binding.csv?download=true"
                 ],
                 "file_name": ["SARS-CoV-2-RBD_DMS_Omicron-EG5-FLip-BA286_bc_binding.csv"],
             },
             "Omicron_XBB_BQ": {
                 "files": ["SARS-CoV-2-RBD_DMS_Omicron-XBB-BQ_bc_binding.csv"],
                 "huggingface_repos": [
-                    "datasets/Zoey13891350636/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_Omicron-XBB-BQ_bc_binding.csv?download=true"
+                    "datasets/xulab-research/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_Omicron-XBB-BQ_bc_binding.csv?download=true"
                 ],
                 "file_name": ["SARS-CoV-2-RBD_DMS_Omicron-XBB-BQ_bc_binding.csv"],
             },
             "Omicron": {
                 "files": ["SARS-CoV-2-RBD_DMS_Omicron_bc_binding.csv"],
                 "huggingface_repos": [
-                    "datasets/Zoey13891350636/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_Omicron_bc_binding.csv?download=true"
+                    "datasets/xulab-research/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_Omicron_bc_binding.csv?download=true"
                 ],
                 "file_name": ["SARS-CoV-2-RBD_DMS_Omicron_bc_binding.csv"],
             },
             "DMS_variants": {
                 "files": ["SARS-CoV-2-RBD_DMS_variants_bc_binding.csv"],
                 "huggingface_repos": [
-                    "datasets/Zoey13891350636/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_variants_bc_binding.csv?download=true"
+                    "datasets/xulab-research/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_DMS_variants_bc_binding.csv?download=true"
                 ],
                 "file_name": ["SARS-CoV-2-RBD_DMS_variants_bc_binding.csv"],
             },
             "Delta": {
                 "files": ["SARS-CoV-2-RBD_Delta_bc_binding.csv"],
                 "huggingface_repos": [
-                    "datasets/Zoey13891350636/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_Delta_bc_binding.csv?download=true"
+                    "datasets/xulab-research/RBD_ACE2/resolve/main/SARS-CoV-2-RBD_Delta_bc_binding.csv?download=true"
                 ],
                 "file_name": ["SARS-CoV-2-RBD_Delta_bc_binding.csv"],
             },

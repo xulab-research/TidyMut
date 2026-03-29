@@ -105,14 +105,19 @@ class RBDACE2CleanerConfig(BaseCleanerConfig):
     reference_sequences: Dict[str, str] = field(
         default_factory=lambda: RBD_ACE2_REFERENCE_SEQUENCES.copy()
     )
+
     target_name_aliases: Dict[str, str] = field(
         default_factory=lambda: RBD_ACE2_TARGET_NAME_ALIASES.copy()
     )
+
     validate_mut_workers: int = 16
+
     process_workers: int = 16
+
     cache_validation_results: bool = False
 
     label_columns: List[str] = field(default_factory=lambda: ["label"])
+
     primary_label_column: str = "label"
 
     pipeline_name: str = "RBD_ACE2_binding"
@@ -206,17 +211,14 @@ def create_rbd_ace2_cleaner(
 
         pipeline = create_pipeline(dataset_or_path, final_config.pipeline_name)
 
-        # Standardize raw columns, target/background labels, and explicit WT annotations
-        # before mutation validation. Stop-codon rows are removed at this stage.
         pipeline = (
-            pipeline
-            .delayed_then(
+            pipeline.delayed_then(
                 extract_and_rename_columns,
                 column_mapping=final_config.column_mapping,
             )
             .delayed_then(
                 normalize_rbd_ace2_target_names,
-                name_column="name",
+                name_column=final_config.column_mapping.get("target", "target"),
                 name_aliases=final_config.target_name_aliases,
             )
             .delayed_then(
@@ -225,27 +227,30 @@ def create_rbd_ace2_cleaner(
             )
             .delayed_then(
                 mark_wild_type_by_variant_class,
-                mutation_column="mut_info",
-                variant_class_column="variant_class",
+                mutation_column=final_config.column_mapping.get(
+                    "aa_substitutions", "aa_substitutions"
+                ),
+                variant_class_column=final_config.column_mapping.get(
+                    "variant_class", "variant_class"
+                ),
                 wild_type_value="wildtype",
                 wt_identifier="WT",
             )
             .delayed_then(
                 filter_and_clean_data,
                 filters=ace2_filters,
-                exclude_patterns={"mut_info": [r"\*"]},
+                exclude_patterns={
+                    final_config.column_mapping.get(
+                        "aa_substitutions", "aa_substitutions"
+                    ): [r"\*"]
+                },
                 drop_na_columns=final_config.drop_na_columns,
             )
-        )
-
-        # Validate and format mutation strings, collapse duplicate measurements,
-        # attach the target-specific reference sequence, subtract the per-target
-        # WT baseline, and then build the final mutation dataset view.
-        pipeline = (
-            pipeline
             .delayed_then(
                 validate_mutations,
-                mutation_column="mut_info",
+                mutation_column=final_config.column_mapping.get(
+                    "aa_substitutions", "aa_substitutions"
+                ),
                 format_mutations=True,
                 mutation_sep=" ",
                 is_zero_based=False,
@@ -255,20 +260,27 @@ def create_rbd_ace2_cleaner(
             )
             .delayed_then(
                 average_labels_by_name,
-                name_columns=("name", "mut_info"),
+                name_columns=(
+                    final_config.column_mapping.get("target", "target"),
+                    final_config.column_mapping.get(
+                        "aa_substitutions", "aa_substitutions"
+                    ),
+                ),
                 label_columns=final_config.primary_label_column,
             )
             .delayed_then(
                 add_reference_sequences_by_target,
                 reference_sequences=final_config.reference_sequences,
-                name_column="name",
+                name_column=final_config.column_mapping.get("target", "target"),
                 sequence_column="sequence",
             )
             .delayed_then(
                 apply_mutations_preserving_wild_type,
                 sequence_column="sequence",
-                name_column="name",
-                mutation_column="mut_info",
+                name_column=final_config.column_mapping.get("target", "target"),
+                mutation_column=final_config.column_mapping.get(
+                    "aa_substitutions", "aa_substitutions"
+                ),
                 mutation_sep=",",
                 is_zero_based=True,
                 sequence_type="protein",
@@ -276,17 +288,21 @@ def create_rbd_ace2_cleaner(
             )
             .delayed_then(
                 subtract_labels_by_wt,
-                name_column="name",
+                name_column=final_config.column_mapping.get("target", "target"),
                 label_columns=final_config.primary_label_column,
-                mutation_column="mut_info",
+                mutation_column=final_config.column_mapping.get(
+                    "aa_substitutions", "aa_substitutions"
+                ),
                 wt_identifier="WT",
                 in_place=True,
                 drop_wt_row=False,
             )
             .delayed_then(
                 convert_to_mutation_dataset_format,
-                name_column="name",
-                mutation_column="mut_info",
+                name_column=final_config.column_mapping.get("target", "target"),
+                mutation_column=final_config.column_mapping.get(
+                    "aa_substitutions", "aa_substitutions"
+                ),
                 mutated_sequence_column="mut_seq",
                 label_column=final_config.primary_label_column,
                 is_zero_based=True,
@@ -295,7 +311,9 @@ def create_rbd_ace2_cleaner(
 
         if isinstance(dataset_or_path, (str, Path)):
             pipeline.add_delayed_step(read_dataset, 0, file_format="csv")
-        elif dataset_or_path is not None and not isinstance(dataset_or_path, pd.DataFrame):
+        elif dataset_or_path is not None and not isinstance(
+            dataset_or_path, pd.DataFrame
+        ):
             raise TypeError(
                 f"dataset_or_path must be pd.DataFrame or str/Path, got {type(dataset_or_path)}"
             )
@@ -341,4 +359,6 @@ def clean_rbd_ace2_dataset(
         return pipeline, dataset
     except Exception as e:
         logger.error(f"Error in running RBD ACE2 dataset cleaning pipeline: {str(e)}")
-        raise RuntimeError(f"Error in running RBD ACE2 dataset cleaning pipeline: {str(e)}")
+        raise RuntimeError(
+            f"Error in running RBD ACE2 dataset cleaning pipeline: {str(e)}"
+        )

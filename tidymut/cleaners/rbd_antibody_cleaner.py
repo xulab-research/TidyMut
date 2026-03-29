@@ -17,8 +17,8 @@ from tidymut.cleaners.basic_cleaners import (
     filter_and_clean_data,
     read_dataset,
     validate_mutations,
+    subtract_labels_by_wt,
 )
-from tidymut.cleaners.cdna_proteolysis_custom_cleaners import subtract_labels_by_wt
 from tidymut.cleaners.rbd_custom_cleaners import (
     apply_mutations_preserving_wild_type,
     mark_wild_type_by_variant_class,
@@ -115,11 +115,17 @@ class RBDAntibodyCleanerConfig(BaseCleanerConfig):
     )
 
     label_columns: List[str] = field(default_factory=lambda: ["label"])
+
     primary_label_column: str = "label"
+
     input_is_zero_based: bool = False
+
     validate_mut_workers: int = 16
+
     process_workers: int = 16
+
     cache_validation_results: bool = False
+
     pipeline_name: str = "RBD_Antibody"
 
     def validate(self) -> None:
@@ -218,8 +224,7 @@ def create_rbd_antibody_cleaner(
         # Standardize raw columns and explicit WT annotations before mutation
         # validation. Stop-codon rows are removed at this stage.
         pipeline = (
-            pipeline
-            .delayed_then(
+            pipeline.delayed_then(
                 extract_and_rename_columns,
                 column_mapping=final_config.column_mapping,
             )
@@ -229,15 +234,23 @@ def create_rbd_antibody_cleaner(
             )
             .delayed_then(
                 mark_wild_type_by_variant_class,
-                mutation_column="aa_substitutions",
-                variant_class_column="variant_class",
+                mutation_column=final_config.column_mapping.get(
+                    "aa_substitutions", "aa_substitutions"
+                ),
+                variant_class_column=final_config.column_mapping.get(
+                    "variant_class", "variant_class"
+                ),
                 wild_type_value="wildtype",
                 wt_identifier="WT",
             )
             .delayed_then(
                 filter_and_clean_data,
                 filters=final_config.filters,
-                exclude_patterns={"aa_substitutions": [r"\*"]},
+                exclude_patterns={
+                    final_config.column_mapping.get(
+                        "aa_substitutions", "aa_substitutions"
+                    ): [r"\*"]
+                },
                 drop_na_columns=final_config.drop_na_columns,
             )
             .delayed_then(
@@ -245,16 +258,11 @@ def create_rbd_antibody_cleaner(
                 dataset_name=final_config.wt_sequence,
                 column_name="sequence",
             )
-        )
-
-        # Validate and format mutation strings, apply them to the shared RBD
-        # reference, aggregate repeated antibody measurements, subtract the
-        # per-antibody WT baseline, and build the final mutation dataset view.
-        pipeline = (
-            pipeline
             .delayed_then(
                 validate_mutations,
-                mutation_column="aa_substitutions",
+                mutation_column=final_config.column_mapping.get(
+                    "aa_substitutions", "aa_substitutions"
+                ),
                 format_mutations=True,
                 mutation_sep=" ",
                 is_zero_based=final_config.input_is_zero_based,
@@ -265,30 +273,41 @@ def create_rbd_antibody_cleaner(
             .delayed_then(
                 apply_mutations_preserving_wild_type,
                 sequence_column="sequence",
-                name_column="name",
-                mutation_column="aa_substitutions",
+                name_column=final_config.column_mapping.get("name", "name"),
+                mutation_column=final_config.column_mapping.get(
+                    "aa_substitutions", "aa_substitutions"
+                ),
                 mutation_sep=",",
                 is_zero_based=True,
                 num_workers=final_config.process_workers,
             )
             .delayed_then(
                 average_labels_by_name,
-                name_columns=("name", "aa_substitutions"),
+                name_columns=(
+                    final_config.column_mapping.get("name", "name"),
+                    final_config.column_mapping.get(
+                        "aa_substitutions", "aa_substitutions"
+                    ),
+                ),
                 label_columns=final_config.primary_label_column,
             )
             .delayed_then(
                 subtract_labels_by_wt,
-                name_column="name",
+                name_column=final_config.column_mapping.get("name", "name"),
                 label_columns=final_config.primary_label_column,
-                mutation_column="aa_substitutions",
+                mutation_column=final_config.column_mapping.get(
+                    "aa_substitutions", "aa_substitutions"
+                ),
                 wt_identifier="WT",
                 in_place=True,
                 drop_wt_row=False,
             )
             .delayed_then(
                 convert_to_mutation_dataset_format,
-                name_column="name",
-                mutation_column="aa_substitutions",
+                name_column=final_config.column_mapping.get("name", "name"),
+                mutation_column=final_config.column_mapping.get(
+                    "aa_substitutions", "aa_substitutions"
+                ),
                 mutated_sequence_column="mut_seq",
                 label_column=final_config.primary_label_column,
                 is_zero_based=True,
@@ -297,7 +316,9 @@ def create_rbd_antibody_cleaner(
 
         if isinstance(dataset_or_path, (str, Path)):
             pipeline.add_delayed_step(read_dataset, 0, file_format="csv")
-        elif dataset_or_path is not None and not isinstance(dataset_or_path, pd.DataFrame):
+        elif dataset_or_path is not None and not isinstance(
+            dataset_or_path, pd.DataFrame
+        ):
             raise TypeError(
                 f"dataset_or_path must be pd.DataFrame or str/Path, got {type(dataset_or_path)}"
             )
@@ -340,7 +361,9 @@ def clean_rbd_antibody_dataset(
         )
         return pipeline, dataset
     except Exception as e:
-        logger.error(f"Error in running RBD antibody dataset cleaning pipeline: {str(e)}")
+        logger.error(
+            f"Error in running RBD antibody dataset cleaning pipeline: {str(e)}"
+        )
         raise RuntimeError(
             f"Error in running RBD antibody dataset cleaning pipeline: {str(e)}"
         )

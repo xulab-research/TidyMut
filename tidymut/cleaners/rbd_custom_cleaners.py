@@ -77,16 +77,10 @@ def mark_wild_type_by_variant_class(
 
     result = dataset.copy()
     wt_mask = (
-        result[variant_class_column]
-        .fillna("")
-        .astype(str)
-        .str.strip()
-        .str.lower()
+        result[variant_class_column].fillna("").astype(str).str.strip().str.lower()
         == wild_type_value.lower()
     )
-    result[mutation_column] = (
-        result[mutation_column].fillna("").astype(str).str.strip()
-    )
+    result[mutation_column] = result[mutation_column].fillna("").astype(str).str.strip()
     result.loc[wt_mask, mutation_column] = wt_identifier
     return result
 
@@ -102,7 +96,9 @@ def normalize_rbd_ace2_target_names(
         raise ValueError(f"Target column '{name_column}' not found")
 
     aliases = name_aliases or RBD_ACE2_TARGET_NAME_ALIASES
-    normalized_aliases = {_normalize_target_key(key): value for key, value in aliases.items()}
+    normalized_aliases = {
+        _normalize_target_key(key): value for key, value in aliases.items()
+    }
     result = dataset.copy()
     unmatched_names = set()
 
@@ -124,8 +120,7 @@ def normalize_rbd_ace2_target_names(
     result[name_column] = result[name_column].map(normalize_name)
     if unmatched_names:
         tqdm.write(
-            "Warning: Unrecognized RBD ACE2 target names: "
-            f"{sorted(unmatched_names)}"
+            "Warning: Unrecognized RBD ACE2 target names: " f"{sorted(unmatched_names)}"
         )
     return result
 
@@ -144,7 +139,9 @@ def add_reference_sequences_by_target(
     result = dataset.copy()
     unknown_targets = sorted(set(result[name_column]) - set(reference_sequences))
     if unknown_targets:
-        raise ValueError(f"Unknown targets without reference sequence: {unknown_targets}")
+        raise ValueError(
+            f"Unknown targets without reference sequence: {unknown_targets}"
+        )
 
     result[sequence_column] = result[name_column].map(reference_sequences)
     return result
@@ -173,9 +170,7 @@ def apply_mutations_preserving_wild_type(
         wt_rows["mut_seq"] = wt_rows[sequence_column]
 
     if mutant_rows.empty:
-        failed_dataset = pd.DataFrame(
-            columns=list(dataset.columns) + ["error_message"]
-        )
+        failed_dataset = pd.DataFrame(columns=list(dataset.columns) + ["error_message"])
         return wt_rows, failed_dataset
 
     mutation_result = apply_mutations_to_sequences(

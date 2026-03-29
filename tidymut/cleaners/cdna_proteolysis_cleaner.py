@@ -17,10 +17,10 @@ from .basic_cleaners import (
     average_labels_by_name,
     convert_to_mutation_dataset_format,
     replace_in_column,
+    subtract_labels_by_wt,
 )
 from .cdna_proteolysis_custom_cleaners import (
     validate_wt_sequence,
-    subtract_labels_by_wt,
 )
 from ..core.dataset import MutationDataset
 from ..core.pipeline import Pipeline, create_pipeline
