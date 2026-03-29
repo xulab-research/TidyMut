@@ -17,6 +17,8 @@ This guide provides usage examples for data cleaning modules organized by databa
 - [**CTXM Datasets**](#ctxm-database): a comprehensive deep mutational scanning library of 49,096 pairwise double mutations across 17 active site residues of the CTX-M-14 $\beta$-lactamase enzyme, constructed to systematically map the epistatic interaction network driving antibiotic resistance.
     - [**CTXM ampicillin**]: A subset of the CTX-M library quantifying the functional fitness and epistatic interactions of the enzyme variants under ampicillin selection, revealing a broader mutational tolerance and distinct compensatory pathways.
     - [**CTXM cefotaxime**]: A subset of the CTX-M library quantifying the functional fitness and epistatic interactions of the enzyme variants under cefotaxime selection, characterized by highly stringent sequence requirements and substrate-specific epistasis.
+- [**RBD ACE2 Database**](#rbd-ace2-database): SARS-CoV-2 RBD sequences with ACE2 binding affinity scores, labeled by `log10Ka` where higher values indicate stronger ACE2 binding affinity.
+- [**RBD Antibody Database**](#rbd-antibody-database): SARS-CoV-2 RBD antibody escape data with `score` computed as the negative logarithm of escape. Higher scores indicate weaker escape, reflecting better binding capacity.
 
 
 ## Prerequisites
@@ -360,3 +362,107 @@ ctxm_cleaning_pipeline, ctxm_dataset = clean_trpb_dataset(ctxm_cleaning_pipeline
 ### Advanced Settings
 
 See {py:func}`tidymut.cleaners.CTXMCleanerConfig` for details.
+
+
+## RBD ACE2 Database
+
+### File Preparation
+
+You can download the source file directly by running (see {py:func}`tidymut.utils.download_rbd_ace2_source_file` for details):
+```python
+from tidymut import download_rbd_ace2_source_file
+filepaths = download_rbd_ace2_source_file("path/to/target/folder")
+```
+
+You can also download and process a specific sub-dataset:
+
+```python
+from tidymut import download_rbd_ace2_source_file
+filepaths = download_rbd_ace2_source_file(
+    "path/to/target/folder",
+    sub_dataset="Omicron_EG5_FLip_BA286",
+)
+```
+
+Supported sub-datasets:
+- `Omicron_EG5_FLip_BA286`
+- `Omicron_XBB_BQ`
+- `Omicron`
+- `DMS_variants`
+- `Delta`
+
+Alternatively, you can download it from [Hugging Face](https://huggingface.co/datasets/Zoey13891350636/RBD_ACE2).
+
+### Basic Usage
+
+```python
+from tidymut import download_rbd_ace2_source_file
+from tidymut.cleaners import clean_rbd_ace2_dataset, create_rbd_ace2_cleaner
+
+filepaths = download_rbd_ace2_source_file(
+    "path/to/target/folder",
+    sub_dataset="Omicron_EG5_FLip_BA286",
+)
+dataset_filepath = next(iter(filepaths.values()))
+
+rbd_ace2_cleaning_pipeline = create_rbd_ace2_cleaner(dataset_filepath)
+rbd_ace2_cleaning_pipeline, rbd_ace2_dataset = clean_rbd_ace2_dataset(
+    rbd_ace2_cleaning_pipeline
+)
+```
+
+### Advanced Settings
+
+See {py:func}`tidymut.cleaners.RBDACE2CleanerConfig` for details.
+
+## RBD Antibody Database
+
+### File Preparation
+
+You can download the source file directly by running (see {py:func}`tidymut.utils.download_rbd_antibody_source_file` for details):
+```python
+from tidymut import download_rbd_antibody_source_file
+filepaths = download_rbd_antibody_source_file("path/to/target/folder")
+```
+
+You can also download and process a specific sub-dataset:
+
+```python
+from tidymut import download_rbd_antibody_source_file
+filepaths = download_rbd_antibody_source_file(
+    "path/to/target/folder",
+    sub_dataset="AZ_Abs",
+)
+```
+
+Supported sub-datasets:
+- `AZ_Abs`
+- `HAARVI_sera`
+- `Moderna`
+- `Rockefeller`
+- `Vir_mAbs`
+- `clinical_Abs`
+
+Alternatively, you can download it from [Hugging Face](https://huggingface.co/datasets/Zoey13891350636/RBD_Antibody).
+
+### Basic Usage
+
+```python
+from tidymut import download_rbd_antibody_source_file
+from tidymut.cleaners import clean_rbd_antibody_dataset, create_rbd_antibody_cleaner
+
+filepaths = download_rbd_antibody_source_file(
+    "path/to/target/folder",
+    sub_dataset="AZ_Abs",
+)
+dataset_filepath = next(iter(filepaths.values()))
+
+rbd_antibody_cleaning_pipeline = create_rbd_antibody_cleaner(dataset_filepath)
+rbd_antibody_cleaning_pipeline, rbd_antibody_dataset = clean_rbd_antibody_dataset(
+    rbd_antibody_cleaning_pipeline
+)
+```
+
+### Advanced Settings
+
+See {py:func}`tidymut.cleaners.RBDAntibodyCleanerConfig` for details.

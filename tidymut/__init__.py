@@ -37,6 +37,8 @@ from .cleaners import (
     ctxm_cleaner,
     trpb_cleaner,
     antitoxin_pard3_cleaner,
+    rbd_antibody_cleaner,
+    rbd_ace2_cleaner,
 )
 
 from .utils import (
@@ -52,4 +54,6 @@ from .utils import (
     download_ctxm_source_file,
     download_trpb_source_file,
     download_antitoxin_pard3_source_file,
+    download_rbd_antibody_source_file,
+    download_rbd_ace2_source_file,
 )

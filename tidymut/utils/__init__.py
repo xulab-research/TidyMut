@@ -16,6 +16,8 @@ from .raw_data_downloader import (
     download_ctxm_source_file,
     download_trpb_source_file,
     download_antitoxin_pard3_source_file,
+    download_rbd_antibody_source_file,
+    download_rbd_ace2_source_file,
 )
 
 # fmt: off
@@ -32,4 +34,6 @@ __all__ = [
     "download_ctxm_source_file",
     "download_trpb_source_file",
     "download_antitoxin_pard3_source_file",
+    "download_rbd_antibody_source_file",
+    "download_rbd_ace2_source_file",
 ]
