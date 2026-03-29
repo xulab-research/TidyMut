@@ -18,7 +18,7 @@ This guide provides usage examples for data cleaning modules organized by databa
     - [**CTXM ampicillin**]: A subset of the CTX-M library quantifying the functional fitness and epistatic interactions of the enzyme variants under ampicillin selection, revealing a broader mutational tolerance and distinct compensatory pathways.
     - [**CTXM cefotaxime**]: A subset of the CTX-M library quantifying the functional fitness and epistatic interactions of the enzyme variants under cefotaxime selection, characterized by highly stringent sequence requirements and substrate-specific epistasis.
 - [**RBD ACE2 Database**](#rbd-ace2-database): SARS-CoV-2 RBD sequences with ACE2 binding affinity scores, labeled by `log10Ka` where higher values indicate stronger ACE2 binding affinity.
-- [**RBD Antibody Database**](#rbd-antibody-database): SARS-CoV-2 RBD antibody binding data with `score` transformed by negative logarithm. Higher scores indicate stronger binding.
+- [**RBD Antibody Database**](#rbd-antibody-database): SARS-CoV-2 RBD antibody escape data with `score` computed as the negative logarithm of escape. Higher scores indicate weaker escape, reflecting better binding capacity.
 
 
 ## Prerequisites
@@ -397,16 +397,16 @@ Alternatively, you can download it from [Hugging Face](https://huggingface.co/da
 
 ```python
 from tidymut import download_rbd_ace2_source_file
-from tidymut import rbd_ace2_cleaner
+from tidymut.cleaners import clean_rbd_ace2_dataset, create_rbd_ace2_cleaner
 
-rbd_ace2_filepaths = download_rbd_ace2_source_file(
+filepaths = download_rbd_ace2_source_file(
     "path/to/target/folder",
     sub_dataset="Omicron_EG5_FLip_BA286",
 )
-dataset_filepath = next(iter(rbd_ace2_filepaths.values()))
+dataset_filepath = next(iter(filepaths.values()))
 
-rbd_ace2_cleaning_pipeline = rbd_ace2_cleaner.create_rbd_ace2_cleaner(dataset_filepath)
-rbd_ace2_cleaning_pipeline, rbd_ace2_dataset = rbd_ace2_cleaner.clean_rbd_ace2_dataset(
+rbd_ace2_cleaning_pipeline = create_rbd_ace2_cleaner(dataset_filepath)
+rbd_ace2_cleaning_pipeline, rbd_ace2_dataset = clean_rbd_ace2_dataset(
     rbd_ace2_cleaning_pipeline
 )
 ```
@@ -449,7 +449,7 @@ Alternatively, you can download it from [Hugging Face](https://huggingface.co/da
 
 ```python
 from tidymut import download_rbd_antibody_source_file
-from tidymut import rbd_antibody_cleaner
+from tidymut.cleaners import clean_rbd_antibody_dataset, create_rbd_antibody_cleaner
 
 filepaths = download_rbd_antibody_source_file(
     "path/to/target/folder",
@@ -457,9 +457,9 @@ filepaths = download_rbd_antibody_source_file(
 )
 dataset_filepath = next(iter(filepaths.values()))
 
-rbd_cleaning_pipeline = rbd_antibody_cleaner.create_rbd_antibody_cleaner(dataset_filepath)
-rbd_cleaning_pipeline, rbd_dataset = rbd_antibody_cleaner.clean_rbd_antibody_dataset(
-    rbd_cleaning_pipeline
+rbd_antibody_cleaning_pipeline = create_rbd_antibody_cleaner(dataset_filepath)
+rbd_antibody_cleaning_pipeline, rbd_antibody_dataset = clean_rbd_antibody_dataset(
+    rbd_antibody_cleaning_pipeline
 )
 ```
 

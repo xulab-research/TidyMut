@@ -18,7 +18,7 @@ This guide provides usage examples for saving cleaned datasets and cleaning arti
     - [**CTXM ampicillin**]: A subset of the CTX-M library quantifying the functional fitness and epistatic interactions of the enzyme variants under ampicillin selection, revealing a broader mutational tolerance and distinct compensatory pathways.
     - [**CTXM cefotaxime**]: A subset of the CTX-M library quantifying the functional fitness and epistatic interactions of the enzyme variants under cefotaxime selection, characterized by highly stringent sequence requirements and substrate-specific epistasis.
 - [**RBD ACE2 Database**](#rbd-ace2-database): SARS-CoV-2 RBD sequences with ACE2 binding affinity scores, labeled by `log10Ka` where higher values indicate stronger ACE2 binding affinity.
-- [**RBD Antibody Database**](#rbd-antibody-database): SARS-CoV-2 RBD antibody binding data with `score` transformed by negative logarithm. Higher scores indicate stronger binding.
+- [**RBD Antibody Database**](#rbd-antibody-database): SARS-CoV-2 RBD antibody escape data with `score` computed as the negative logarithm of escape. Higher scores indicate weaker escape, reflecting better binding capacity.
 
 ### Main idea
 
@@ -287,10 +287,9 @@ rbd_ace2_cleaning_pipeline.save_artifacts("path/to/artifacts.pkl")
 with open("path/to/artifacts.pkl", "rb") as f:
     obj = pickle.load(f)
 
-obj["capture_rbd_ace2_wt_score_table.wt_score_table"].to_csv(
-    "path/to/target_dir/rbd_ace2_wt_score_table.csv",
-    index=False,
-)
+for key, val in obj.items():
+    out_path = f"path/to/target_dir/{key}.csv"
+    val.to_csv(out_path, index=False)
 ```
 
 ## RBD Antibody Database
@@ -298,7 +297,7 @@ obj["capture_rbd_ace2_wt_score_table.wt_score_table"].to_csv(
 **save the main data**
 
 ```python
-rbd_dataset.save("path/to/output_dir")
+rbd_antibody_dataset.save("path/to/output_dir")
 ```
 
 **save the artifacts data**
@@ -306,13 +305,12 @@ rbd_dataset.save("path/to/output_dir")
 ```python
 import pickle
 
-rbd_cleaning_pipeline.save_artifacts("path/to/artifacts.pkl")
+rbd_antibody_cleaning_pipeline.save_artifacts("path/to/artifacts.pkl")
 
 with open("path/to/artifacts.pkl", "rb") as f:
     obj = pickle.load(f)
 
-obj["capture_rbd_wt_score_table.wt_score_table"].to_csv(
-    "path/to/target_dir/rbd_wt_score_table.csv",
-    index=False,
-)
+for key, val in obj.items():
+    out_path = f"path/to/target_dir/{key}.csv"
+    val.to_csv(out_path, index=False)
 ```

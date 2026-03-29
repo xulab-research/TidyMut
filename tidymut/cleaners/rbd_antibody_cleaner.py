@@ -7,27 +7,20 @@ from typing import TYPE_CHECKING
 
 import pandas as pd
 
-from tidymut.cleaners.antitoxin_pard3_custom_cleaners import add_wild_type_sequence
 from tidymut.cleaners.base_config import BaseCleanerConfig
 from tidymut.cleaners.basic_cleaners import (
+    add_column,
     average_labels_by_name,
+    apply_mutations_preserving_wild_type,
     convert_data_types,
     convert_to_mutation_dataset_format,
     extract_and_rename_columns,
     filter_and_clean_data,
+    mark_wild_type_by_variant_class,
     read_dataset,
     validate_mutations,
 )
-from tidymut.cleaners.rbd_antibody_custom_cleaners import (
-    apply_mutations_preserving_wild_type,
-    build_mutation_column,
-    capture_rbd_wt_score_table,
-    drop_na_in_required_columns,
-    normalize_aa_substitutions,
-    prepare_rbd_standard_output,
-    remove_stop_mutations,
-    remove_wild_type_rows,
-)
+from tidymut.cleaners.cdna_proteolysis_custom_cleaners import subtract_labels_by_wt
 from tidymut.core.dataset import MutationDataset
 from tidymut.core.pipeline import Pipeline, create_pipeline
 
@@ -52,12 +45,13 @@ def __dir__() -> List[str]:
 @dataclass
 class RBDAntibodyCleanerConfig(BaseCleanerConfig):
     """
-    Configuration class for the RBD antibody binding dataset cleaner.
+    Configuration class for the RBD antibody dataset cleaner.
 
     This cleaner is designed for tables like
     `SARS-CoV-2-RBD_MAP_AZ_Abs_scores.csv`, where:
     - `aa_substitutions` stores 1-based amino-acid mutations separated by spaces
-    - `score` is the per-barcode binding score after negative logarithm transformation
+    - `score` is the negative-log-transformed per-barcode escape score
+    - higher `score` values indicate weaker escape, reflecting better binding capacity
     - identical `(name, aa_substitutions)` observations should be averaged
 
     Attributes
@@ -66,10 +60,12 @@ class RBDAntibodyCleanerConfig(BaseCleanerConfig):
         Mapping from raw antibody table columns to tidymut standard columns.
     filters : Dict[str, Callable]
         Filter conditions used to remove rows that fail score or QC checks.
+    drop_na_columns : List[str]
+        Required columns that must be present before downstream processing.
     type_conversions : Dict[str, str]
         Data type conversion specifications for score and mutation counts.
     wt_sequence : str
-        Reference RBD sequence shared by the antibody binding datasets.
+        Reference RBD sequence shared by the antibody datasets.
     label_columns : List[str]
         Label columns available in the cleaned dataset.
     primary_label_column : str
@@ -85,9 +81,9 @@ class RBDAntibodyCleanerConfig(BaseCleanerConfig):
     column_mapping: Dict[str, str] = field(
         default_factory=lambda: {
             "aa_substitutions": "aa_substitutions",
-            "n_aa_substitutions": "n_mutations",
-            "score": "score",
+            "score": "label",
             "name": "name",
+            "variant_class": "variant_class",
             "pass_pre_count_filter": "pass_pre_count_filter",
             "pass_ACE2bind_expr_filter": "pass_ACE2bind_expr_filter",
         }
@@ -95,22 +91,29 @@ class RBDAntibodyCleanerConfig(BaseCleanerConfig):
 
     filters: Dict[str, Callable] = field(
         default_factory=lambda: {
-            "score": lambda s: pd.to_numeric(s, errors="coerce").notna(),
+            "label": lambda s: pd.to_numeric(s, errors="coerce").notna(),
             "pass_pre_count_filter": lambda s: s == True,
             "pass_ACE2bind_expr_filter": lambda s: s == True,
         }
     )
 
-    type_conversions: Dict[str, str] = field(
-        default_factory=lambda: {"score": "float", "n_mutations": "int"}
+    drop_na_columns: List[str] = field(
+        default_factory=lambda: [
+            "name",
+            "label",
+            "pass_pre_count_filter",
+            "pass_ACE2bind_expr_filter",
+        ]
     )
+
+    type_conversions: Dict[str, str] = field(default_factory=lambda: {"label": "float"})
 
     wt_sequence: str = (
         "NITNLCPFGEVFNATRFASVYAWNRKRISNCVADYSVLYNSASFSTFKCYGVSPTKLNDLCFTNVYADSFVIRGDEVRQIAPGQTGKIADYNYKLPDDFTGCVIAWNSNNLDSKVGGNYNYLYRLFRKSNLKPFERDISTEIYQAGSTPCNGVEGFNCYFPLQSYGFQPTNGVGYQPYRVVVLSFELLHAPATVCGPKKST"
     )
 
-    label_columns: List[str] = field(default_factory=lambda: ["score"])
-    primary_label_column: str = "score"
+    label_columns: List[str] = field(default_factory=lambda: ["label"])
+    primary_label_column: str = "label"
     input_is_zero_based: bool = False
     validate_mut_workers: int = 16
     process_workers: int = 16
@@ -138,9 +141,9 @@ class RBDAntibodyCleanerConfig(BaseCleanerConfig):
 
         required_mappings = {
             "aa_substitutions",
-            "n_aa_substitutions",
             "score",
             "name",
+            "variant_class",
             "pass_pre_count_filter",
             "pass_ACE2bind_expr_filter",
         }
@@ -210,56 +213,48 @@ def create_rbd_antibody_cleaner(
 
         pipeline = create_pipeline(dataset_or_path, final_config.pipeline_name)
 
-        # Normalize raw columns and construct mutation annotations before validation.
+        # Standardize raw columns and explicit WT annotations before mutation
+        # validation. Stop-codon rows are removed at this stage.
         pipeline = (
             pipeline
             .delayed_then(
                 extract_and_rename_columns,
                 column_mapping=final_config.column_mapping,
             )
-            .delayed_then(normalize_aa_substitutions)
-            .delayed_then(
-                filter_and_clean_data,
-                filters=final_config.filters,
-            )
             .delayed_then(
                 convert_data_types,
                 type_conversions=final_config.type_conversions,
             )
             .delayed_then(
-                remove_stop_mutations,
+                mark_wild_type_by_variant_class,
                 mutation_column="aa_substitutions",
+                variant_class_column="variant_class",
+                wild_type_value="wildtype",
+                wt_identifier="WT",
             )
             .delayed_then(
-                build_mutation_column,
-                source_column="aa_substitutions",
-                target_column="mut_info",
-                mutation_count_column="n_mutations",
+                filter_and_clean_data,
+                filters=final_config.filters,
+                exclude_patterns={"aa_substitutions": [r"\*"]},
+                drop_na_columns=final_config.drop_na_columns,
             )
             .delayed_then(
-                add_wild_type_sequence,
-                wt_sequence_column="sequence",
-                wt_sequence=final_config.wt_sequence,
+                add_column,
+                dataset_name=final_config.wt_sequence,
+                column_name="sequence",
             )
         )
 
-        # Validate mutations, aggregate scores, and build the final dataset outputs.
+        # Validate and format mutation strings, apply them to the shared RBD
+        # reference, aggregate repeated antibody measurements, subtract the
+        # per-antibody WT baseline, and build the final mutation dataset view.
         pipeline = (
             pipeline
             .delayed_then(
-                drop_na_in_required_columns,
-                required_columns=[
-                    "name",
-                    "score",
-                    "pass_pre_count_filter",
-                    "pass_ACE2bind_expr_filter",
-                ],
-            )
-            .delayed_then(
                 validate_mutations,
-                mutation_column="mut_info",
+                mutation_column="aa_substitutions",
                 format_mutations=True,
-                mutation_sep=",",
+                mutation_sep=" ",
                 is_zero_based=final_config.input_is_zero_based,
                 exclude_patterns=["WT"],
                 cache_results=final_config.cache_validation_results,
@@ -269,31 +264,30 @@ def create_rbd_antibody_cleaner(
                 apply_mutations_preserving_wild_type,
                 sequence_column="sequence",
                 name_column="name",
-                mutation_column="mut_info",
+                mutation_column="aa_substitutions",
                 mutation_sep=",",
                 is_zero_based=True,
                 num_workers=final_config.process_workers,
             )
             .delayed_then(
                 average_labels_by_name,
-                name_columns=("name", "mut_info"),
+                name_columns=("name", "aa_substitutions"),
                 label_columns=final_config.primary_label_column,
-                remove_origin_columns=False,
-            )
-            .delayed_then(prepare_rbd_standard_output)
-            .delayed_then(
-                capture_rbd_wt_score_table,
-                columns=["name", "mut_info", "score", "sequence", "mut_seq"],
             )
             .delayed_then(
-                remove_wild_type_rows,
-                mutation_column="mut_info",
+                subtract_labels_by_wt,
+                name_column="name",
+                label_columns=final_config.primary_label_column,
+                mutation_column="aa_substitutions",
+                wt_identifier="WT",
+                in_place=True,
+                drop_wt_row=False,
             )
             .delayed_then(
                 convert_to_mutation_dataset_format,
                 name_column="name",
-                mutation_column="mut_info",
-                sequence_column="sequence",
+                mutation_column="aa_substitutions",
+                mutated_sequence_column="mut_seq",
                 label_column=final_config.primary_label_column,
                 is_zero_based=True,
             )

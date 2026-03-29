@@ -11,23 +11,21 @@ from tidymut.cleaners.rbd_ace2_custom_cleaners import (
     RBD_ACE2_REFERENCE_SEQUENCES,
     RBD_ACE2_TARGET_NAME_ALIASES,
     add_reference_sequences_by_target,
-    apply_mutations_preserving_wild_type,
-    capture_rbd_ace2_wt_score_table,
-    normalize_rbd_ace2_mutations,
     normalize_rbd_ace2_target_names,
-    remove_stop_mutations,
-    remove_wild_type_rows,
 )
 from tidymut.cleaners.base_config import BaseCleanerConfig
 from tidymut.cleaners.basic_cleaners import (
     average_labels_by_name,
+    apply_mutations_preserving_wild_type,
     convert_data_types,
     convert_to_mutation_dataset_format,
     extract_and_rename_columns,
     filter_and_clean_data,
+    mark_wild_type_by_variant_class,
     read_dataset,
     validate_mutations,
 )
+from tidymut.cleaners.cdna_proteolysis_custom_cleaners import subtract_labels_by_wt
 from tidymut.core.dataset import MutationDataset
 from tidymut.core.pipeline import Pipeline, create_pipeline
 
@@ -89,23 +87,20 @@ class RBDACE2CleanerConfig(BaseCleanerConfig):
         default_factory=lambda: {
             "target": "name",
             "aa_substitutions": "mut_info",
+            "variant_class": "variant_class",
             "log10Ka": "label",
-            "n_aa_substitutions": "n_mutations",
         }
     )
 
     filters: Dict[str, Callable] = field(
         default_factory=lambda: {
             "label": lambda s: pd.to_numeric(s, errors="coerce").notna(),
-            "name": lambda s: s.isin(RBD_ACE2_REFERENCE_SEQUENCES),
         }
     )
 
     drop_na_columns: List[str] = field(default_factory=lambda: ["name", "label"])
 
-    type_conversions: Dict[str, str] = field(
-        default_factory=lambda: {"label": "float", "n_mutations": "int"}
-    )
+    type_conversions: Dict[str, str] = field(default_factory=lambda: {"label": "float"})
 
     reference_sequences: Dict[str, str] = field(
         default_factory=lambda: RBD_ACE2_REFERENCE_SEQUENCES.copy()
@@ -141,7 +136,7 @@ class RBDACE2CleanerConfig(BaseCleanerConfig):
                 f"must be in label_columns {self.label_columns}"
             )
 
-        required_mappings = {"target", "aa_substitutions", "log10Ka"}
+        required_mappings = {"target", "aa_substitutions", "variant_class", "log10Ka"}
         missing = required_mappings - set(self.column_mapping.keys())
         if missing:
             raise ValueError(f"Missing required column mappings: {missing}")
@@ -193,6 +188,9 @@ def create_rbd_ace2_cleaner(
     logger.debug(f"Configuration:\n{final_config.get_summary()}")
 
     try:
+        ace2_filters = dict(final_config.filters)
+        ace2_filters["name"] = lambda s: s.isin(final_config.reference_sequences)
+
         if isinstance(dataset_or_path, list):
             dataset_or_path = pd.concat(
                 [pd.read_csv(p) for p in dataset_or_path],
@@ -208,7 +206,8 @@ def create_rbd_ace2_cleaner(
 
         pipeline = create_pipeline(dataset_or_path, final_config.pipeline_name)
 
-        # Normalize raw columns, target names, and mutation annotations before validation.
+        # Standardize raw columns, target/background labels, and explicit WT annotations
+        # before mutation validation. Stop-codon rows are removed at this stage.
         pipeline = (
             pipeline
             .delayed_then(
@@ -225,29 +224,30 @@ def create_rbd_ace2_cleaner(
                 type_conversions=final_config.type_conversions,
             )
             .delayed_then(
-                normalize_rbd_ace2_mutations,
+                mark_wild_type_by_variant_class,
                 mutation_column="mut_info",
-                mutation_count_column="n_mutations",
+                variant_class_column="variant_class",
+                wild_type_value="wildtype",
+                wt_identifier="WT",
             )
             .delayed_then(
-                remove_stop_mutations,
-                mutation_column="mut_info",
+                filter_and_clean_data,
+                filters=ace2_filters,
+                exclude_patterns={"mut_info": [r"\*"]},
+                drop_na_columns=final_config.drop_na_columns,
             )
         )
 
-        # Validate mutations, attach reference sequences, and build the final dataset outputs.
+        # Validate and format mutation strings, collapse duplicate measurements,
+        # attach the target-specific reference sequence, subtract the per-target
+        # WT baseline, and then build the final mutation dataset view.
         pipeline = (
             pipeline
-            .delayed_then(
-                filter_and_clean_data,
-                filters=final_config.filters,
-                drop_na_columns=final_config.drop_na_columns,
-            )
             .delayed_then(
                 validate_mutations,
                 mutation_column="mut_info",
                 format_mutations=True,
-                mutation_sep=",",
+                mutation_sep=" ",
                 is_zero_based=False,
                 exclude_patterns=["WT"],
                 cache_results=final_config.cache_validation_results,
@@ -275,25 +275,19 @@ def create_rbd_ace2_cleaner(
                 num_workers=final_config.process_workers,
             )
             .delayed_then(
-                capture_rbd_ace2_wt_score_table,
-                columns=[
-                    "name",
-                    "mut_info",
-                    "n_mutations",
-                    final_config.primary_label_column,
-                    "sequence",
-                    "mut_seq",
-                ],
-            )
-            .delayed_then(
-                remove_wild_type_rows,
+                subtract_labels_by_wt,
+                name_column="name",
+                label_columns=final_config.primary_label_column,
                 mutation_column="mut_info",
+                wt_identifier="WT",
+                in_place=True,
+                drop_wt_row=False,
             )
             .delayed_then(
                 convert_to_mutation_dataset_format,
                 name_column="name",
                 mutation_column="mut_info",
-                sequence_column="sequence",
+                mutated_sequence_column="mut_seq",
                 label_column=final_config.primary_label_column,
                 is_zero_based=True,
             )

@@ -1,28 +1,22 @@
 from __future__ import annotations
-
-import re
 from typing import TYPE_CHECKING
 
 import pandas as pd
 from tqdm import tqdm
 
-from tidymut.cleaners.basic_cleaners import apply_mutations_to_sequences
-from tidymut.core.pipeline import multiout_step, pipeline_step
+from tidymut.cleaners.basic_cleaners import mark_wild_type_by_variant_class
+from tidymut.core.pipeline import pipeline_step
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, List, Optional, Tuple
+    from typing import Any, Dict, List, Optional
 
 
 __all__ = [
     "RBD_ACE2_REFERENCE_SEQUENCES",
     "RBD_ACE2_TARGET_NAME_ALIASES",
     "add_reference_sequences_by_target",
-    "apply_mutations_preserving_wild_type",
-    "capture_rbd_ace2_wt_score_table",
-    "normalize_rbd_ace2_mutations",
+    "mark_wild_type_by_variant_class",
     "normalize_rbd_ace2_target_names",
-    "remove_stop_mutations",
-    "remove_wild_type_rows",
 ]
 
 
@@ -30,65 +24,21 @@ def __dir__() -> List[str]:
     return __all__
 
 
-# Alias table used to normalize target names across RBD ACE2 sub-datasets.
 RBD_ACE2_TARGET_NAME_ALIASES = {
     "Wuhan_Hu_1": "Wuhan-Hu-1",
-    "Wuhan-Hu-1": "Wuhan-Hu-1",
-    "wuhan_hu_1": "Wuhan-Hu-1",
-    "wuhan-hu-1": "Wuhan-Hu-1",
-    "wuhan hu 1": "Wuhan-Hu-1",
-    "Alpha": "Alpha",
-    "alpha": "Alpha",
-    "Beta": "Beta",
-    "beta": "Beta",
+    "N501Y": "Alpha",
+    "B1351": "Beta",
     "Delta": "Delta",
-    "delta": "Delta",
-    "Eta": "Eta",
-    "eta": "Eta",
     "E484K": "Eta",
-    "e484k": "Eta",
-    "Wuhan_Hu_1_E484K": "Eta",
-    "wuhan_hu_1_e484k": "Eta",
     "BA1": "Omicron_BA1",
-    "BA.1": "Omicron_BA1",
-    "Omicron_BA1": "Omicron_BA1",
-    "Omicron BA1": "Omicron_BA1",
-    "Omicron BA.1": "Omicron_BA1",
     "BA2": "Omicron_BA2",
-    "BA.2": "Omicron_BA2",
-    "Omicron_BA2": "Omicron_BA2",
-    "Omicron BA2": "Omicron_BA2",
-    "Omicron BA.2": "Omicron_BA2",
-    "BA286": "Omicron_BA286",
-    "BA.2.86": "Omicron_BA286",
-    "Omicron_BA286": "Omicron_BA286",
-    "Omicron BA286": "Omicron_BA286",
-    "Omicron BA.2.86": "Omicron_BA286",
     "BQ11": "Omicron_BQ11",
-    "BQ1.1": "Omicron_BQ11",
-    "BQ.1.1": "Omicron_BQ11",
-    "Omicron_BQ11": "Omicron_BQ11",
-    "Omicron BQ11": "Omicron_BQ11",
-    "Omicron BQ1.1": "Omicron_BQ11",
     "EG5": "Omicron_EG5",
-    "EG.5": "Omicron_EG5",
-    "Omicron_EG5": "Omicron_EG5",
-    "Omicron EG5": "Omicron_EG5",
-    "Omicron EG.5": "Omicron_EG5",
     "FLip": "Omicron_FLip",
-    "flip": "Omicron_FLip",
-    "Omicron_FLip": "Omicron_FLip",
-    "Omicron FLip": "Omicron_FLip",
     "XBB15": "Omicron_XBB15",
-    "XBB1.5": "Omicron_XBB15",
-    "XBB.1.5": "Omicron_XBB15",
-    "Omicron_XBB15": "Omicron_XBB15",
-    "Omicron XBB15": "Omicron_XBB15",
-    "Omicron XBB1.5": "Omicron_XBB15",
 }
 
 
-# Reference RBD sequences used as RBD ACE2 binding backgrounds.
 RBD_ACE2_REFERENCE_SEQUENCES = {
     "Wuhan-Hu-1": "NITNLCPFGEVFNATRFASVYAWNRKRISNCVADYSVLYNSASFSTFKCYGVSPTKLNDLCFTNVYADSFVIRGDEVRQIAPGQTGKIADYNYKLPDDFTGCVIAWNSNNLDSKVGGNYNYLYRLFRKSNLKPFERDISTEIYQAGSTPCNGVEGFNCYFPLQSYGFQPTNGVGYQPYRVVVLSFELLHAPATVCGPKKST",
     "Alpha": "NITNLCPFGEVFNATRFASVYAWNRKRISNCVADYSVLYNSASFSTFKCYGVSPTKLNDLCFTNVYADSFVIRGDEVRQIAPGQTGKIADYNYKLPDDFTGCVIAWNSNNLDSKVGGNYNYLYRLFRKSNLKPFERDISTEIYQAGSTPCNGVEGFNCYFPLQSYGFQPTYGVGYQPYRVVVLSFELLHAPATVCGPKKST",
@@ -104,18 +54,56 @@ RBD_ACE2_REFERENCE_SEQUENCES = {
 }
 
 
+def _normalize_target_key(value: str) -> str:
+    """Normalize a raw target label into a stable dictionary lookup key."""
+    return value.strip().replace("-", "_").replace(" ", "_")
+
+
 @pipeline_step
 def normalize_rbd_ace2_target_names(
     dataset: pd.DataFrame,
     name_column: str = "name",
     name_aliases: Optional[Dict[str, str]] = None,
 ) -> pd.DataFrame:
-    """Normalize raw RBD ACE2 target names to a shared reference naming scheme."""
+    """
+    Normalize raw RBD ACE2 target names to a shared reference naming scheme.
+
+    This step maps source-specific target labels onto the canonical reference
+    names used downstream for sequence lookup so the rest of the pipeline can
+    operate on a single naming convention.
+
+    Parameters
+    ----------
+    dataset : pd.DataFrame
+        Input dataframe containing the target/background name column.
+    name_column : str, default="name"
+        Column containing raw target/background labels to normalize.
+    name_aliases : Optional[Dict[str, str]], default=None
+        Mapping from raw source labels to canonical reference names. If ``None``,
+        ``RBD_ACE2_TARGET_NAME_ALIASES`` is used.
+
+    Returns
+    -------
+    pd.DataFrame
+        A copied dataframe with normalized values in ``name_column``.
+
+    Raises
+    ------
+    ValueError
+        If ``name_column`` is not present in the input dataframe.
+
+    Notes
+    -----
+    Unmatched target names are preserved as-is and reported with a warning so
+    missing aliases can be added explicitly when new source labels appear.
+    """
     if name_column not in dataset.columns:
         raise ValueError(f"Target column '{name_column}' not found")
 
     aliases = name_aliases or RBD_ACE2_TARGET_NAME_ALIASES
+    normalized_aliases = {_normalize_target_key(key): value for key, value in aliases.items()}
     result = dataset.copy()
+    unmatched_names = set()
 
     def normalize_name(value: Any) -> Any:
         if pd.isna(value):
@@ -125,92 +113,19 @@ def normalize_rbd_ace2_target_names(
         if raw in aliases:
             return aliases[raw]
 
-        normalized_key = raw.replace("-", "_").replace(" ", "_")
-        if normalized_key in aliases:
-            return aliases[normalized_key]
+        normalized_key = _normalize_target_key(raw)
+        if normalized_key in normalized_aliases:
+            return normalized_aliases[normalized_key]
 
+        unmatched_names.add(raw)
         return raw
 
     result[name_column] = result[name_column].map(normalize_name)
-    return result
-
-
-@pipeline_step
-def normalize_rbd_ace2_mutations(
-    dataset: pd.DataFrame,
-    mutation_column: str = "mut_info",
-    mutation_count_column: Optional[str] = "n_mutations",
-) -> pd.DataFrame:
-    """Normalize RBD ACE2 mutation strings and mark rows with zero mutations as WT."""
-    if mutation_column not in dataset.columns:
-        raise ValueError(f"Mutation column '{mutation_column}' not found")
-
-    result = dataset.copy()
-
-    def normalize_value(value: Any, mutation_count: Any) -> str:
-        raw = "" if pd.isna(value) else str(value).strip()
-
-        if mutation_count_column is not None and pd.notna(mutation_count):
-            try:
-                if int(mutation_count) == 0:
-                    return "WT"
-            except (TypeError, ValueError):
-                pass
-
-        if raw == "":
-            return "WT"
-
-        raw = raw.replace(";", ",")
-        raw = re.sub(r"\s+", ",", raw)
-        raw = re.sub(r",+", ",", raw).strip(",")
-        return raw if raw else "WT"
-
-    if mutation_count_column and mutation_count_column in result.columns:
-        result[mutation_column] = [
-            normalize_value(value, count)
-            for value, count in zip(
-                result[mutation_column].tolist(),
-                result[mutation_count_column].tolist(),
-            )
-        ]
-    else:
-        result[mutation_column] = [
-            normalize_value(value, None) for value in result[mutation_column].tolist()
-        ]
-
-    return result
-
-
-@multiout_step(main="success", failed="failed")
-def remove_stop_mutations(
-    dataset: pd.DataFrame,
-    mutation_column: str = "mut_info",
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Remove rows containing stop mutations and return them as a failed artifact."""
-    if mutation_column not in dataset.columns:
-        raise ValueError(f"Mutation column '{mutation_column}' not found")
-
-    removed = dataset[dataset[mutation_column].str.contains(r"\*", na=False)].copy()
-    if not removed.empty:
-        removed["error_message"] = "Removed stop-containing mutations"
-    result = dataset[~dataset[mutation_column].str.contains(r"\*", na=False)].copy()
-    tqdm.write(f"Removed stop-containing mutations: {len(dataset)} -> {len(result)} rows")
-    return result, removed
-
-
-@pipeline_step
-def remove_wild_type_rows(
-    dataset: pd.DataFrame,
-    mutation_column: str = "mut_info",
-) -> pd.DataFrame:
-    """Drop WT rows before creating the final RBD ACE2 MutationDataset."""
-    if mutation_column not in dataset.columns:
-        raise ValueError(f"Mutation column '{mutation_column}' not found")
-
-    result = dataset[dataset[mutation_column].astype(str).str.upper() != "WT"].copy()
-    tqdm.write(
-        f"Removed WT rows before sequence application: {len(dataset)} -> {len(result)} rows"
-    )
+    if unmatched_names:
+        tqdm.write(
+            "Warning: Unrecognized RBD ACE2 target names: "
+            f"{sorted(unmatched_names)}"
+        )
     return result
 
 
@@ -221,7 +136,36 @@ def add_reference_sequences_by_target(
     name_column: str = "name",
     sequence_column: str = "sequence",
 ) -> pd.DataFrame:
-    """Attach the correct reference sequence to each normalized RBD ACE2 target."""
+    """
+    Attach the appropriate reference RBD sequence to each normalized target name.
+
+    This step uses the normalized target/background label in ``name_column`` to
+    look up the matching reference sequence from ``reference_sequences`` and
+    stores the result in ``sequence_column``. Every target present in the input
+    dataframe must have a corresponding reference entry.
+
+    Parameters
+    ----------
+    dataset : pd.DataFrame
+        Input dataframe containing normalized target/background names.
+    reference_sequences : Dict[str, str]
+        Mapping from canonical target name to reference RBD sequence.
+    name_column : str, default="name"
+        Column containing the normalized target/background identifier.
+    sequence_column : str, default="sequence"
+        Output column that will store the matched reference sequence.
+
+    Returns
+    -------
+    pd.DataFrame
+        A copied dataframe with reference sequences added in ``sequence_column``.
+
+    Raises
+    ------
+    ValueError
+        If ``name_column`` is missing or if any target cannot be mapped to a
+        reference sequence.
+    """
     if name_column not in dataset.columns:
         raise ValueError(f"Target column '{name_column}' not found")
 
@@ -234,55 +178,4 @@ def add_reference_sequences_by_target(
     return result
 
 
-@multiout_step(main="success", failed="failed")
-def apply_mutations_preserving_wild_type(
-    dataset: pd.DataFrame,
-    sequence_column: str = "sequence",
-    name_column: str = "name",
-    mutation_column: str = "mut_info",
-    mutation_sep: str = ",",
-    is_zero_based: bool = True,
-    sequence_type: str = "protein",
-    num_workers: int = 4,
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Apply mutations while copying WT rows forward unchanged."""
-    if mutation_column not in dataset.columns:
-        raise ValueError(f"Mutation column '{mutation_column}' not found")
 
-    wt_mask = dataset[mutation_column].astype(str).str.upper() == "WT"
-    wt_rows = dataset[wt_mask].copy()
-    mutant_rows = dataset[~wt_mask].copy()
-
-    if not wt_rows.empty:
-        wt_rows["mut_seq"] = wt_rows[sequence_column]
-
-    if mutant_rows.empty:
-        failed = pd.DataFrame(columns=list(dataset.columns) + ["error_message"])
-        return wt_rows, failed
-
-    mutant_success, mutant_failed = apply_mutations_to_sequences(
-        mutant_rows,
-        sequence_column=sequence_column,
-        name_column=name_column,
-        mutation_column=mutation_column,
-        mutation_sep=mutation_sep,
-        is_zero_based=is_zero_based,
-        sequence_type=sequence_type,
-        num_workers=num_workers,
-    )
-
-    success = pd.concat([mutant_success, wt_rows], axis=0).sort_index()
-    return success, mutant_failed
-
-
-@multiout_step(main="main", wt_table="wt_score_table")
-def capture_rbd_ace2_wt_score_table(
-    dataset: pd.DataFrame,
-    columns: Optional[List[str]] = None,
-) -> Tuple[pd.DataFrame, pd.DataFrame]:
-    """Capture the WT-inclusive RBD ACE2 score table as a pipeline artifact."""
-    wt_table = dataset.copy()
-    if columns is not None:
-        available_columns = [col for col in columns if col in wt_table.columns]
-        wt_table = wt_table[available_columns].copy()
-    return dataset, wt_table

@@ -47,7 +47,9 @@ __all__ = [
     "filter_and_clean_data",
     "convert_data_types",
     "validate_mutations",
+    "mark_wild_type_by_variant_class",
     "apply_mutations_to_sequences",
+    "apply_mutations_preserving_wild_type",
     "infer_mutations_from_sequences",
     "infer_wildtype_sequences",
     "aggregate_labels_by_name",
@@ -131,6 +133,69 @@ def read_dataset(
         )
     except Exception as e:
         raise RuntimeError(f"Unexpected error reading {file_path}: {e}")
+
+
+@pipeline_step
+def mark_wild_type_by_variant_class(
+    dataset: pd.DataFrame,
+    mutation_column: str = "mut_info",
+    variant_class_column: str = "variant_class",
+    wild_type_value: str = "wildtype",
+    wt_identifier: str = "WT",
+) -> pd.DataFrame:
+    """
+    Rewrite mutation labels for rows explicitly annotated as wild type.
+
+    Rows whose ``variant_class_column`` matches ``wild_type_value`` are marked as
+    ``wt_identifier`` in ``mutation_column``. Existing mutation strings for
+    non-wild-type rows are preserved after whitespace normalization.
+
+    Parameters
+    ----------
+    dataset : pd.DataFrame
+        Input dataframe containing mutation annotations and variant-class labels.
+    mutation_column : str, default="mut_info"
+        Column containing mutation strings that should be rewritten for explicit
+        wild-type rows.
+    variant_class_column : str, default="variant_class"
+        Column containing the source variant-class annotation.
+    wild_type_value : str, default="wildtype"
+        Source label in ``variant_class_column`` that identifies wild-type rows.
+    wt_identifier : str, default="WT"
+        Standardized token written into ``mutation_column`` for rows identified
+        as wild type.
+
+    Returns
+    -------
+    pd.DataFrame
+        A copied dataframe where explicit wild-type rows have
+        ``mutation_column == wt_identifier``.
+
+    Raises
+    ------
+    ValueError
+        If ``mutation_column`` or ``variant_class_column`` is missing from the
+        input dataframe.
+    """
+    if mutation_column not in dataset.columns:
+        raise ValueError(f"Mutation column '{mutation_column}' not found")
+    if variant_class_column not in dataset.columns:
+        raise ValueError(f"Variant-class column '{variant_class_column}' not found")
+
+    result = dataset.copy()
+    wt_mask = (
+        result[variant_class_column]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        == wild_type_value.lower()
+    )
+    result[mutation_column] = (
+        result[mutation_column].fillna("").astype(str).str.strip()
+    )
+    result.loc[wt_mask, mutation_column] = wt_identifier
+    return result
 
 
 @pipeline_step
@@ -1176,6 +1241,92 @@ def apply_mutations_to_sequences(
 
 
 @multiout_step(main="success", failed="failed")
+def apply_mutations_preserving_wild_type(
+    dataset: pd.DataFrame,
+    sequence_column: str = "sequence",
+    name_column: str = "name",
+    mutation_column: str = "mut_info",
+    mutation_sep: str = ",",
+    is_zero_based: bool = True,
+    sequence_type: str = "protein",
+    num_workers: int = 4,
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Apply mutations while preserving explicit WT rows.
+
+    Rows explicitly labeled as ``WT`` in ``mutation_column`` are copied forward
+    unchanged and their output sequence is taken directly from
+    ``sequence_column``. All non-WT rows are passed to
+    :func:`apply_mutations_to_sequences`, and failed mutation applications are
+    returned as the ``failed`` side output.
+
+    Parameters
+    ----------
+    dataset : pd.DataFrame
+        Input dataframe containing formatted mutation strings and reference
+        sequences.
+    sequence_column : str, default="sequence"
+        Column containing the reference sequence used for mutation application.
+    name_column : str, default="name"
+        Column identifying the protein, antibody, or target/background group.
+    mutation_column : str, default="mut_info"
+        Column containing formatted mutation strings or explicit ``WT`` labels.
+    mutation_sep : str, default=","
+        Separator used in formatted mutation strings during sequence
+        application.
+    is_zero_based : bool, default=True
+        Whether mutation positions in ``mutation_column`` are zero-based.
+    sequence_type : str, default="protein"
+        Sequence type passed through to :func:`apply_mutations_to_sequences`.
+    num_workers : int, default=4
+        Number of workers used for parallel mutation application.
+
+    Returns
+    -------
+    Tuple[pd.DataFrame, pd.DataFrame]
+        ``(successful_dataset, failed_dataset)`` where WT rows are preserved in
+        the successful output and failed mutant rows include an
+        ``error_message`` column.
+
+    Raises
+    ------
+    ValueError
+        If ``mutation_column`` is missing from the input dataframe.
+    """
+    if mutation_column not in dataset.columns:
+        raise ValueError(f"Mutation column '{mutation_column}' not found")
+
+    wt_mask = dataset[mutation_column].astype(str).str.upper() == "WT"
+    wt_rows = dataset[wt_mask].copy()
+    mutant_rows = dataset[~wt_mask].copy()
+
+    if not wt_rows.empty:
+        wt_rows["mut_seq"] = wt_rows[sequence_column]
+
+    if mutant_rows.empty:
+        failed_dataset = pd.DataFrame(
+            columns=list(dataset.columns) + ["error_message"]
+        )
+        return wt_rows, failed_dataset
+
+    mutation_result = apply_mutations_to_sequences(
+        mutant_rows,
+        sequence_column=sequence_column,
+        name_column=name_column,
+        mutation_column=mutation_column,
+        mutation_sep=mutation_sep,
+        is_zero_based=is_zero_based,
+        sequence_type=sequence_type,
+        num_workers=num_workers,
+    )
+    mutant_success = mutation_result.main
+    mutant_failed = mutation_result.side["failed"]
+
+    successful_dataset = pd.concat([mutant_success, wt_rows], axis=0).sort_index()
+    return successful_dataset, mutant_failed
+
+
+@multiout_step(main="success", failed="failed")
 def infer_mutations_from_sequences(
     dataset: pd.DataFrame,
     wt_sequence_column: str = "wt_seq",
@@ -1779,7 +1930,6 @@ def average_labels_by_name(
             .rename(columns={c: f"{c}_mean_by_name" for c in label_cols})
         )
         out = pd.concat([dataset, means], axis=1)
-    print("out:\n", out)
     return out
 
 
