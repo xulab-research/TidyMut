@@ -1,20 +1,22 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import pandas as pd
 from tqdm import tqdm
 
-from tidymut.cleaners.basic_cleaners import mark_wild_type_by_variant_class
-from tidymut.core.pipeline import pipeline_step
+from tidymut.cleaners.basic_cleaners import apply_mutations_to_sequences
+from tidymut.core.pipeline import multiout_step, pipeline_step
 
 if TYPE_CHECKING:
-    from typing import Any, Dict, List, Optional
+    from typing import Any, Dict, List, Optional, Tuple
 
 
 __all__ = [
     "RBD_ACE2_REFERENCE_SEQUENCES",
     "RBD_ACE2_TARGET_NAME_ALIASES",
     "add_reference_sequences_by_target",
+    "apply_mutations_preserving_wild_type",
     "mark_wild_type_by_variant_class",
     "normalize_rbd_ace2_target_names",
 ]
@@ -60,43 +62,42 @@ def _normalize_target_key(value: str) -> str:
 
 
 @pipeline_step
+def mark_wild_type_by_variant_class(
+    dataset: pd.DataFrame,
+    mutation_column: str = "mut_info",
+    variant_class_column: str = "variant_class",
+    wild_type_value: str = "wildtype",
+    wt_identifier: str = "WT",
+) -> pd.DataFrame:
+    """Rewrite mutation labels for rows explicitly annotated as wild type."""
+    if mutation_column not in dataset.columns:
+        raise ValueError(f"Mutation column '{mutation_column}' not found")
+    if variant_class_column not in dataset.columns:
+        raise ValueError(f"Variant-class column '{variant_class_column}' not found")
+
+    result = dataset.copy()
+    wt_mask = (
+        result[variant_class_column]
+        .fillna("")
+        .astype(str)
+        .str.strip()
+        .str.lower()
+        == wild_type_value.lower()
+    )
+    result[mutation_column] = (
+        result[mutation_column].fillna("").astype(str).str.strip()
+    )
+    result.loc[wt_mask, mutation_column] = wt_identifier
+    return result
+
+
+@pipeline_step
 def normalize_rbd_ace2_target_names(
     dataset: pd.DataFrame,
     name_column: str = "name",
     name_aliases: Optional[Dict[str, str]] = None,
 ) -> pd.DataFrame:
-    """
-    Normalize raw RBD ACE2 target names to a shared reference naming scheme.
-
-    This step maps source-specific target labels onto the canonical reference
-    names used downstream for sequence lookup so the rest of the pipeline can
-    operate on a single naming convention.
-
-    Parameters
-    ----------
-    dataset : pd.DataFrame
-        Input dataframe containing the target/background name column.
-    name_column : str, default="name"
-        Column containing raw target/background labels to normalize.
-    name_aliases : Optional[Dict[str, str]], default=None
-        Mapping from raw source labels to canonical reference names. If ``None``,
-        ``RBD_ACE2_TARGET_NAME_ALIASES`` is used.
-
-    Returns
-    -------
-    pd.DataFrame
-        A copied dataframe with normalized values in ``name_column``.
-
-    Raises
-    ------
-    ValueError
-        If ``name_column`` is not present in the input dataframe.
-
-    Notes
-    -----
-    Unmatched target names are preserved as-is and reported with a warning so
-    missing aliases can be added explicitly when new source labels appear.
-    """
+    """Normalize raw RBD ACE2 target names to a shared reference naming scheme."""
     if name_column not in dataset.columns:
         raise ValueError(f"Target column '{name_column}' not found")
 
@@ -136,36 +137,7 @@ def add_reference_sequences_by_target(
     name_column: str = "name",
     sequence_column: str = "sequence",
 ) -> pd.DataFrame:
-    """
-    Attach the appropriate reference RBD sequence to each normalized target name.
-
-    This step uses the normalized target/background label in ``name_column`` to
-    look up the matching reference sequence from ``reference_sequences`` and
-    stores the result in ``sequence_column``. Every target present in the input
-    dataframe must have a corresponding reference entry.
-
-    Parameters
-    ----------
-    dataset : pd.DataFrame
-        Input dataframe containing normalized target/background names.
-    reference_sequences : Dict[str, str]
-        Mapping from canonical target name to reference RBD sequence.
-    name_column : str, default="name"
-        Column containing the normalized target/background identifier.
-    sequence_column : str, default="sequence"
-        Output column that will store the matched reference sequence.
-
-    Returns
-    -------
-    pd.DataFrame
-        A copied dataframe with reference sequences added in ``sequence_column``.
-
-    Raises
-    ------
-    ValueError
-        If ``name_column`` is missing or if any target cannot be mapped to a
-        reference sequence.
-    """
+    """Attach the appropriate reference RBD sequence to each normalized target name."""
     if name_column not in dataset.columns:
         raise ValueError(f"Target column '{name_column}' not found")
 
@@ -178,4 +150,46 @@ def add_reference_sequences_by_target(
     return result
 
 
+@multiout_step(main="success", failed="failed")
+def apply_mutations_preserving_wild_type(
+    dataset: pd.DataFrame,
+    sequence_column: str = "sequence",
+    name_column: str = "name",
+    mutation_column: str = "mut_info",
+    mutation_sep: str = ",",
+    is_zero_based: bool = True,
+    sequence_type: str = "protein",
+    num_workers: int = 4,
+) -> Tuple[pd.DataFrame, pd.DataFrame]:
+    """Apply mutations while preserving explicit WT rows."""
+    if mutation_column not in dataset.columns:
+        raise ValueError(f"Mutation column '{mutation_column}' not found")
 
+    wt_mask = dataset[mutation_column].astype(str).str.upper() == "WT"
+    wt_rows = dataset[wt_mask].copy()
+    mutant_rows = dataset[~wt_mask].copy()
+
+    if not wt_rows.empty:
+        wt_rows["mut_seq"] = wt_rows[sequence_column]
+
+    if mutant_rows.empty:
+        failed_dataset = pd.DataFrame(
+            columns=list(dataset.columns) + ["error_message"]
+        )
+        return wt_rows, failed_dataset
+
+    mutation_result = apply_mutations_to_sequences(
+        mutant_rows,
+        sequence_column=sequence_column,
+        name_column=name_column,
+        mutation_column=mutation_column,
+        mutation_sep=mutation_sep,
+        is_zero_based=is_zero_based,
+        sequence_type=sequence_type,
+        num_workers=num_workers,
+    )
+    mutant_success = mutation_result.main
+    mutant_failed = mutation_result.side["failed"]
+
+    successful_dataset = pd.concat([mutant_success, wt_rows], axis=0).sort_index()
+    return successful_dataset, mutant_failed
